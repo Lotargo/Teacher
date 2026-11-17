@@ -1,7 +1,6 @@
 <!doctype html>
 <html lang="ru"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f8f6ee">
-
 <!-- site-theme:start -->
 <script src="../src/theme-init.js"></script>
 <!-- site-theme:end -->
@@ -12,7 +11,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&amp;family=Nunito:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../styles/lesson.css"><link rel="stylesheet" href="../styles/portal.css"><link rel="stylesheet" href="../styles/chrome.css"><link rel="stylesheet" href="../styles/atlas.css">
 <script type="module" src="../src/portal.js"></script><script type="module" src="../src/workshop.js"></script>
-
 <link rel="stylesheet" href="../styles/theme.css">
 </head><body class="portal with-chrome atlas-page" data-page="workshop"><a class="skip" href="#main">Перейти к содержанию</a>
 <!-- site-header:start -->
@@ -58,10 +56,11 @@
     <label for="idea-who">Для кого это нужно?<textarea id="idea-who" rows="2" maxlength="300" placeholder="Для моих клиентов, которые чаще заходят с телефона" required></textarea></label>
     <label for="idea-first">Что обязательно должно работать в первой версии?<textarea id="idea-first" rows="2" maxlength="500" placeholder="Услуги, цены, кнопка связи. Без регистрации и сложной оплаты" required></textarea></label>
     <label for="idea-check">Как ты поймёшь, что получилось правильно?<textarea id="idea-check" rows="2" maxlength="500" placeholder="Открою с телефона, нажму все кнопки и проверю отправку заявки" required></textarea></label>
-    <button class="button dark" type="submit">Собрать понятное задание ↗</button>
+    <div class="workshop-actions"><button class="button dark" type="button" id="idea-ai">Собрать с Пикси ✦</button><button class="button secondary" type="submit">Собрать без ИИ ↗</button></div>
    </form>
+   <p class="workshop-state" id="idea-ai-status" role="status" aria-live="polite"></p>
    <div id="idea-output-wrap" class="idea-output-wrap" hidden><h3>Вот начало твоего задания</h3><p>Можно отнести этот текст в любой инструмент разработки с ИИ и дальше уточнять по шагам.</p><pre id="idea-output" aria-live="polite"></pre><button class="button secondary" id="copy-idea" type="button">Скопировать текст</button><p id="copy-status" role="status" aria-live="polite"></p></div>
-   <p class="privacy-hint">Всё собирается прямо в твоём браузере. Текст не отправляется на сервер и не сохраняется в аккаунте.</p>
+   <p class="privacy-hint">«Собрать с Пикси» отправит четыре заполненных поля в облачный ИИ. «Без ИИ» соберёт текст только в браузере. Не указывай пароли и личные данные.</p>
   </div>
   <aside class="atlas-note"><span class="hand">Пример из жизни</span><h3>Ты сантехник. Тебе нужен сайт.</h3><p>Не нужно начинать с выбора языка программирования. Начни с вопроса: «Как клиенту быстро понять мои услуги и связаться со мной?»</p><p>Уже потом появится техника. Её можно поручить ИИ, но смысл и проверку результата оставь за собой.</p></aside>
  </div>

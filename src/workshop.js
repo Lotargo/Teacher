@@ -1,10 +1,40 @@
+import { workshopPrompt, askWorkshopPixie } from './workshop-core.js';
+import { friendlyError } from './pix-errors.js';
 const form=document.querySelector('#idea-form');
 if(form){
  const box=document.querySelector('#idea-output-wrap'),out=document.querySelector('#idea-output');
  const copy=document.querySelector('#copy-idea'),status=document.querySelector('#copy-status');
+ const ai=document.querySelector('#idea-ai');
+ const aiStatus=document.querySelector('#idea-ai-status');
+ const title=box.querySelector('h3');
+ let aiBusy=false;
+ const fields=()=>({idea:form.querySelector('#idea-what').value.trim(),audience:form.querySelector('#idea-who').value.trim(),first:form.querySelector('#idea-first').value.trim(),check:form.querySelector('#idea-check').value.trim()});
+ ai.addEventListener('click',async()=>{
+  if(aiBusy||!form.reportValidity())return;
+  let prompt;
+  try{prompt=workshopPrompt(fields());}catch{aiStatus.textContent='Заполни все четыре поля своими словами.';return;}
+  aiBusy=true;ai.disabled=true;copy.disabled=true;
+  form.querySelector('[type="submit"]').disabled=true;
+  aiStatus.textContent='Пикси собирает задание по твоим ответам…';aiStatus.classList.add('is-busy');
+  box.hidden=false;box.classList.add('is-ai');box.setAttribute('aria-busy','true');
+  title.textContent='Задание от Пикси';out.textContent='';status.textContent='';
+  try{
+   const reply=await askWorkshopPixie(prompt,part=>{out.textContent+=part;});
+   out.textContent=reply;
+   aiStatus.textContent='Готово. Проверь, что Пикси правильно поняла твою идею. Можно уточнить детали в чате.';
+  }catch(error){
+   out.textContent='';
+   aiStatus.textContent=error?.name==='AbortError'?'Ответ остановлен. Поля остались на месте.':friendlyError(error);
+  }finally{
+   aiBusy=false;ai.disabled=false;copy.disabled=!out.textContent;
+   form.querySelector('[type="submit"]').disabled=false;
+   aiStatus.classList.remove('is-busy');box.removeAttribute('aria-busy');
+  }
+ });
  form.addEventListener('submit',event=>{
   event.preventDefault();
-  if(!form.reportValidity())return;
+  if(aiBusy||!form.reportValidity())return;
+  title.textContent='Вот начало твоего задания';box.classList.remove('is-ai');copy.disabled=false;aiStatus.textContent='';
   const get=id=>document.getElementById(id).value.trim();
   const idea=get('idea-what'),people=get('idea-who'),minimum=get('idea-first'),check=get('idea-check');
   if(!idea||!people||!minimum||!check){status.textContent='Заполни все четыре вопроса своими словами.';return;}

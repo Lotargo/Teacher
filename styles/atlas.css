@@ -209,3 +209,13 @@
  .atlas-page .atlas-hero{padding:28px 19px}
  .atlas-receipt{min-width:190px}
 }
+
+.library-scribble{z-index:2;bottom:-27px;left:5%;padding:12px 19px;background:#fffdf3;border:2px solid #57654b;border-radius:15px;color:#43543e;box-shadow:4px 5px 0 #ad936838;transform:rotate(-7deg);font-size:29px;line-height:1.15}
+.workshop-actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.workshop-disclosure{font-size:14px;line-height:1.6;color:var(--muted)}
+.idea-output-wrap.is-ai pre{font:17px/1.8 'Nunito','Segoe UI',sans-serif;max-height:600px}
+.workshop-state{display:flex;align-items:center;gap:10px;margin-top:15px;font-size:15px;color:var(--muted)}
+.workshop-state.is-busy::before{content:'';display:block;width:18px;height:18px;border:2px solid #bacd94;border-top-color:#3c6548;border-radius:50%;animation:workshop-spin .9s linear infinite;flex:none}
+@keyframes workshop-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.workshop-state::before{animation:none!important}}
+@media(max-width:600px){.library-scribble{font-size:24px;bottom:-16px}.workshop-actions .button{width:100%}}
