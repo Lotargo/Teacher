@@ -7,7 +7,8 @@
 .pix-guide[data-state="idea"]{--frame:66.666667%}
 .pix-guide[data-state="guide"]{--frame:100%}
 .pix-guide .pix-pose{--pix-size:110px;flex:none;display:block;width:var(--pix-size);height:var(--pix-size);background-image:url('../assets/pix-guide.webp');background-size:400% 100%;background-position:var(--frame) 50%;background-repeat:no-repeat;image-rendering:auto;filter:drop-shadow(0 8px 6px #26394223)}
-.pix-launcher{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:0;position:relative;min-width:100px;background:none;border:0;color:#2b3a42;padding:0;isolation:isolate;animation:pix-hello 4.8s ease-in-out infinite;cursor:pointer}
+.pix-launcher{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:0;position:relative;min-width:100px;background:none;border:0;color:#2b3a42;padding:0;isolation:isolate;cursor:pointer}
+body.motion-ready:not(.still):not(.page-hidden) .pix-launcher{animation:pix-hello 4.8s ease-in-out infinite}
 .pix-launcher .pix-pose{transition:transform .18s ease}
 .pix-launcher:hover .pix-pose{transform:translateY(-5px) rotate(-5deg)}
 .pix-launch-label{font-size:15px;font-weight:900;letter-spacing:.03em;background:#e2f381;border:2px solid #2b3c45;border-radius:100px;box-shadow:0 4px 0 #a9bb75;padding:6px 15px;margin-top:-14px;z-index:1;white-space:nowrap}
