@@ -1,6 +1,10 @@
 <!doctype html>
 <html lang="ru"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f8f6ee">
+
+<!-- site-theme:start -->
+<script src="../src/theme-init.js"></script>
+<!-- site-theme:end -->
 <title>Вопросы и ответы — АГА!</title><meta name="description" content="Как работает Пикс с Cloudflare Workers AI, какие данные отправляются и почему АГА! остаётся бесплатной.">
 <meta property="og:title" content="Вопросы и ответы — АГА!"><meta property="og:description" content="Пикс, бесплатная лаборатория и добровольный Cloudflare Workers AI."><meta property="og:type" content="website">
 <link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
@@ -8,6 +12,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&amp;family=Nunito:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../styles/lesson.css"><link rel="stylesheet" href="../styles/portal.css"><link rel="stylesheet" href="../styles/chrome.css"><link rel="stylesheet" href="../styles/faq.css">
 <script type="module" src="../src/portal.js"></script>
+
+<link rel="stylesheet" href="../styles/theme.css">
 </head><body class="portal with-chrome" data-page="faq"><a class="skip" href="#main">Перейти к вопросам</a>
 <!-- site-header:start -->
 <div id="page-top" class="page-top-anchor" aria-hidden="true"></div>
@@ -24,6 +30,7 @@
         <a class="nav-chip" href="../library/">Библиотека</a>
         <a class="nav-chip is-active" href="../faq/" aria-current="page">Вопросы</a>
       </nav>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false" aria-label="Включить тёмную тему" hidden><span data-theme-icon aria-hidden="true">☾</span><span class="sr-only">Тема</span></button>
       <a class="button lime header-action" href="../lessons/first-discovery/" data-resume data-resume-compact>Попробовать ↗</a>
     </div>
   </div>

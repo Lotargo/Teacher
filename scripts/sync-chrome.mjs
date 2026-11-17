@@ -42,6 +42,12 @@ for (const [path, prefix, page] of pages) {
     if (from < 0 || to < 0) throw Error('Missing chrome markers in ' + path);
     html = html.slice(0, from) + start + '\n' + content + '\n' + end + html.slice(to + end.length);
   }
+  html = html.replace(/<!-- site-theme:start -->[\s\S]*?<!-- site-theme:end -->\n?/g, '');
+  const theme = '<!-- site-theme:start -->\n<script src="' + prefix + 'src/theme-init.js"></script>\n<!-- site-theme:end -->\n';
+  const titleAt = html.indexOf('<title>');
+  html = html.slice(0, titleAt) + theme + html.slice(titleAt);
+  html = html.replace(/<link rel="stylesheet" href="[^"\n]*styles\/theme.css">\n?/g, '');
+  html = html.replace('</head>', '<link rel="stylesheet" href="' + prefix + 'styles/theme.css">\n</head>');
   if (html !== original) {
     changed = true;
     if (!check) writeFileSync(resolve(root, path), html);
