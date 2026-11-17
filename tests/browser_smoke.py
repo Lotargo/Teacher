@@ -1,7 +1,7 @@
 """Real multi-document navigation on an intercepted test origin, under /Teacher-/.
 No HTML inlining, module rewriting, or mock localStorage. External fonts are
 blocked in this test; the site's system-font fallback is deliberately exercised.
-Requires Python Playwright and /usr/bin/chromium (not site dependencies).
+Requires Python Playwright and its Chromium build (not site dependencies).
 """
 from pathlib import Path
 from urllib.parse import urlparse, unquote
@@ -33,18 +33,23 @@ with sync_playwright() as pw:
     page=context.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
     def go(path=''):
         page.goto(BASE+path,wait_until='networkidle')
+    def follow(locator):
+        locator.click()
+        page.wait_for_load_state('networkidle')
     go();assert page.locator('h1').count()==1
     page.screenshot(path=str(OUT/'home-desktop.png'),full_page=True)
-    page.get_by_role('link',name='Выбрать свой первый шаг').click()
+    follow(page.get_by_role('link',name='Выбрать свой первый шаг'))
     assert page.url==BASE+'courses/'
+    page.locator('.path-ready').wait_for(state='visible')
+    page.locator('.path-planned').wait_for(state='visible')
     assert page.locator('.path-planned a').count()==0
     assert page.locator('.path-ready').bounding_box()['y']==page.locator('.path-planned').bounding_box()['y']
     page.screenshot(path=str(OUT/'catalog-desktop.png'),full_page=True)
-    page.locator('.path-ready a').click()
+    follow(page.locator('.path-ready a'))
     assert page.url==BASE+'courses/start/'
     assert page.locator('.lesson-row').count()==1
     page.screenshot(path=str(OUT/'course-desktop.png'),full_page=True)
-    page.locator('.lesson-row > a').click()
+    follow(page.locator('.lesson-row > a'))
     assert page.url==BASE+'lessons/first-discovery/'
     assert page.locator('#answer-add').count()==1
     page.locator('#answer-add').fill('5');page.locator('#math form button[type="submit"]').click()
@@ -53,14 +58,14 @@ with sync_playwright() as pw:
     assert page.locator('#math .hint-button').is_disabled()
     page.locator('#answer-add').fill('8');page.locator('#math form button[type="submit"]').click()
     assert page.locator('#math .result').is_visible()
-    page.locator('.lesson-back').click()
+    follow(page.locator('.lesson-back'))
     assert page.locator('.lesson-meta').inner_text()=='1 из 7 заданий'
-    page.locator('.lesson-row > a').click()
+    follow(page.locator('.lesson-row > a'))
     assert page.url.endswith('#backward')
     assert page.locator('#math .result').is_visible()
     page.locator('#answer-undo').fill('5');page.locator('#backward form button[type="submit"]').click()
     page.locator('#language [data-choice="0"]').click()
-    page.locator('.lesson-back').click();page.locator('.lesson-row > a').click()
+    follow(page.locator('.lesson-back'));follow(page.locator('.lesson-row > a'))
     assert page.url.endswith('#code')
     for task,solution in [('show','print(8)'),('add-code','print(5+3)'),('undo-code','print(8-3)')]:
         page.locator('[data-code="'+task+'"]').click()
@@ -72,7 +77,7 @@ with sync_playwright() as pw:
         page.locator('#code-editor').fill(solution);page.locator('#code-editor').press('Control+Enter')
         assert page.locator('#code-result').is_visible()
         if task=='show':
-            page.locator('.lesson-back').click();page.locator('.lesson-row > a').click()
+            follow(page.locator('.lesson-back'));follow(page.locator('.lesson-row > a'))
             assert page.locator('[data-code="add-code"]').get_attribute('aria-pressed')=='true'
     page.locator('#code-editor').focus();page.keyboard.press('Tab')
     assert page.locator('#run-code').evaluate('(el)=>el===document.activeElement')
@@ -81,7 +86,7 @@ with sync_playwright() as pw:
     page.locator('#transfer input[value="-"]').check();page.locator('#transfer form button[type="submit"]').click()
     assert page.locator('#progress-label').inner_text()=='7 из 7 открытий'
     page.reload(wait_until='networkidle');assert page.locator('#progress-label').inner_text()=='7 из 7 открытий'
-    page.locator('.lesson-back').click();assert 'Пройдено' in page.locator('.lesson-copy').inner_text()
+    follow(page.locator('.lesson-back'));assert 'Пройдено' in page.locator('.lesson-copy').inner_text()
     go();assert page.locator('[data-started]').is_visible()
     assert page.locator('[data-progress-text]').inner_text()=='Знакомство пройдено. Можно повторить.'
     # Direct paths, native history, no horizontal overflow, and all images load.
@@ -94,7 +99,7 @@ with sync_playwright() as pw:
             assert page.evaluate('[...document.images].filter(i=>i.loading!=="lazy").every(i=>i.complete&&i.naturalWidth>0)'),path
             if width==390:
                 page.screenshot(path=str(OUT/(('home' if not path else path.strip('/').replace('/','-'))+'-mobile.png')),full_page=True)
-    go('courses/');page.locator('.path-ready a').click();page.go_back(wait_until='networkidle');assert page.url==BASE+'courses/'
+    go('courses/');follow(page.locator('.path-ready a'));page.go_back(wait_until='networkidle');assert page.url==BASE+'courses/'
     go('#math');page.wait_for_url('**/lessons/first-discovery/#math');assert page.locator('#answer-add').count()==1
     assert not missing,missing
     assert not errors,errors

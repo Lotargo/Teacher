@@ -30,7 +30,7 @@ function renderProgress() {
   }
 }
 renderProgress();
-window.addEventListener('pageshow', renderProgress);
+window.addEventListener('pageshow', event => { if (event.persisted) renderProgress(); });
 window.addEventListener('storage', event => { if (!event.key || event.key === introLesson.storageKey) renderProgress(); });
 // Existing bookmarks into the old one-page lesson retain their destination.
 const oldAnchors = new Set(['intro','math','backward','language','code','transfer','finish']);
