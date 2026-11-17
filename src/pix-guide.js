@@ -1,6 +1,7 @@
-import { PATHS, getPageContext, getSuggestions, getLocalAnswer, guessLocalIntent, buildAiMessages } from './pix-core.js';
+import { PATHS, getPageContext, buildAiMessages } from './pix-core.js';
 import { askCloudflare } from './cloudflare-adapter.js';
 import { TURNSTILE_SITE_KEY, CLOUDFLARE_CHAT_URL } from './cloudflare-config.js';
+import { clampPosition, createTextPresenter } from './pix-ui.js';
 
 const page = getPageContext(document.body.dataset.page || 'home').route;
 const root = new URL('../', import.meta.url);
@@ -9,500 +10,273 @@ stylesheet.rel = 'stylesheet';
 stylesheet.href = new URL('../styles/pix.css', import.meta.url).href;
 document.head.appendChild(stylesheet);
 
+// This greeting is local copy, not an inference or an entry in model history.
+export const GREETING = 'Привет! Я Пикси ✨\n\nГотова ответить на твои вопросы: помочь с уроком, поговорить о наболевшем или вместе придумать, как затащить в Dota 2.\n\nРасполагайся. Что у тебя на уме?';
 const host = document.createElement('aside');
 host.id = 'pix-guide';
 host.className = 'pix-guide';
 host.dataset.state = 'hello';
-host.setAttribute('aria-label', 'Помощница Пикс');
+host.setAttribute('aria-label', 'Помощница Пикси');
 host.innerHTML = `
-  <button class="pix-launcher" type="button" aria-label="Открыть помощницу Пикс" aria-controls="pix-panel" aria-expanded="false">
-    <span class="pix-pose" aria-hidden="true"></span>
+  <button class="pix-launcher" type="button" aria-label="Открыть Пикси" aria-controls="pix-panel" aria-expanded="false">
+    <span class="pix-unread" id="pix-unread" aria-hidden="true"><span class="pix-unread-icon">✉</span><b>1</b></span>
+    <span class="pix-launch-art"><span class="pix-pose" aria-hidden="true"></span></span>
     <span class="pix-launch-label">Пикс <span aria-hidden="true">✦</span></span>
   </button>
-  <section class="pix-panel" id="pix-panel" role="dialog" aria-label="Пикс — помощница АГА!" aria-modal="false" hidden>
-    <div class="pix-panel-head">
+  <section class="pix-panel" id="pix-panel" role="dialog" aria-label="Пикси — твоя собеседница" aria-modal="false" hidden>
+    <header class="pix-panel-head" id="pix-drag-handle" tabindex="0" aria-label="Переместить окно Пикси: перетащи шапку или используй стрелки на клавиатуре">
       <span class="pix-pose pix-head-pose" aria-hidden="true"></span>
-      <div class="pix-identity">
-        <span class="pix-eyebrow">АГА! · твой проводник</span>
-        <h2>Пикс <span class="pix-presence" aria-label="На связи">● На связи</span></h2>
-        <p>Помогу разобраться, а не зазубрить.</p>
+      <div class="pix-identity"><span class="pix-eyebrow">АГА! · твой проводник</span><h2>Пикс</h2><p>И разобраться. И просто поболтать.</p></div>
+      <div class="pix-window-controls" role="group" aria-label="Управление окном">
+        <button class="pix-window-button pix-sound" id="pix-sound" type="button" aria-label="Выключить звук" aria-pressed="true" title="Выключить звук"><span class="pix-control-dot"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6h3l3-3v10l-3-3H3zM11 5q4 3 0 6"/></svg></span></button>
+        <button class="pix-window-button pix-expand" id="pix-expand" type="button" aria-label="Развернуть чат" aria-pressed="false" title="Развернуть чат"><span class="pix-control-dot"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 7V3h4m2 10h4V9M3 3l4 4m6 6L9 9"/></svg></span></button>
+        <button class="pix-window-button pix-close" type="button" aria-label="Закрыть Пикси" title="Закрыть"><span class="pix-control-dot"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 4 8 8M4 12l8-8"/></svg></span></button>
       </div>
-      <div class="pix-head-tools">
-        <button type="button" class="pix-icon-button" id="pix-sound" aria-label="Включить звуки чата" aria-pressed="false" title="Включить звуки">♪</button>
-        <button type="button" class="pix-icon-button" id="pix-expand" aria-label="Развернуть чат" aria-pressed="false" title="Развернуть окно">⤢</button>
-        <button class="pix-close" type="button" aria-label="Закрыть Пикс">×</button>
-      </div>
-    </div>
-    <div class="pix-mode-switch" role="group" aria-label="Режим помощницы">
-      <button type="button" class="pix-mode is-current" data-pix-mode="local" aria-pressed="true">Без ИИ</button>
-      <button type="button" class="pix-mode" data-pix-mode="ai" aria-pressed="false">Gemma 4 · ИИ <span aria-hidden="true">✦</span></button>
-    </div>
-    <div class="pix-body">
-      <section class="pix-local" id="pix-local">
-        <p class="pix-section-label">С чем помочь сегодня?</p>
-        <div class="pix-chips" id="pix-chips"></div>
-        <form id="pix-search-form" class="pix-search-form">
-          <label class="pix-sr-only" for="pix-search">Спроси Пикс о портале</label>
-          <input id="pix-search" maxlength="400" placeholder="Например: где изучить проценты?" autocomplete="off">
-          <button type="submit" aria-label="Найти подсказку">↗</button>
-        </form>
-        <div class="pix-answer" id="pix-answer" role="status" aria-live="polite"></div>
-        <p class="pix-local-note">Здесь я работаю без ИИ: подсказываю путь по сайту и простые аналогии. Всё локально.</p>
-      </section>
-      <section class="pix-ai" id="pix-ai" hidden>
-        <div id="pix-ai-consent" class="pix-consent">
-          <div class="pix-ai-sticker" aria-hidden="true">✧</div>
-          <h3>Хочешь поговорить с ИИ?</h3>
-          <p>Это <strong>необязательная</strong> беседа с Gemma 4 через Cloudflare. Аккаунт и оплата не нужны, но у бесплатной модели есть ограничения.</p>
-          <p>Только при отправке в Cloudflare попадут твой вопрос, название раздела и до восьми предыдущих реплик диалога. Не отправляй пароли и чужие личные данные. АГА! не сохраняет переписку в собственной базе.</p>
-          <details id="pix-owner-entry" class="pix-owner-entry">
-            <summary>Для владельца: вход по личному токену</summary>
-            <label class="pix-secret-label" for="pix-owner-key">Личный доступ для тестирования</label>
-            <input id="pix-owner-key" type="password" autocomplete="off" spellcheck="false" placeholder="PILOT_TOKEN владельца">
-            <p class="pix-owner-note">Публичный доступ ещё не настроен: сейчас нужен токен владельца. Не публикуй его. Он не сохраняется после перезагрузки страницы.</p>
-          </details>
-          <button type="button" id="pix-connect-cloudflare" class="pix-primary">Подключить облачный ИИ</button>
-          <p id="pix-connect-status" class="pix-status" role="status" aria-live="polite"></p>
+    </header>
+    <div class="pix-chat-log" id="pix-chat-log" role="log" aria-label="Диалог с Пикси" aria-live="off"></div>
+    <div class="pix-chat-dock">
+      <div class="pix-thinking" id="pix-thinking" role="status" hidden><span class="pix-spinner" aria-hidden="true"></span><span id="pix-thinking-text">Пикси думает…</span></div>
+      <div id="pix-turnstile" aria-label="Проверка подключения"></div>
+      <form id="pix-chat-form" class="pix-chat-form">
+        <label class="pix-sr-only" for="pix-chat-question">Сообщение Пикси</label>
+        <div class="pix-composer">
+          <textarea id="pix-chat-question" rows="2" maxlength="1200" placeholder="Напиши вопрос или расскажи, как ты…" required></textarea>
+          <div class="pix-composer-foot"><span class="pix-input-hint">Enter — отправить · Shift+Enter — строка</span><div class="pix-send-controls">
+            <button type="button" id="pix-stop" class="pix-stop" hidden>■ Стоп</button>
+            <button type="submit" class="pix-send" id="pix-send">Отправить <span aria-hidden="true">↗</span></button>
+          </div></div>
         </div>
-        <div id="pix-ai-chat" class="pix-ai-chat" hidden>
-          <div class="pix-chat-topline">
-            <span class="pix-model-chip"><span class="pix-model-dot"></span> Gemma 4 <span aria-hidden="true">·</span> Cloudflare</span>
-            <span class="pix-privacy-label">Диалог только в этой вкладке</span>
-          </div>
-          <div class="pix-chat-log" id="pix-chat-log" role="log" aria-label="Диалог с Пикс" aria-live="off">
-            <div class="pix-chat-intro"><span class="pix-intro-spark" aria-hidden="true">✳</span><strong>С чего начнём?</strong><p>Спроси о том, что не получается, или просто поделись идеей. Попробуем разобраться вместе.</p></div>
-          </div>
-          <div class="pix-chat-dock">
-            <div class="pix-thinking" id="pix-thinking" role="status" aria-live="polite" hidden>
-              <span class="pix-spinner" aria-hidden="true"></span>
-              Пикс подбирает слова…
-            </div>
-            <div id="pix-turnstile" class="pix-turnstile" aria-label="Проверка Cloudflare" hidden></div>
-            <form id="pix-chat-form" class="pix-chat-form">
-              <label class="pix-sr-only" for="pix-chat-question">Вопрос к Пикс через Cloudflare</label>
-              <div class="pix-composer">
-                <textarea id="pix-chat-question" maxlength="1200" rows="2" placeholder="Напиши вопрос или расскажи об идее…" required></textarea>
-                <div class="pix-composer-foot">
-                  <span class="pix-input-hint">Enter — отправить · Shift+Enter — строка</span>
-                  <div class="pix-send-controls">
-                    <button type="button" id="pix-stop" class="pix-stop" hidden aria-label="Остановить ответ">■ Стоп</button>
-                    <button type="submit" class="pix-primary pix-send" id="pix-send">Отправить <span aria-hidden="true">↗</span></button>
-                  </div>
-                </div>
-              </div>
-            </form>
-            <div class="pix-chat-bottom">
-              <button type="button" id="pix-clear-chat" class="pix-muted">Очистить диалог</button>
-              <p class="pix-status" id="pix-chat-status" role="status" aria-live="polite">Ответы ИИ лучше проверять.</p>
-            </div>
-          </div>
-        </div>
-      </section>
+      </form>
+      <div class="pix-chat-bottom"><button type="button" id="pix-clear-chat" class="pix-clear">Очистить диалог</button></div>
+      <p class="pix-error" id="pix-chat-status" role="alert" hidden></p>
     </div>
-    <div class="pix-footer"><a id="pix-faq-link" href="#">Вопросы и приватность</a><span>АГА! · помощница по желанию</span></div>
+    <footer class="pix-footer"><a id="pix-faq-link" href="#">Вопросы и приватность</a><p id="pix-privacy-notice">Отправляя сообщение, ты передаёшь его облачному ИИ.</p></footer>
+    <span class="pix-sr-only" id="pix-announcement" role="status" aria-live="polite"></span>
   </section>`;
 document.body.appendChild(host);
-
 const get = selector => host.querySelector(selector);
-const launcher = get('.pix-launcher'), panel = get('#pix-panel');
-const faqLink = get('#pix-faq-link');
-faqLink.href = new URL(PATHS.faq.path, root).href;
-const chips = get('#pix-chips'), answer = get('#pix-answer');
-let activeMode = 'local';
-let accessMode = '';
-let ownerToken = '';
-let challengeToken = '';
-let widgetId = null;
-let turnstileScript = null;
-let publicSiteKey = TURNSTILE_SITE_KEY;
-let loading = false;
-let pending = false;
-let turns = [];
-
-function pose(state) { host.dataset.state = ['hello', 'thinking', 'idea', 'guide'].includes(state) ? state : 'hello'; }
+const panel = get('#pix-panel'), launcher = get('.pix-launcher'), log = get('#pix-chat-log');
+const input = get('#pix-chat-question'), send = get('#pix-send'), stop = get('#pix-stop');
+const status = get('#pix-chat-status'), thinking = get('#pix-thinking'), clear = get('#pix-clear-chat');
+const soundButton = get('#pix-sound'), expandButton = get('#pix-expand');
+get('#pix-faq-link').href = new URL(PATHS.faq.path, root).href;
+let turns = [], pending = false, activeRequest = null, unread = 0;
+let soundEnabled = true, audioContext = null;
+const AudioCtor = window.AudioContext || window.webkitAudioContext;
+function pose(state) { host.dataset.state = state; }
+function isReading() { return !panel.hidden && !document.hidden; }
+function setUnread(count) {
+  unread = count;
+  get('#pix-unread').hidden = count === 0;
+  get('#pix-unread b').textContent = count > 9 ? '9+' : String(count);
+  launcher.setAttribute('aria-label', 'Открыть Пикси' + (count ? `, непрочитанных сообщений: ${count}` : ''));
+}
+function announce(text) { get('#pix-announcement').textContent = text; }
+function notify() { if (!isReading()) setUnread(unread + 1); }
 function open() {
   panel.hidden = false; launcher.setAttribute('aria-expanded', 'true');
-  host.classList.add('is-open'); get('.pix-close').focus();
+  host.classList.add('is-open'); setUnread(0); clampPanel();
+  log.scrollTop = log.scrollHeight; input.focus({ preventScroll:true });
 }
 function close() {
   panel.hidden = true; launcher.setAttribute('aria-expanded', 'false');
-  host.classList.remove('is-open'); launcher.focus();
+  host.classList.remove('is-open'); launcher.focus({ preventScroll:true });
 }
 launcher.addEventListener('click', () => panel.hidden ? open() : close());
 get('.pix-close').addEventListener('click', close);
 document.addEventListener('keydown', event => {
   if (event.key === 'Escape' && !panel.hidden) { event.preventDefault(); close(); }
 });
-// The panel is non-modal so the lesson behind Pix remains interactive.
-const soundButton = get('#pix-sound');
-const expandButton = get('#pix-expand');
-let soundEnabled = false;
-let audioContext = null;
-const AudioCtor = window.AudioContext || window.webkitAudioContext;
+document.addEventListener('visibilitychange', () => { if (isReading()) setUnread(0); });
 
-soundButton.addEventListener('click', async () => {
+// Sound is enabled by default, but audio is unlocked only by a real user gesture.
+function unlockAudio() {
+  if (!soundEnabled || !AudioCtor) return;
+  try { audioContext ||= new AudioCtor(); void audioContext.resume().catch(() => {}); }
+  catch { /* Browsers without audio still have the visual notification. */ }
+}
+host.addEventListener('pointerdown', unlockAudio);
+host.addEventListener('keydown', unlockAudio);
+soundButton.addEventListener('click', () => {
   soundEnabled = !soundEnabled;
   soundButton.setAttribute('aria-pressed', String(soundEnabled));
-  soundButton.setAttribute('aria-label', soundEnabled ? 'Выключить звуки чата' : 'Включить звуки чата');
-  soundButton.title = soundEnabled ? 'Выключить звуки' : 'Включить звуки';
-  soundButton.textContent = soundEnabled ? '♫' : '♪';
-  if (soundEnabled && AudioCtor) {
-    try {
-      audioContext ||= new AudioCtor();
-      await audioContext.resume();
-    } catch { soundEnabled = false; soundButton.setAttribute('aria-pressed', 'false'); }
-  }
+  soundButton.setAttribute('aria-label', soundEnabled ? 'Выключить звук' : 'Включить звук');
+  soundButton.title = soundButton.getAttribute('aria-label');
+  if (soundEnabled) unlockAudio();
 });
-
 function playSound(kind = 'done') {
-  if (!soundEnabled || document.hidden || !AudioCtor) return;
+  if (!soundEnabled || !audioContext || audioContext.state !== 'running') return;
   try {
-    audioContext ||= new AudioCtor();
-    if (audioContext.state === 'suspended') void audioContext.resume();
-    const now = audioContext.currentTime;
-    const notes = kind === 'error' ? [350] : [620, 820];
+    const notes = kind === 'error' ? [330] : [660, 880];
     notes.forEach((frequency, index) => {
-      const oscillator = audioContext.createOscillator();
-      const volume = audioContext.createGain();
-      const start = now + index * 0.095;
-      oscillator.type = 'sine';
-      oscillator.frequency.value = frequency;
-      volume.gain.setValueAtTime(0.0001, start);
-      volume.gain.exponentialRampToValueAtTime(0.035, start + 0.018);
-      volume.gain.exponentialRampToValueAtTime(0.0001, start + 0.14);
+      const oscillator = audioContext.createOscillator(), volume = audioContext.createGain();
+      const start = audioContext.currentTime + index * .09;
+      oscillator.type = 'sine'; oscillator.frequency.value = frequency;
+      volume.gain.setValueAtTime(.0001, start);
+      volume.gain.exponentialRampToValueAtTime(.03, start + .018);
+      volume.gain.exponentialRampToValueAtTime(.0001, start + .15);
       oscillator.connect(volume).connect(audioContext.destination);
-      oscillator.start(start);
-      oscillator.stop(start + 0.15);
+      oscillator.start(start); oscillator.stop(start + .16);
     });
-  } catch { /* No sound support: the text chat still works. */ }
+  } catch { /* Never block a message because of sound. */ }
 }
 
-expandButton.addEventListener('click', () => {
+// Move the non-modal window without trapping the lesson or allowing it off-screen.
+const handle = get('#pix-drag-handle');
+let draggedPosition = null, beforeExpand = null, drag = null;
+function place(left, top) {
+  const rect = panel.getBoundingClientRect();
+  const pos = clampPosition(left, top, rect.width, rect.height, innerWidth, innerHeight);
+  panel.style.left = pos.left + 'px'; panel.style.top = pos.top + 'px';
+  panel.style.right = 'auto'; panel.style.bottom = 'auto';
+  draggedPosition = pos;
+}
+function resetPosition() { ['left','top','right','bottom'].forEach(key => panel.style.removeProperty(key)); }
+function clampPanel() {
+  if (innerWidth <= 600) { resetPosition(); return; }
+  if (draggedPosition && !host.classList.contains('is-expanded')) place(draggedPosition.left, draggedPosition.top);
+}
+function toggleExpanded() {
   const expanded = host.classList.toggle('is-expanded');
+  if (expanded) { beforeExpand = draggedPosition; resetPosition(); }
+  else { draggedPosition = beforeExpand; clampPanel(); }
   expandButton.setAttribute('aria-pressed', String(expanded));
   expandButton.setAttribute('aria-label', expanded ? 'Свернуть чат' : 'Развернуть чат');
-  expandButton.title = expanded ? 'Свернуть окно' : 'Развернуть окно';
-  expandButton.textContent = expanded ? '⤡' : '⤢';
+  expandButton.title = expandButton.getAttribute('aria-label');
+}
+expandButton.addEventListener('click', toggleExpanded);
+handle.addEventListener('dblclick', e => { if (!e.target.closest('button')) toggleExpanded(); });
+handle.addEventListener('pointerdown', e => {
+  if (e.button !== 0 || e.target.closest('button,a') || host.classList.contains('is-expanded') || innerWidth <= 600) return;
+  const rect = panel.getBoundingClientRect();
+  drag = { id:e.pointerId, x:e.clientX, y:e.clientY, left:rect.left, top:rect.top };
+  handle.setPointerCapture(e.pointerId); host.classList.add('is-dragging');
+  e.preventDefault();
 });
-
-
-function renderLocal(id) {
-  const result = getLocalAnswer(id);
-  pose(result.state);
-  answer.replaceChildren();
-  const p = document.createElement('p'); p.textContent = result.text; answer.appendChild(p);
-  const links = document.createElement('div'); links.className = 'pix-answer-links';
-  for (const link of result.links) {
-    const a = document.createElement('a');
-    a.href = new URL(link.path, root).href;
-    a.textContent = link.label + ' ↗';
-    links.appendChild(a);
-  }
-  answer.appendChild(links);
-}
-for (const { id, label } of getSuggestions(page)) {
-  const button = document.createElement('button'); button.type = 'button';
-  button.className = 'pix-chip'; button.textContent = label + ' ↗';
-  button.addEventListener('click', () => renderLocal(id)); chips.appendChild(button);
-}
-get('#pix-search-form').addEventListener('submit', event => {
-  event.preventDefault();
-  const input = get('#pix-search');
-  if (!input.value.trim()) { input.focus(); return; }
-  renderLocal(guessLocalIntent(input.value, page));
+handle.addEventListener('pointermove', e => {
+  if (drag?.id === e.pointerId) place(drag.left + e.clientX - drag.x, drag.top + e.clientY - drag.y);
 });
-renderLocal(page === 'lesson' ? 'lesson' : page === 'math' ? 'math' : page === 'workshop' ? 'idea' : 'how');
-
-function mode(next) {
-  activeMode = next;
-  get('#pix-local').hidden = next !== 'local';
-  get('#pix-ai').hidden = next !== 'ai';
-  host.querySelectorAll('[data-pix-mode]').forEach(button => {
-    const selected = button.dataset.pixMode === next;
-    button.setAttribute('aria-pressed', String(selected));
-    button.classList.toggle('is-current', selected);
-  });
-  pose(next === 'ai' ? 'thinking' : 'hello');
+function endDrag(e) {
+  if (drag?.id !== e.pointerId) return;
+  drag = null; host.classList.remove('is-dragging');
+  if (handle.hasPointerCapture(e.pointerId)) handle.releasePointerCapture(e.pointerId);
 }
-host.querySelectorAll('[data-pix-mode]').forEach(button => button.addEventListener('click', () => mode(button.dataset.pixMode)));
+['pointerup','pointercancel','lostpointercapture'].forEach(type => handle.addEventListener(type, endDrag));
+handle.addEventListener('keydown', e => {
+  if (e.target !== handle || !['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key) || host.classList.contains('is-expanded') || innerWidth <= 600) return;
+  e.preventDefault(); const r = panel.getBoundingClientRect(), step = e.shiftKey ? 60 : 20;
+  place(r.left + (e.key === 'ArrowRight' ? step : e.key === 'ArrowLeft' ? -step : 0), r.top + (e.key === 'ArrowDown' ? step : e.key === 'ArrowUp' ? -step : 0));
+});
+window.addEventListener('resize', clampPanel);
+window.visualViewport?.addEventListener('resize', clampPanel);
 
-const status = get('#pix-connect-status');
-function setStatus(message) { status.textContent = message; }
-function showConnected() {
-  get('#pix-ai-consent').hidden = true;
-  get('#pix-ai-chat').hidden = false;
-  pose('idea');
-  get('#pix-chat-question').focus();
-}
+// No requests, SDKs or inference on page load/open. First Send is the opt-in.
+let publicSiteKey = TURNSTILE_SITE_KEY, widgetId = null, sdkPromise = null, challenge = '', challengeWaiter = null;
 function loadTurnstile() {
   if (window.turnstile?.render) return Promise.resolve(window.turnstile);
-  if (turnstileScript) return turnstileScript;
-  turnstileScript = new Promise((resolve, reject) => {
+  if (sdkPromise) return sdkPromise;
+  sdkPromise = new Promise((resolve, reject) => {
     const script = document.createElement('script');
-    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
-    script.async = true;
-    script.onload = () => window.turnstile?.render
-      ? resolve(window.turnstile)
-      : reject(new Error('Проверка Cloudflare не загрузилась.'));
-    script.onerror = () => reject(new Error('Не удалось загрузить проверку Cloudflare.'));
+    const timer = setTimeout(() => { script.remove(); reject(new Error('Проверка подключения не загрузилась. Попробуй ещё раз.')); }, 15000);
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'; script.async = true;
+    script.onload = () => { clearTimeout(timer); window.turnstile?.render ? resolve(window.turnstile) : reject(new Error('Проверка подключения недоступна.')); };
+    script.onerror = () => { clearTimeout(timer); script.remove(); reject(new Error('Не удалось загрузить проверку подключения.')); };
     document.head.appendChild(script);
-  }).catch(error => { turnstileScript = null; throw error; });
-  return turnstileScript;
+  }).catch(error => { sdkPromise = null; throw error; });
+  return sdkPromise;
 }
-get('#pix-owner-entry').hidden = Boolean(TURNSTILE_SITE_KEY);
-async function discoverPublicSiteKey() {
-  if (publicSiteKey) return publicSiteKey;
-  try {
-    const endpoint = new URL(CLOUDFLARE_CHAT_URL);
-    endpoint.pathname = '/config';
-    const response = await fetch(endpoint, { cache:'no-store' });
-    if (!response.ok) return '';
-    const config = await response.json();
-    if (config?.publicEnabled && typeof config.sitekey === 'string' && config.sitekey) {
-      publicSiteKey = config.sitekey;
-      get('#pix-owner-entry').hidden = true;
-      return publicSiteKey;
-    }
-  } catch { /* Owner-only pilot remains available if config is unreachable. */ }
-  return '';
+async function getChallenge(signal) {
+  if (!publicSiteKey) {
+    const endpoint = new URL(CLOUDFLARE_CHAT_URL); endpoint.pathname = '/config';
+    const response = await fetch(endpoint, { cache:'no-store', signal });
+    const config = response.ok ? await response.json() : null;
+    if (!config?.publicEnabled || typeof config.sitekey !== 'string' || !config.sitekey) throw new Error('Чат пока недоступен. Попробуй немного позже.');
+    publicSiteKey = config.sitekey;
+  }
+  const turnstile = await loadTurnstile(); signal.throwIfAborted();
+  if (challenge) { const token = challenge; challenge = ''; return token; }
+  return new Promise((resolve, reject) => {
+    const finish = (error, token) => {
+      clearTimeout(timer); signal.removeEventListener('abort', onAbort); challengeWaiter = null;
+      error ? reject(error) : resolve(token);
+    };
+    const onAbort = () => finish(new DOMException('Cancelled', 'AbortError'));
+    const timer = setTimeout(() => finish(new Error('Проверка заняла слишком много времени. Повтори отправку.')), 45000);
+    challengeWaiter = finish; signal.addEventListener('abort', onAbort, { once:true });
+    try {
+      if (widgetId === null) {
+        widgetId = turnstile.render(get('#pix-turnstile'), {
+          sitekey:publicSiteKey, action:'pix_chat', theme:'light', size:'flexible', appearance:'interaction-only',
+          callback(token) { if (challengeWaiter) challengeWaiter(null, token); else challenge = token; },
+          'expired-callback'() { challenge = ''; },
+          'error-callback'() { challenge = ''; challengeWaiter?.(new Error('Не удалось пройти проверку. Повтори отправку.')); }
+        });
+      } else turnstile.reset(widgetId);
+    } catch { finish(new Error('Проверка подключения не запустилась.')); }
+  });
 }
-
-get('#pix-connect-cloudflare').addEventListener('click', async event => {
-  if (loading) return;
-  const button = event.currentTarget;
-  loading = true; button.disabled = true;
-  try {
-    const siteKey = await discoverPublicSiteKey();
-    if (siteKey) {
-      setStatus('Загружаю проверку Cloudflare…');
-      const turnstile = await loadTurnstile();
-      accessMode = 'public';
-      showConnected();
-      const mount = get('#pix-turnstile');
-      mount.hidden = false;
-      get('#pix-send').disabled = true;
-      widgetId = turnstile.render(mount, {
-        sitekey: siteKey,
-        action: 'pix_chat',
-        theme: 'light',
-        size: 'flexible',
-        appearance: 'interaction-only',
-        callback(token) {
-          challengeToken = token;
-          if (!pending) get('#pix-send').disabled = false;
-          get('#pix-chat-status').textContent = 'Проверка готова. Можно отправить сообщение.';
-        },
-        'expired-callback'() {
-          challengeToken = '';
-          get('#pix-send').disabled = true;
-          get('#pix-chat-status').textContent = 'Проверка устарела. Подожди обновления.';
-        },
-        'error-callback'() {
-          challengeToken = '';
-          get('#pix-send').disabled = true;
-          get('#pix-chat-status').textContent = 'Cloudflare не смог проверить подключение.';
-        }
-      });
-    } else {
-      const key = get('#pix-owner-key');
-      const token = key.value.trim();
-      if (!token) { get('#pix-owner-entry').open = true; setStatus('Введи личный PILOT_TOKEN для тестирования.'); key.focus(); return; }
-      ownerToken = token;
-      key.value = '';
-      accessMode = 'owner';
-      showConnected();
-    }
-  } catch(error) {
-    get('#pix-ai-consent').hidden = false;
-    get('#pix-ai-chat').hidden = true;
-    setStatus(error?.message || 'Не удалось подключить Cloudflare.');
-    pose('guide');
-  } finally { loading = false; button.disabled = false; }
-});
-
-const form = get('#pix-chat-form');
-const input = get('#pix-chat-question');
-const log = get('#pix-chat-log');
-const chatStatus = get('#pix-chat-status');
-const send = get('#pix-send');
-const stop = get('#pix-stop');
-const thinking = get('#pix-thinking');
-const clearButton = get('#pix-clear-chat');
-let activeRequest = null;
-
-function resizeComposer() {
-  input.style.height = 'auto';
-  input.style.height = Math.min(160, Math.max(72, input.scrollHeight)) + 'px';
+let followTail = true;
+log.addEventListener('scroll', () => { followTail = nearBottom(); });
+function nearBottom() { return log.scrollHeight - log.scrollTop - log.clientHeight < 90; }
+function bubble(role, text = '') {
+  const row = document.createElement('div'); row.className = 'pix-message is-' + role;
+  if (role === 'assistant') { const avatar = document.createElement('span'); avatar.className = 'pix-message-avatar'; avatar.textContent = '✦'; avatar.setAttribute('aria-hidden','true'); row.append(avatar); }
+  const card = document.createElement('div'); card.className = 'pix-bubble is-' + role;
+  const name = document.createElement('strong'); name.textContent = role === 'user' ? 'Ты' : 'Пикси';
+  const body = document.createElement('p'); body.textContent = text;
+  card.append(name, body); row.append(card); log.append(row); followTail = true; log.scrollTop = log.scrollHeight;
+  return { row, body, card };
 }
+function resizeComposer() { input.style.height = 'auto'; input.style.height = Math.min(144, Math.max(64, input.scrollHeight)) + 'px'; }
 input.addEventListener('input', resizeComposer);
-
-function bubble(role, text = '', options = {}) {
-  const wrap = document.createElement('div');
-  wrap.className = 'pix-message ' + (role === 'user' ? 'is-user' : 'is-pix');
-  if (role !== 'user') {
-    const avatar = document.createElement('span');
-    avatar.className = 'pix-message-avatar';
-    avatar.textContent = '✦';
-    avatar.setAttribute('aria-hidden', 'true');
-    wrap.appendChild(avatar);
-  }
-  const card = document.createElement('div');
-  card.className = 'pix-bubble ' + (role === 'user' ? 'is-user' : 'is-pix');
-  const name = document.createElement('strong');
-  name.textContent = role === 'user' ? 'Ты' : 'Пикс';
-  const body = document.createElement('p');
-  body.textContent = text;
-  card.append(name, body);
-  wrap.appendChild(card);
-  log.appendChild(wrap);
-  if (options.waiting) {
-    body.textContent = '';
-    const dots = document.createElement('span');
-    dots.className = 'pix-typing-dots';
-    dots.setAttribute('aria-label', 'Пикс печатает');
-    for (let i = 0; i < 3; i++) dots.appendChild(document.createElement('i'));
-    body.appendChild(dots);
-    card.classList.add('is-waiting');
-  }
-  log.scrollTop = log.scrollHeight;
-  return { wrap, card, body };
-}
-
-function textPresenter(node) {
-  let target = '', shown = 0, frame = 0, finishResolve = null;
-  const reduced = () => document.hidden || document.body.classList.contains('still')
-    || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  function render() {
-    frame = 0;
-    const backlog = target.length - shown;
-    shown = reduced() ? target.length : Math.min(target.length, shown + Math.max(3, Math.ceil(backlog / 12)));
-    node.textContent = target.slice(0, shown); // Never render model HTML.
-    log.scrollTop = log.scrollHeight;
-    if (shown < target.length) frame = requestAnimationFrame(render);
-    else if (finishResolve) { finishResolve(); finishResolve = null; }
-  }
-  return {
-    push(part) {
-      if (!part) return;
-      target += part;
-      if (!frame) frame = requestAnimationFrame(render);
-    },
-    async finish(reply) {
-      if (reply.length > target.length) target = reply;
-      if (shown >= target.length) return;
-      await new Promise(resolve => {
-        finishResolve = resolve;
-        if (!frame) frame = requestAnimationFrame(render);
-      });
-    },
-    stop() {
-      if (frame) cancelAnimationFrame(frame);
-      frame = 0;
-      if (finishResolve) { finishResolve(); finishResolve = null; }
-    }
-  };
-}
-
+function showError(text) { status.textContent = text; status.hidden = !text; }
 async function sendMessage() {
-  if (pending || !accessMode) return;
-  if (accessMode === 'public' && !challengeToken) {
-    chatStatus.textContent = 'Подожди подтверждения проверки Cloudflare.';
-    return;
-  }
-  const question = input.value.trim();
-  if (!question) return;
-
-  pending = true;
-  input.disabled = true;
-  send.disabled = true;
-  clearButton.disabled = true;
-  stop.hidden = false;
-  thinking.hidden = false;
-  input.value = '';
-  resizeComposer();
-  const user = bubble('user', question);
-  const assistant = bubble('assistant', '', { waiting:true });
-  const request = new AbortController();
-  activeRequest = request;
+  if (pending || !input.value.trim()) return;
+  const question = input.value.trim(), request = new AbortController();
+  activeRequest = request; pending = true; send.disabled = true; clear.disabled = true; input.disabled = true;
+  stop.hidden = false; thinking.hidden = false; showError(''); input.value = ''; resizeComposer();
+  get('#pix-privacy-notice').hidden = true;
+  const user = bubble('user', question), assistant = bubble('assistant');
+  assistant.card.classList.add('is-waiting'); assistant.body.classList.add('pix-typing-dots'); assistant.body.textContent = '•••';
   let presenter = null;
-  pose('thinking');
-  chatStatus.textContent = 'Пикс готовит ответ…';
-
+  const timeout = setTimeout(() => request.abort(), 120000);
+  pose('thinking'); get('#pix-thinking-text').textContent = 'Соединяюсь…';
   try {
-    const messages = buildAiMessages(page, turns, question);
-    const reply = await askCloudflare(messages, {
-      page, signal: request.signal,
-      ...(accessMode === 'owner' ? { ownerToken } : { turnstileToken: challengeToken }),
+    const token = await getChallenge(request.signal); request.signal.throwIfAborted();
+    get('#pix-thinking-text').textContent = 'Пикси думает…';
+    const reply = await askCloudflare(buildAiMessages(page, turns, question), {
+      page, turnstileToken:token, signal:request.signal,
       onDelta(text) {
+        request.signal.throwIfAborted();
         if (!presenter) {
-          assistant.card.classList.remove('is-waiting');
-          assistant.body.replaceChildren();
-          presenter = textPresenter(assistant.body);
-          thinking.hidden = true;
+          assistant.card.classList.remove('is-waiting'); assistant.body.classList.remove('pix-typing-dots');
+          assistant.body.textContent = ''; thinking.hidden = true;
+          presenter = createTextPresenter(assistant.body, { signal:request.signal, onRender:() => { if (followTail) log.scrollTop = log.scrollHeight; } });
         }
         presenter.push(text);
       }
     });
-    if (!presenter) {
-      assistant.body.replaceChildren();
-      assistant.card.classList.remove('is-waiting');
-      presenter = textPresenter(assistant.body);
-    }
-    await presenter.finish(reply);
-    turns.push({ role:'user', content:question }, { role:'assistant', content:reply });
-    turns = turns.slice(-8);
-    pose('idea');
-    playSound('done');
-    chatStatus.textContent = 'Готово! Важные выводы лучше проверить самостоятельно.';
-  } catch(error) {
-    presenter?.stop();
-    assistant.wrap.remove();
-    user.wrap.remove();
-    input.value = question; // Let the user retry without retyping.
-    resizeComposer();
-    if (error?.name === 'AbortError') {
-      chatStatus.textContent = 'Ответ остановлен. Вопрос сохранился в поле ввода.';
-    } else {
-      pose('guide');
-      bubble('assistant', 'Не удалось получить ответ. Попробуй ещё раз или используй локальные подсказки.');
-      chatStatus.textContent = error?.message || 'Неизвестная ошибка Cloudflare.';
-      playSound('error');
-    }
+    request.signal.throwIfAborted();
+    if (!presenter) { assistant.body.classList.remove('pix-typing-dots'); presenter = createTextPresenter(assistant.body, { signal:request.signal }); presenter.push(reply); }
+    await presenter.finish(); request.signal.throwIfAborted();
+    turns.push({ role:'user', content:question }, { role:'assistant', content:reply }); turns = turns.slice(-8);
+    pose('idea'); notify(); playSound('done'); announce('Пикси ответила.');
+  } catch (error) {
+    presenter?.stop(); assistant.row.remove(); user.row.remove(); input.value = question; resizeComposer();
+    const cancelled = error?.name === 'AbortError';
+    showError(cancelled ? 'Ответ остановлен. Сообщение осталось в поле ввода.' : (error?.message || 'Не получилось получить ответ. Попробуй ещё раз.'));
+    pose('guide'); if (!cancelled) playSound('error');
   } finally {
-    pending = false;
-    activeRequest = null;
-    thinking.hidden = true;
-    stop.hidden = true;
-    input.disabled = false;
-    clearButton.disabled = false;
-    if (accessMode === 'public') {
-      challengeToken = '';
-      send.disabled = true;
-      if (widgetId !== null) window.turnstile?.reset(widgetId);
-    } else send.disabled = false;
-    if (!panel.hidden && activeMode === 'ai') input.focus();
+    clearTimeout(timeout); presenter?.stop(); pending = false; activeRequest = null;
+    input.disabled = false; send.disabled = false; clear.disabled = false; stop.hidden = true; thinking.hidden = true;
+    if (isReading()) input.focus({ preventScroll:true });
   }
 }
-
 stop.addEventListener('click', () => activeRequest?.abort());
-form.addEventListener('submit', event => {
-  event.preventDefault();
-  void sendMessage();
+get('#pix-chat-form').addEventListener('submit', e => { e.preventDefault(); void sendMessage(); });
+input.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); void sendMessage(); }
 });
-input.addEventListener('keydown', event => {
-  if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
-    event.preventDefault();
-    void sendMessage();
-  }
-});
-clearButton.addEventListener('click', () => {
-  turns = [];
-  log.replaceChildren();
-  const p = document.createElement('p');
-  p.className = 'pix-chat-intro';
-  p.textContent = 'Диалог очищен. Можно начать новую тему!';
-  log.appendChild(p);
-  chatStatus.textContent = 'Готова слушать!';
-  pose('hello');
-});
-// No external code loads before the user opts in; owner token stays in memory only.
+clear.addEventListener('click', () => { turns = []; log.replaceChildren(); bubble('assistant', 'Начнём с чистого листа. Я рядом ✨'); showError(''); pose('hello'); });
+bubble('assistant', GREETING);
+setUnread(1);
