@@ -37,6 +37,14 @@ with sync_playwright() as pw:
         locator.click()
         page.wait_for_load_state('networkidle')
     go();assert page.locator('h1').count()==1
+    assert page.locator('.story-card').count()==4
+    assert page.locator('.home-team').evaluate('(im)=>im.complete && im.naturalWidth===640')
+    for image in page.locator('.story-card img').all():
+        image.scroll_into_view_if_needed()
+        page.wait_for_function('(im)=>im.complete && im.naturalWidth>0',arg=image.element_handle())
+    assert page.locator('[data-motion]').is_disabled()
+    assert page.evaluate('document.getAnimations().length')==0
+    page.evaluate('scrollTo(0,0)')
     page.screenshot(path=str(OUT/'home-desktop.png'),full_page=True)
     follow(page.get_by_role('link',name='Выбрать свой первый шаг'))
     assert page.url==BASE+'courses/'
@@ -113,6 +121,26 @@ with sync_playwright() as pw:
     for path in PAGES:bp.goto(BASE+path,wait_until='networkidle')
     bp.locator('#answer-add').fill('8');bp.locator('#math form button[type="submit"]').click()
     assert bp.locator('#math .result').is_visible();assert not blocked_errors,blocked_errors
+    # Motion remains optional and is paused off screen; no observer is required to read.
+    animated=browser.new_context(viewport={'width':1440,'height':1000},reduced_motion='no-preference')
+    animated.route('**/*',serve);ap=animated.new_page()
+    ap.goto(BASE,wait_until='networkidle')
+    ap.locator('.home-stage.in-view').wait_for()
+    assert ap.locator('.home-team').evaluate('(im)=>getComputedStyle(im).animationPlayState')=='running'
+    ap.locator('[data-motion]').click()
+    assert ap.locator('body').evaluate('(el)=>el.classList.contains("still")')
+    assert ap.evaluate('document.getAnimations().length')==0
+    ap.reload(wait_until='networkidle')
+    assert ap.locator('[data-motion]').get_attribute('aria-pressed')=='false'
+    ap.locator('[data-motion]').click()
+    ap.locator('.site-footer').scroll_into_view_if_needed()
+    ap.wait_for_timeout(200)
+    assert ap.locator('.home-team').evaluate('(im)=>getComputedStyle(im).animationPlayState')=='paused'
+    ap.add_init_script('delete window.IntersectionObserver')
+    ap.reload(wait_until='networkidle')
+    assert ap.locator('.story-card').count()==4
+    assert ap.locator('body').evaluate('(el)=>!el.classList.contains("motion-ready")')
+    assert ap.evaluate('document.getAnimations().length')==0
     # Static navigation also works with JavaScript disabled.
     plain=browser.new_context(java_script_enabled=False,viewport={'width':390,'height':844})
     plain.route('**/*',serve);np=plain.new_page()

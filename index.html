@@ -7,12 +7,68 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&amp;family=Nunito:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./styles/lesson.css"><link rel="stylesheet" href="./styles/portal.css">
+<link rel="stylesheet" href="./styles/home.css">
 <script type="module" src="./src/portal.js"></script></head><body class="portal" data-page="home"><a class="skip" href="#main">Перейти к содержанию</a>
 <header class="site-header"><a class="brand" href="./" aria-label="АГА! — главная"><img src="./assets/mark.svg" alt="" width="48" height="48"><span><b>АГА!</b><small>лаборатория ясности</small></span></a>
 <nav class="portal-nav" aria-label="Главная навигация"><a href="./" aria-current="page">Главная</a><a href="./courses/">Курсы и уроки</a></nav>
-<a class="header-action" href="./lessons/first-discovery/" data-resume>Попробовать знакомство ↗</a></header><main id="main"><section class="home-hero">
-<div class="home-copy"><span class="eyebrow">Математика и код. Сначала — смысл.</span><h1>От «кажется»<br>к <mark>«могу проверить».</mark></h1><p>Ты умеешь задавать вопросы. Здесь научишься превращать догадки в понятные вычисления и первые строки кода. Даже если никогда их не писал.</p><div class="home-actions"><a class="button dark" href="./courses/">Выбрать свой первый шаг <span aria-hidden="true">↗</span></a><a class="quiet-link" href="./courses/start/">Сначала познакомимся</a></div><p class="hand">Не зубрить. Понимать, что происходит.</p></div>
-<div class="home-stage" aria-label="Понятная история становится вычислением"><div class="home-board"><span class="hand">Мысль становится точнее</span><strong>5 + 3 = 8</strong><small>представить · записать · проверить</small></div><img class="home-pix bobbing" src="./assets/pix.webp" alt="Пикс приветствует тебя" width="230" height="230"><span class="home-note hand">Вот теперь<br>понятно!</span><span class="home-star" aria-hidden="true">✦</span></div>
-</section><div class="value-strip"><span>С самого начала</span><span>Без страха ошибиться</span><span>В своём темпе</span></div><section class="resume-panel" data-started hidden aria-label="Твоё знакомство"><div><strong>Продолжим с твоего открытия?</strong><p data-progress-text></p><div class="mini-progress" data-progress-bar role="progressbar" aria-label="Прогресс знакомства" aria-valuemin="0" aria-valuemax="7" aria-valuenow="0"></div></div><a class="button dark" href="./lessons/first-discovery/" data-resume>Продолжить знакомство ↗</a></section><section class="portal-section reveal"><div class="section-head"><div><span class="hand">Хорошая точка старта</span><h2>Давай сначала познакомимся.</h2></div><a href="./courses/">К курсам и урокам ↗</a></div>
+<a class="header-action" href="./lessons/first-discovery/" data-resume>Попробовать знакомство ↗</a></header><main id="main"><section class="home-hero" aria-labelledby="home-title">
+  <div class="home-copy">
+    <span class="eyebrow">Математика и код. Сначала — смысл.</span>
+    <h1 id="home-title">От «кажется»<br>к <mark>«могу проверить».</mark></h1>
+    <p>Ты умеешь задавать вопросы. Здесь научишься превращать догадки в понятные вычисления и первые строки кода. Даже если никогда их не писал.</p>
+    <div class="home-actions">
+      <a class="button dark" href="./courses/">Выбрать свой первый шаг <span aria-hidden="true">↗</span></a>
+      <a class="quiet-link" href="./courses/start/">Сначала познакомимся</a>
+    </div>
+    <p class="hand hero-signature">Не зубрить. Понимать, что происходит.</p>
+  </div>
+  <div class="home-stage">
+    <span class="team-caption hand" aria-hidden="true">Знания,<br>которые работают!
+      <svg viewBox="0 0 90 46" width="90" height="46"><path d="M8 5c-9 32 38 39 68 23m-16-7 19 5-8 15"/></svg>
+    </span>
+    <img class="home-team" src="./assets/home/team.avif" alt="Пикс с командой: любопытный мозг, сонная кружка, озорная звезда и жук с инструментом" width="640" height="640" fetchpriority="high" decoding="async">
+    <span class="team-bubble hand" aria-hidden="true">Учиться можно<br>и с кайфом!</span>
+    <span class="stage-spark stage-spark-left" aria-hidden="true">✦</span>
+    <span class="stage-spark stage-spark-right" aria-hidden="true">✧</span>
+  </div>
+</section>
+<div class="value-strip" aria-label="Наш подход">
+  <span>С самого начала</span><span>Без страха ошибиться</span><span>В своём темпе</span><span>С примерами из жизни</span>
+</div>
+<section class="stories portal-section" aria-labelledby="stories-title">
+  <div class="stories-heading">
+    <div><span class="hand">Больше, чем просто формулы</span><h2 id="stories-title">Для любопытных, уставших<br class="desktop-break"> и вечно занятых.</h2></div>
+    <p class="stories-note hand" aria-hidden="true"><span>Математика, код<br>и здравый смысл<br>в повседневной жизни</span>
+      <svg viewBox="0 0 86 65" width="86" height="65"><path d="M79 7C43 0 18 20 13 52m-8-14 8 17 17-9"/></svg>
+    </p>
+  </div>
+  <div class="story-grid">
+    <article class="story-card story-chaos reveal">
+      <div class="story-art"><img src="./assets/home/chaos.avif" alt="Пикс среди списка дел, книг, календаря и звонящего телефона" width="480" height="480" loading="lazy" decoding="async"></div>
+      <div class="story-copy"><h3>Наводи порядок <br>в хаосе.</h3><p>Разбирай задачу на понятные действия. Даже когда дел больше, чем сил и кофе.</p></div>
+    </article>
+    <article class="story-card story-thoughts reveal">
+      <div class="story-art"><img src="./assets/home/thoughts.avif" alt="Мозг под одеялом размышляет о космосе, пока рядом шалит звезда" width="480" height="480" loading="lazy" decoding="async"></div>
+      <div class="story-copy"><h3>Задавай большие <br>вопросы.</h3><p>Думать «а почему?» — уже начало. Следующий шаг — понять, как проверить догадку.</p></div>
+    </article>
+    <article class="story-card story-debug reveal">
+      <div class="story-art"><img src="./assets/home/debug.avif" alt="Жук с гаечным ключом распутывает провода и исправляет смешные ошибки" width="480" height="480" loading="lazy" decoding="async"></div>
+      <div class="story-copy"><h3>Превращай ошибки <br>в опыт.</h3><p>Код запустился — ещё не значит, что всё верно. Учись замечать, где рассуждение свернуло не туда.</p></div>
+    </article>
+    <article class="story-card story-surf reveal">
+      <div class="story-art"><img src="./assets/home/surf.avif" alt="Пикс уверенно скользит на размотанном рулоне туалетной бумаги" width="480" height="480" loading="lazy" decoding="async"></div>
+      <div class="story-copy"><h3>Двигайся вперёд, <br>без занудства.</h3><p>Серьёзные вещи можно понимать без серьёзного лица. Маленькими шагами и с правом на «ой».</p></div>
+    </article>
+  </div>
+  <div class="stories-actions">
+    <span class="hand cta-doodle" aria-hidden="true">Без занудства<br>и лишней теории!
+      <svg viewBox="0 0 110 45" width="110" height="45"><path d="M4 22c14-28 58-10 38 1-16 9-10-30 52 5m-12-14 13 16-21 3"/></svg>
+    </span>
+    <a class="button dark" href="./lessons/first-discovery/" data-resume>Попробовать знакомство ↗</a>
+    <a class="quiet-link" href="#how-it-works">Посмотреть, как это устроено</a>
+    <svg class="doodle-face" viewBox="0 0 100 80" width="100" height="80" aria-hidden="true"><path d="M19 38c-2-29 64-37 66-4 3 37-59 37-66 4Z"/><path d="m5 20 8 5m-10 17 9-1m78-23-5 8m11 17-8-2"/><circle cx="40" cy="30" r="3"/><circle cx="65" cy="28" r="3"/><path d="M37 44q17 15 32-1m-23 7q0 20 12 10l1-10"/></svg>
+  </div>
+</section>
+<section class="resume-panel" data-started hidden aria-label="Твоё знакомство"><div><strong>Продолжим с твоего открытия?</strong><p data-progress-text></p><div class="mini-progress" data-progress-bar role="progressbar" aria-label="Прогресс знакомства" aria-valuemin="0" aria-valuemax="7" aria-valuenow="0"></div></div><a class="button dark" href="./lessons/first-discovery/" data-resume>Продолжить знакомство ↗</a></section><section class="portal-section reveal" id="how-it-works"><div class="section-head"><div><span class="hand">Хорошая точка старта</span><h2>Давай сначала познакомимся.</h2></div><a href="./courses/">К курсам и урокам ↗</a></div>
 <article class="start-card"><div><span class="tag">Знакомство, не курс</span><h3>От догадки к проверке</h3><p>Одна коробка с яблоками связывает бытовое действие, математическую запись и первый код. Попробуй сам и почувствуй, как здесь устроено обучение.</p></div><div class="start-side"><span class="hand">Ничего знать заранее не нужно</span><a class="button dark" href="./courses/start/">Посмотреть занятие ↗</a><span class="small-copy">Одна история. Семь маленьких открытий.</span></div></article></section>
 <section class="about-block reveal"><span class="hand">Можно хорошо мыслить<br>и пока не знать,<br>как это записать.</span><div><h2>Для детей. Для взрослых.<br>Для тебя — с любого старта.</h2><p>АГА! соединяет знакомые ситуации с точным языком математики и кода. Чтобы не только доверять готовому ответу, но и понимать, откуда он взялся.</p><p>Здесь нет гонки за профессией или оценками. Есть вопросы, эксперименты, подсказки и спокойное право попробовать ещё раз.</p></div></section></main><footer class="site-footer"><span><b>АГА!</b> Для любопытных, а не для оценок.</span><a href="https://github.com/Lotargo/Teacher-" target="_blank" rel="noopener noreferrer">Открытый проект ↗</a><button type="button" data-motion aria-pressed="true">Выключить движение</button></footer></body></html>

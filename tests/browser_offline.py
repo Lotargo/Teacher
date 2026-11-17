@@ -13,7 +13,7 @@ def document(path):
     html=(ROOT/path).read_text()
     html=re.sub(r'<link[^>]+>', '', html)
     html=re.sub(r'<script[^>]+src=[^>]+></script>', '', html)
-    html=html.replace('</head>','<style>'+ (ROOT/'styles/lesson.css').read_text()+(ROOT/'styles/portal.css').read_text()+'</style></head>')
+    html=html.replace('</head>','<style>'+ (ROOT/'styles/lesson.css').read_text()+(ROOT/'styles/portal.css').read_text()+((ROOT/'styles/home.css').read_text() if path=='index.html' else '')+'</style></head>')
     names=['lesson-data.js','interpreter.js','grading.js','lesson-app.js'] if path.startswith('lessons/') else ['lesson-data.js','catalog.js','portal.js']
     modules=[]
     for name in names:
@@ -29,7 +29,7 @@ def document(path):
                 code=code.replace("url('assets/"+asset+"')",repr(data))
         modules.append(code)
     html=html.replace('</body>','<script>'+setup+'</script><script type="module">'+'\n'.join(modules)+'</script></body>')
-    for name,mime in [('pix.webp','image/webp'),('mark.svg','image/svg+xml')]:
+    for name,mime in [('pix.webp','image/webp'),('mark.svg','image/svg+xml')] + [('home/'+n+'.avif','image/avif') for n in ['team','chaos','thoughts','debug','surf']]:
         data='data:'+mime+';base64,'+base64.b64encode((ROOT/'assets'/name).read_bytes()).decode()
         html=re.sub(r'(?:\.\./|\./)*assets/'+re.escape(name),data,html)
     return html
@@ -49,8 +49,19 @@ with sync_playwright() as pw:
                 assert page.locator('.path-ready').bounding_box()['y']==page.locator('.path-planned').bounding_box()['y']
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'),(width,path)
             if width in [390,1440]:
+                for image in page.locator('img[loading="lazy"]').all():
+                    image.scroll_into_view_if_needed()
+                    page.wait_for_function('(im)=>im.complete && im.naturalWidth>0',arg=image.element_handle())
+                page.evaluate('scrollTo(0,0)')
                 name=path.replace('/index.html','').replace('index.html','home').replace('/','-')
                 page.screenshot(path=str(OUT/f'{name}-{width}.png'),full_page=not path.startswith('lessons/'))
+    load('index.html')
+    assert page.locator('.story-card').count()==4
+    for img in page.locator('.story-card img').all():
+        img.scroll_into_view_if_needed()
+        page.wait_for_function('(el)=>el.complete && el.naturalWidth>0',arg=img.element_handle())
+    assert page.locator('.home-team').evaluate('(el)=>el.complete && el.naturalWidth===640')
+    assert page.locator('[data-motion]').is_disabled()
     assert not errors,errors
     load('lessons/first-discovery/index.html')
     for task,section,wrong,right in [('add','math','5','8'),('undo','backward','8','5')]:

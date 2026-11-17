@@ -49,6 +49,7 @@ function applyMotion() {
 $$('[data-motion]').forEach(button => button.addEventListener('click', () => { motion = !motion; try { localStorage.setItem('aga-motion', motion ? 'on' : 'off'); } catch {} applyMotion(); }));
 reduced.addEventListener('change', applyMotion); applyMotion();
 if ('IntersectionObserver' in window) {
+  document.body.classList.add('motion-ready');
   const observer = new IntersectionObserver(entries => entries.forEach(entry => {
     entry.target.classList.toggle('in-view', entry.isIntersecting);
     if (entry.isIntersecting && !entry.target.dataset.seen) {
@@ -58,3 +59,10 @@ if ('IntersectionObserver' in window) {
   }));
   $$('.reveal, .home-stage').forEach(element => observer.observe(element));
 }
+
+// Pause decorative motion while the document is in the background.
+function syncVisibility() {
+  document.body.classList.toggle('page-hidden', document.hidden);
+}
+document.addEventListener('visibilitychange', syncVisibility);
+syncVisibility();
