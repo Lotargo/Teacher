@@ -11,7 +11,7 @@ from lesson_layout import assert_lesson_layout
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT.parent/'aga-multipage-previews';OUT.mkdir(exist_ok=True)
 BASE='https://aga.test/Teacher-/'
-PAGES=['','courses/','courses/start/','lessons/first-discovery/','math/','workshop/','library/','library/check-ai/']
+PAGES=['','courses/','courses/start/','lessons/first-discovery/','math/','workshop/','library/','library/check-ai/','faq/']
 missing=[]
 def serve(route):
     u=urlparse(route.request.url)

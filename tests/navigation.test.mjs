@@ -5,7 +5,7 @@ import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { learningPaths, introLesson, readLessonProgress } from '../src/catalog.js';
 const root = fileURLToPath(new URL('../', import.meta.url));
-const pages = ['index.html','courses/index.html','courses/start/index.html','lessons/first-discovery/index.html','math/index.html','workshop/index.html','library/index.html','library/check-ai/index.html'];
+const pages = ['index.html','courses/index.html','courses/start/index.html','lessons/first-discovery/index.html','math/index.html','workshop/index.html','library/index.html','library/check-ai/index.html','faq/index.html'];
 const storage = value => ({ getItem:() => typeof value === 'string' ? value : JSON.stringify(value) });
 
 test('every destination is a real independently loadable HTML document', () => {

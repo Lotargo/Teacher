@@ -12,6 +12,7 @@ const pages = [
   ['workshop/index.html', '../', 'workshop'],
   ['library/index.html', '../', 'library'],
   ['library/check-ai/index.html', '../../', 'article'],
+  ['faq/index.html', '../', 'faq'],
 ];
 const check = process.argv.includes('--check');
 let changed = false;
@@ -19,7 +20,7 @@ for (const [path, prefix, page] of pages) {
   let html = readFileSync(resolve(root, path), 'utf8');
   const original = html;
   const values = { root:prefix };
-  for (const name of ['home', 'catalog', 'math', 'workshop', 'library']) {
+  for (const name of ['home', 'catalog', 'math', 'workshop', 'library', 'faq']) {
     const active = page === name
       || (name === 'catalog' && (page === 'start' || page === 'lesson'))
       || (name === 'library' && page === 'article');
