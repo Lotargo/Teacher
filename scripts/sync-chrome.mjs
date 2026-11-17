@@ -8,6 +8,10 @@ const pages = [
   ['courses/index.html', '../', 'catalog'],
   ['courses/start/index.html', '../../', 'start'],
   ['lessons/first-discovery/index.html', '../../', 'lesson'],
+  ['math/index.html', '../', 'math'],
+  ['workshop/index.html', '../', 'workshop'],
+  ['library/index.html', '../', 'library'],
+  ['library/check-ai/index.html', '../../', 'article'],
 ];
 const check = process.argv.includes('--check');
 let changed = false;
@@ -15,8 +19,10 @@ for (const [path, prefix, page] of pages) {
   let html = readFileSync(resolve(root, path), 'utf8');
   const original = html;
   const values = { root:prefix };
-  for (const name of ['home', 'catalog', 'start']) {
-    const active = page === name || (name === 'start' && page === 'lesson');
+  for (const name of ['home', 'catalog', 'math', 'workshop', 'library']) {
+    const active = page === name
+      || (name === 'catalog' && (page === 'start' || page === 'lesson'))
+      || (name === 'library' && page === 'article');
     values[name + 'Class'] = active ? ' is-active' : '';
     values[name + 'Current'] = active ? ' aria-current="' + (page === 'lesson' ? 'location' : 'page') + '"' : '';
   }

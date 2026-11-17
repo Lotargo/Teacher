@@ -132,3 +132,43 @@
 @media(prefers-reduced-motion:reduce){.home-team,.stage-spark,.story-art img{animation:none!important;transition:none!important}}
 
 .team-bubble{text-align:center}
+
+/* The wider mission: four human entry points rather than an endless course list. */
+.story-copy{display:flex;flex-direction:column;flex:1}
+.story-link{align-self:flex-start;margin-top:auto;padding:15px 0 0;font-size:15px;line-height:1.4;font-weight:900;color:#334b4a;text-underline-offset:4px}
+.story-link:hover{color:#7b5a91}
+.paths-showcase{border-top:1px solid #e3e4d7;padding-top:58px}
+.paths-heading{max-width:930px;margin-bottom:26px}
+.paths-heading .hand{color:#826b94;font-size:29px}
+.paths-heading h2{font-size:clamp(32px,3.6vw,47px);margin:8px 0 14px}
+.paths-heading>p{font-size:18px;color:#637476;max-width:730px}
+.paths-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+.direction-card{background:#fffefa;border:1px solid #e0dfd5;border-radius:26px;padding:26px 23px;min-width:0;display:flex;flex-direction:column;text-decoration:none;gap:10px;transition:transform .2s ease,box-shadow .2s}
+.direction-card:hover{transform:translateY(-4px);box-shadow:0 15px 29px #23363e12}
+.direction-practice{background:#e4f0df}
+.direction-math{background:#fff0d8}
+.direction-workshop{background:#ede5fa}
+.direction-library{background:#f9e3e9}
+.direction-icon{display:grid;place-items:center;width:60px;height:60px;background:#fffefa;border:2px solid #2e434b;border-radius:20px;font-size:35px;font-weight:900;margin-bottom:14px;transform:rotate(-8deg)}
+.direction-eyebrow{color:#698073;font-size:13px;font-weight:900;letter-spacing:.03em}
+.direction-card strong{font-size:27px;line-height:1.15}
+.direction-card>span:not(.direction-icon,.direction-eyebrow){font-size:16px;line-height:1.55;color:#526469;flex:1}
+.direction-card b{display:inline-block;margin-top:17px;font-size:15px;color:#30474b}
+.free-manifesto{display:flex;flex-direction:column;align-items:flex-start;background:#dff0e6;border:1px solid #d0e3d9;border-radius:30px;padding:41px 49px;margin:52px 0 45px}
+.free-manifesto .hand{font-size:30px;color:#5d8068}
+.free-manifesto h2{font-size:clamp(30px,3.7vw,48px);margin:10px 0 18px}
+.free-manifesto p{max-width:980px;color:#4e6761;font-size:18px}
+.free-manifesto .button{margin-top:22px}
+.catalog-explore{margin:32px 0 65px}
+.catalog-explore .hand{color:#806d91}
+.catalog-explore h2{font-size:clamp(30px,3vw,40px);margin:9px 0 24px}
+.catalog-explore-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+.catalog-explore-grid a{display:flex;flex-direction:column;gap:9px;border:1px solid #d9dfd0;border-radius:19px;padding:24px;background:#fffdf5;text-decoration:none;min-height:132px}
+.catalog-explore-grid a:nth-child(2){background:#f0eaf9}
+.catalog-explore-grid a:nth-child(3){background:#fff0dc}
+.catalog-explore-grid a:hover{box-shadow:0 12px 24px #28364210;transform:translateY(-2px)}
+.catalog-explore-grid strong{font-size:21px}
+.catalog-explore-grid span{font-size:16px;color:#617379}
+@media(max-width:1080px){.paths-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.catalog-explore-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.paths-showcase{padding-top:35px}.paths-grid,.catalog-explore-grid{grid-template-columns:1fr}.direction-card{padding:24px}.direction-card strong{font-size:24px}.direction-icon{margin-bottom:6px}.free-manifesto{padding:29px 23px;border-radius:24px}.free-manifesto h2{font-size:30px}.free-manifesto p{font-size:17px}.story-link{font-size:16px}}
+@media(prefers-reduced-motion:reduce){.direction-card,.catalog-explore-grid a{transition:none;transform:none!important}}

@@ -11,7 +11,7 @@ from lesson_layout import assert_lesson_layout
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT.parent/'aga-multipage-previews';OUT.mkdir(exist_ok=True)
 BASE='https://aga.test/Teacher-/'
-PAGES=['','courses/','courses/start/','lessons/first-discovery/']
+PAGES=['','courses/','courses/start/','lessons/first-discovery/','math/','workshop/','library/','library/check-ai/']
 missing=[]
 def serve(route):
     u=urlparse(route.request.url)
@@ -64,6 +64,35 @@ with sync_playwright() as pw:
         page.set_viewport_size({'width':1440,'height':1000})
         assert page.locator('.site-menu').is_visible()
     go();assert page.locator('h1').count()==1
+    # New ways into the lab are real pages with local, working tools.
+    assert page.locator('.paths-grid .direction-card').count()==4
+    go('math/')
+    assert page.locator('#discount-total').is_visible()
+    page.locator('#price').fill('1400')
+    page.locator('#discount-percent').fill('25')
+    assert '1 050' in page.locator('#discount-total').inner_text().replace('\u00a0',' ').replace('\u202f',' ')
+    page.locator('#discount-percent').fill('125')
+    assert page.locator('#discount-error').is_visible()
+    page.locator('#discount-percent').fill('20')
+    assert page.locator('#discount-error').is_hidden()
+    go('workshop/')
+    for id,text in [('idea-what','Сайт для ремонта кранов'),('idea-who','Для клиентов'),('idea-first','Контакты и заявки'),('idea-check','Тестовая заявка приходит')]:
+        page.locator('#'+id).fill(text)
+    page.locator('#idea-form button[type="submit"]').click()
+    assert page.locator('#idea-output-wrap').is_visible()
+    assert 'Сайт для ремонта кранов' in page.locator('#idea-output').inner_text()
+    go('library/')
+    assert page.locator('.resource-card').count()==3
+    page.locator('[data-filter="math"]').click()
+    assert page.locator('.resource-card:visible').count()==1
+    page.locator('[data-filter="all"]').click()
+    assert page.locator('.resource-card:visible').count()==3
+    assert page.locator('.external-list a[target="_blank"]').count()==4
+    go('library/check-ai/')
+    assert 'ИИ написал код' in page.locator('h1').inner_text()
+    assert page.locator('.article-step').count()==4
+    go()
+
     assert page.locator('.story-card').count()==4
     assert page.locator('.home-team').evaluate('(im)=>im.complete && im.naturalWidth===640')
     for image in page.locator('.story-card img').all():

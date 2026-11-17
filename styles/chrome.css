@@ -106,3 +106,17 @@ body.with-chrome:is(.portal,.lesson-page) .site-footer :focus-visible{outline-co
 @media(prefers-reduced-motion:reduce){body.with-chrome:is(.portal,.lesson-page) .site-header{backdrop-filter:none}.with-chrome a.button,.with-chrome .next-link,.with-chrome .portal-nav a,.with-chrome .footer-nav a{transition:none;transform:none!important}}
 .with-chrome.still a.button,.with-chrome.still .next-link,.with-chrome.still .portal-nav a,.with-chrome.still .footer-nav a{transition:none;transform:none!important}
 .page-hidden .bobbing{animation-play-state:paused!important}
+
+/* Five useful destinations must fit before the mobile menu takes over. */
+@media(min-width:901px) and (max-width:1260px){
+ .with-chrome .portal-nav .nav-chip{padding:9px 9px;font-size:13px}
+ .with-chrome .chrome-brand b{font-size:31px}
+ .chrome-inner{gap:15px}
+ .site-menu{gap:12px}
+ .with-chrome .header-action{padding:11px 13px}
+}
+@media(min-width:901px) and (max-width:1080px){
+ .with-chrome .chrome-brand small{font-size:10px}
+ .with-chrome .portal-nav{gap:2px}
+ .with-chrome .portal-nav .nav-chip{font-size:12px}
+}

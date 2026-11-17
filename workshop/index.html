@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ru"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f8f6ee">
+<title>Мастерская идей — АГА!</title><meta name="description" content="Создавай с ИИ осмысленно: от идеи до проверяемого задания для сайта, приложения или игры.">
+<meta property="og:title" content="Мастерская идей — АГА!"><meta property="og:description" content="Создавай с ИИ осмысленно: от идеи до проверяемого задания для сайта, приложения или игры."><meta property="og:type" content="website">
+<link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&amp;family=Nunito:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/lesson.css"><link rel="stylesheet" href="../styles/portal.css"><link rel="stylesheet" href="../styles/chrome.css"><link rel="stylesheet" href="../styles/atlas.css">
+<script type="module" src="../src/portal.js"></script><script type="module" src="../src/workshop.js"></script>
+</head><body class="portal with-chrome atlas-page" data-page="workshop"><a class="skip" href="#main">Перейти к содержанию</a>
+<!-- site-header:start -->
+<div id="page-top" class="page-top-anchor" aria-hidden="true"></div>
+<header class="site-header">
+  <div class="chrome-inner">
+    <a class="brand chrome-brand" href="../" aria-label="АГА! — главная"><img src="../assets/mark.svg" alt="" width="48" height="48"><span><b>АГА!</b><small>лаборатория ясности</small></span></a>
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-menu" hidden><span class="menu-lines" aria-hidden="true"></span><span>Меню</span></button>
+    <div class="site-menu" id="site-menu">
+      <nav class="portal-nav" aria-label="Главная навигация">
+        <a class="nav-chip" href="../">Главная</a>
+        <a class="nav-chip" href="../courses/">Практика</a>
+        <a class="nav-chip" href="../math/">Математика</a>
+        <a class="nav-chip is-active" href="../workshop/" aria-current="page">Мастерская</a>
+        <a class="nav-chip" href="../library/">Библиотека</a>
+      </nav>
+      <a class="button lime header-action" href="../lessons/first-discovery/" data-resume data-resume-compact>Попробовать ↗</a>
+    </div>
+  </div>
+</header>
+<!-- site-header:end -->
+<main id="main">
+<section class="atlas-hero atlas-workshop" aria-labelledby="workshop-title">
+ <div class="atlas-intro"><span class="atlas-eyebrow">Мастерская идей · без ИИ внутри сайта</span><h1 id="workshop-title">Идея есть.<br><mark>С чего начать?</mark></h1>
+ <p>Сайт для клиентов, новая версия любимой игры, небольшой помощник по работе? Не обязательно заранее знать Python или Go. Сначала разберёмся, <strong>что именно мы хотим получить</strong> и как убедиться, что всё работает.</p>
+ <div class="atlas-actions"><a class="button dark" href="#brief">Собрать первый замысел ↗</a><a class="button secondary" href="../library/check-ai/">Как проверять работу ИИ</a></div></div>
+ <div class="atlas-visual atlas-work-visual" aria-hidden="true"><div class="idea-window"><span class="idea-dots">● ● ●</span><strong>Есть мысль!</strong><p>Кому это нужно?</p><p>Что должно работать?</p><p>Как проверить?</p></div><span class="work-sticker hand">Не код. Пока идея.</span><span class="atlas-floating-star">✺</span></div>
+</section>
+<section class="atlas-section"><div class="atlas-section-head"><span class="hand">От мысли до результата</span><h2>Не волшебный промпт. Четыре понятных действия.</h2></div>
+ <div class="atlas-steps"><article><span>💡</span><h3>Заметь потребность</h3><p>«Клиенты пишут в разные мессенджеры, а заявки теряются». Это уже задача, а не абстрактное «сделай приложение».</p></article>
+ <article><span>📝</span><h3>Опиши минимальный результат</h3><p>Для начала хватит страницы с услугами, контактами и понятной формой заявки. Всё остальное можно отложить.</p></article>
+ <article><span>🧩</span><h3>Попроси ИИ сделать черновик</h3><p>Пусть он сначала объяснит архитектуру простыми словами, зависимости и риски, а затем предложит реализацию.</p></article>
+ <article><span>🔎</span><h3>Проверь сам</h3><p>Открой на телефоне, попробуй неверные данные, проверь контакты и пустые поля. «Запустилось» — ещё не значит «готово».</p></article></div>
+</section>
+<section class="atlas-section" id="brief" aria-labelledby="brief-title">
+ <div class="atlas-section-head"><span class="hand">Первый инструмент мастерской</span><h2 id="brief-title">Превратим твою идею в ясное задание</h2><p>Ответь своими словами. Не нужно знать терминов или придумывать сложный технический план.</p></div>
+ <div class="atlas-lab-layout">
+  <div class="atlas-lab">
+   <form id="idea-form" class="atlas-form atlas-form-stack">
+    <label for="idea-what">Что ты хочешь сделать?<textarea id="idea-what" rows="2" maxlength="400" placeholder="Например: небольшой сайт, чтобы люди могли заказать ремонт крана" required></textarea></label>
+    <label for="idea-who">Для кого это нужно?<textarea id="idea-who" rows="2" maxlength="300" placeholder="Для моих клиентов, которые чаще заходят с телефона" required></textarea></label>
+    <label for="idea-first">Что обязательно должно работать в первой версии?<textarea id="idea-first" rows="2" maxlength="500" placeholder="Услуги, цены, кнопка связи. Без регистрации и сложной оплаты" required></textarea></label>
+    <label for="idea-check">Как ты поймёшь, что получилось правильно?<textarea id="idea-check" rows="2" maxlength="500" placeholder="Открою с телефона, нажму все кнопки и проверю отправку заявки" required></textarea></label>
+    <button class="button dark" type="submit">Собрать понятное задание ↗</button>
+   </form>
+   <div id="idea-output-wrap" class="idea-output-wrap" hidden><h3>Вот начало твоего задания</h3><p>Можно отнести этот текст в любой инструмент разработки с ИИ и дальше уточнять по шагам.</p><pre id="idea-output" aria-live="polite"></pre><button class="button secondary" id="copy-idea" type="button">Скопировать текст</button><p id="copy-status" role="status" aria-live="polite"></p></div>
+   <p class="privacy-hint">Всё собирается прямо в твоём браузере. Текст не отправляется на сервер и не сохраняется в аккаунте.</p>
+  </div>
+  <aside class="atlas-note"><span class="hand">Пример из жизни</span><h3>Ты сантехник. Тебе нужен сайт.</h3><p>Не нужно начинать с выбора языка программирования. Начни с вопроса: «Как клиенту быстро понять мои услуги и связаться со мной?»</p><p>Уже потом появится техника. Её можно поручить ИИ, но смысл и проверку результата оставь за собой.</p></aside>
+ </div>
+</section>
+<section class="atlas-bottom-cta"><span class="hand">Без обещаний лёгких миллионов</span><h2>Маленький рабочий прототип<br>ценнее большой непроверенной идеи.</h2><a class="button dark" href="../library/check-ai/">Научиться проверять результат ↗</a></section></main>
+<!-- site-footer:start -->
+<footer class="site-footer">
+  <div class="footer-main">
+    <div class="footer-about">
+      <a class="brand chrome-brand" href="../" aria-label="АГА! — главная"><img src="../assets/mark.svg" alt="" width="48" height="48"><span><b>АГА!</b><small>лаборатория ясности</small></span></a>
+      <p>Для тех, у кого уже есть идеи.<br>И для тех, кто ещё ищет свои.</p>
+      <span class="footer-signature hand">Думать. Делать. Проверять.</span>
+    </div>
+    <nav class="footer-nav" aria-label="Навигация внизу страницы">
+      <span class="footer-label">Куда отправимся?</span>
+      <a href="../">На главную <span aria-hidden="true">↗</span></a>
+      <a href="../courses/">Практика и знакомство <span aria-hidden="true">↗</span></a>
+      <a href="../math/">Математика для жизни <span aria-hidden="true">↗</span></a>
+      <a href="../workshop/">Мастерская идей <span aria-hidden="true">↗</span></a>
+      <a href="../library/">Статьи и библиотека <span aria-hidden="true">↗</span></a>
+    </nav>
+    <div class="footer-invite">
+      <span class="footer-spark" aria-hidden="true">✳</span>
+      <p>Можно не знать.<br><strong>Можно разобраться.</strong></p>
+      <a class="button lime" href="../lessons/first-discovery/" data-resume data-resume-compact>Попробовать ↗</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-privacy">Свободно и бесплатно. Без сертификатов. Прогресс знакомства хранится в этом браузере.</span>
+    <div class="footer-tools">
+      <a class="footer-control" href="https://github.com/Lotargo/Teacher-" target="_blank" rel="noopener noreferrer" aria-label="Проект на GitHub — в новой вкладке">Проект на GitHub <span aria-hidden="true">↗</span></a>
+      <button class="footer-control" type="button" data-motion aria-pressed="true">Выключить движение</button>
+      <a class="footer-control to-top" href="#page-top">Наверх <span aria-hidden="true">↑</span></a>
+    </div>
+  </div>
+</footer>
+<!-- site-footer:end -->
+</body></html>

@@ -4,8 +4,8 @@ import { readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 const root = new URL('../', import.meta.url);
-const pages = ['index.html','courses/index.html','courses/start/index.html','lessons/first-discovery/index.html'];
-test('all four pages have one static shared header and footer outside main', () => {
+const pages = ['index.html','courses/index.html','courses/start/index.html','lessons/first-discovery/index.html','math/index.html','workshop/index.html','library/index.html','library/check-ai/index.html'];
+test('all eight pages have one static shared header and footer outside main', () => {
   for (const page of pages) {
     const html = readFileSync(new URL(page,root),'utf8');
     assert.equal((html.match(/<header class="site-header"/g)||[]).length,1,page);

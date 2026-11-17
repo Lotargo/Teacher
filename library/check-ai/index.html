@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ru"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f8f6ee">
+<title>ИИ написал код. А кто проверил решение? — АГА!</title><meta name="description" content="Как проверять проекты, сделанные с ИИ, даже если не умеешь программировать: цель, крайние случаи, безопасность и откат.">
+<meta property="og:title" content="ИИ написал код. А кто проверил решение? — АГА!"><meta property="og:description" content="Как проверять проекты, сделанные с ИИ, даже если не умеешь программировать: цель, крайние случаи, безопасность и откат."><meta property="og:type" content="website">
+<link rel="icon" href="../../assets/mark.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&amp;family=Nunito:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../styles/lesson.css"><link rel="stylesheet" href="../../styles/portal.css"><link rel="stylesheet" href="../../styles/chrome.css"><link rel="stylesheet" href="../../styles/atlas.css">
+<script type="module" src="../../src/portal.js"></script>
+</head><body class="portal with-chrome atlas-page" data-page="article"><a class="skip" href="#main">Перейти к содержанию</a>
+<!-- site-header:start -->
+<div id="page-top" class="page-top-anchor" aria-hidden="true"></div>
+<header class="site-header">
+  <div class="chrome-inner">
+    <a class="brand chrome-brand" href="../../" aria-label="АГА! — главная"><img src="../../assets/mark.svg" alt="" width="48" height="48"><span><b>АГА!</b><small>лаборатория ясности</small></span></a>
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-menu" hidden><span class="menu-lines" aria-hidden="true"></span><span>Меню</span></button>
+    <div class="site-menu" id="site-menu">
+      <nav class="portal-nav" aria-label="Главная навигация">
+        <a class="nav-chip" href="../../">Главная</a>
+        <a class="nav-chip" href="../../courses/">Практика</a>
+        <a class="nav-chip" href="../../math/">Математика</a>
+        <a class="nav-chip" href="../../workshop/">Мастерская</a>
+        <a class="nav-chip is-active" href="../../library/" aria-current="page">Библиотека</a>
+      </nav>
+      <a class="button lime header-action" href="../../lessons/first-discovery/" data-resume data-resume-compact>Попробовать ↗</a>
+    </div>
+  </div>
+</header>
+<!-- site-header:end -->
+<main id="main">
+<article class="atlas-article" aria-labelledby="article-title">
+ <nav class="article-crumbs" aria-label="Путь к статье"><a class="button secondary" href="../">← В библиотеку</a><span>Размышление · 5 минут</span></nav>
+ <header class="article-hero"><span class="atlas-eyebrow">Статья лаборатории</span><h1 id="article-title">ИИ написал код.<br><mark>А кто проверил решение?</mark></h1><p>Можно создавать работающие проекты, не зная синтаксиса. Но как понять, что решение подходит именно тебе, а не просто выглядит убедительно?</p><div class="article-byline">Не про то, как писать тысячу строк. Про то, какие вопросы нужно задать результату.</div></header>
+ <div class="article-text">
+ <h2>«Работает» — не равно «решает задачу».</h2>
+ <p>Допустим, слесарь попросил ИИ сделать сайт для приёма заказов. Главная открылась, кнопки красивые, форма выглядит отлично. Но куда попадают сообщения клиентов? Что будет, если человек не заполнил номер? Кто может увидеть личные данные?</p>
+ <p>Проблема не обязательно в плохом коде. Возможно, у разработчика и заказчика с самого начала были <strong>разные представления о том, что значит «готово»</strong>.</p>
+ <div class="article-quote"><span class="hand">Вопрос, который всё меняет</span><strong>Какой опыт покажет, что моё предположение верно?</strong></div>
+ <h2>Четыре проверки, доступные без программирования</h2>
+ <section class="article-step"><div class="article-step-mark">①</div><div><h3>Сравни с реальной целью</h3><p>Назови результат человеческими словами: «Клиент может найти услугу и оставить заявку». Не «на сайте есть кнопка», а «после нажатия происходит нужное действие».</p></div></section>
+ <section class="article-step"><div class="article-step-mark">②</div><div><h3>Проверь неудобный случай</h3><p>Что, если поле пустое, интернет пропал или пользователь нажал дважды? Хорошая система должна вести себя понятно не только в идеальном сценарии.</p></div></section>
+ <section class="article-step"><div class="article-step-mark">③</div><div><h3>Спроси, что может пострадать</h3><p>Есть ли личные данные, деньги, учётные записи или оборудование? Для таких операций нужна независимая проверка, ограничение прав и зачастую помощь профильного специалиста.</p></div></section>
+ <section class="article-step"><div class="article-step-mark">④</div><div><h3>Узнай, как вернуться назад</h3><p>Если новая версия сломала старую, должна быть возможность восстановить её. До эксперимента спроси про резервные копии, историю изменений и способ отката.</p></div></section>
+ <div class="article-case"><h3>Мини-проверка для сайта заявок</h3><p>Попробуй мысленно пройти три сценария. Сможешь ли ты после этого сказать «готово»?</p><ul><li>Открыть сайт с телефона и найти контакты за несколько секунд</li><li>Отправить тестовую заявку и убедиться, что она получена</li><li>Оставить обязательное поле пустым и понять, что происходит</li></ul></div>
+ <h2>А где здесь математика?</h2>
+ <p>Она помогает заменить «вроде нормально» на измеримый вопрос: сколько заявок дошло, сколько времени экономит форма, сколько ошибок возникло из ста попыток. Цифры не дают автоматической истины, но позволяют проверять собственные догадки.</p>
+ <p>Поэтому АГА! начинается не с заучивания языков. Мы учимся <strong>формулировать наблюдение, выбирать проверку и менять решение по результатам</strong>. Код и ИИ здесь помогают, но не отменяют ответственность за итог.</p>
+ </div>
+ <div class="article-outro"><span class="hand">Есть идея, которую хочется проверить?</span><h2>Начни с понятного задания.</h2><p>В мастерской можно составить его своими словами — без кода и без отправки данных на сервер.</p><a class="button dark" href="../../workshop/#brief">Перейти в мастерскую ↗</a></div>
+</article></main>
+<!-- site-footer:start -->
+<footer class="site-footer">
+  <div class="footer-main">
+    <div class="footer-about">
+      <a class="brand chrome-brand" href="../../" aria-label="АГА! — главная"><img src="../../assets/mark.svg" alt="" width="48" height="48"><span><b>АГА!</b><small>лаборатория ясности</small></span></a>
+      <p>Для тех, у кого уже есть идеи.<br>И для тех, кто ещё ищет свои.</p>
+      <span class="footer-signature hand">Думать. Делать. Проверять.</span>
+    </div>
+    <nav class="footer-nav" aria-label="Навигация внизу страницы">
+      <span class="footer-label">Куда отправимся?</span>
+      <a href="../../">На главную <span aria-hidden="true">↗</span></a>
+      <a href="../../courses/">Практика и знакомство <span aria-hidden="true">↗</span></a>
+      <a href="../../math/">Математика для жизни <span aria-hidden="true">↗</span></a>
+      <a href="../../workshop/">Мастерская идей <span aria-hidden="true">↗</span></a>
+      <a href="../../library/">Статьи и библиотека <span aria-hidden="true">↗</span></a>
+    </nav>
+    <div class="footer-invite">
+      <span class="footer-spark" aria-hidden="true">✳</span>
+      <p>Можно не знать.<br><strong>Можно разобраться.</strong></p>
+      <a class="button lime" href="../../lessons/first-discovery/" data-resume data-resume-compact>Попробовать ↗</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-privacy">Свободно и бесплатно. Без сертификатов. Прогресс знакомства хранится в этом браузере.</span>
+    <div class="footer-tools">
+      <a class="footer-control" href="https://github.com/Lotargo/Teacher-" target="_blank" rel="noopener noreferrer" aria-label="Проект на GitHub — в новой вкладке">Проект на GitHub <span aria-hidden="true">↗</span></a>
+      <button class="footer-control" type="button" data-motion aria-pressed="true">Выключить движение</button>
+      <a class="footer-control to-top" href="#page-top">Наверх <span aria-hidden="true">↑</span></a>
+    </div>
+  </div>
+</footer>
+<!-- site-footer:end -->
+</body></html>
