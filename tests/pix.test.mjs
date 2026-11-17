@@ -89,7 +89,8 @@ test('FAQ and layout retain clear opt-in and privacy explanation',()=>{
   }
   assert.ok((faq.match(/<details/g)||[]).length>=8);
   assert.ok(read('templates/header.html').includes('href="{{root}}faq/"'));
-  assert.ok(read('templates/footer.html').includes('src/pix-guide.js'));
+  assert.ok(read('templates/footer.html').includes('{{pixLoader}}'));
+  assert.ok(read('src/features.js').includes('PIXIE_ENABLED = false'));
 });
 
 test('Gemma SSE is parsed incrementally, ignoring reasoning and handling split chunks',async()=>{

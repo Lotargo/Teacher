@@ -2,7 +2,6 @@ import { PATHS, getPageContext, buildAiMessages } from './pix-core.js';
 import { askCloudflare } from './cloudflare-adapter.js';
 import { TURNSTILE_SITE_KEY, CLOUDFLARE_CHAT_URL } from './cloudflare-config.js';
 import { clampPosition, createTextPresenter } from './pix-ui.js';
-import { createMoodController, spritePosition } from './pix-moods.js';
 import { claimGreeting } from './pix-session.js';
 import { PixieError, friendlyError } from './pix-errors.js';
 
@@ -66,35 +65,10 @@ get('#pix-faq-link').href = new URL(PATHS.faq.path, root).href;
 let turns = [], pending = false, activeRequest = null, unread = 0;
 let soundEnabled = true, audioContext = null;
 const AudioCtor = window.AudioContext || window.webkitAudioContext;
-const moods = createMoodController((state, expression) => {
-  host.dataset.state = state;
-  const position = spritePosition(expression);
-  if (position) {
-    host.dataset.expression = expression;
-    host.style.setProperty('--pix-x', position.x + '%');
-    host.style.setProperty('--pix-y', position.y + '%');
-  } else {
-    delete host.dataset.expression;
-    host.style.removeProperty('--pix-x'); host.style.removeProperty('--pix-y');
-  }
-});
-const moodMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-function syncMoodMotion() {
-  if (document.hidden || document.body.classList.contains('still') || moodMotion.matches) moods.pause();
-  else moods.resume();
-}
-const moodObserver = new MutationObserver(syncMoodMotion);
-moodObserver.observe(document.body, { attributes:true, attributeFilter:['class'] });
-moodMotion.addEventListener('change', syncMoodMotion);
-document.addEventListener('visibilitychange', syncMoodMotion);
-window.addEventListener('pagehide', () => moods.pause());
-window.addEventListener('pageshow', syncMoodMotion);
-syncMoodMotion();
-function pose(state) { moods.setActivity(state); }
+function pose(state) { host.dataset.state = ['hello','thinking','typing','idea','error','guide'].includes(state) ? state : 'hello'; }
 function isReading() { return !panel.hidden && !document.hidden; }
 function setUnread(count, options = {}) {
   unread = count;
-  moods.setUnread(count, options);
   get('#pix-unread').hidden = count === 0;
   get('#pix-unread b').textContent = count > 9 ? '9+' : String(count);
   launcher.setAttribute('aria-label', 'Открыть Пикси' + (count ? `, непрочитанных сообщений: ${count}` : ''));

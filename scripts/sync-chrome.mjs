@@ -2,6 +2,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
+import { PIXIE_ENABLED } from '../src/features.js';
 const root = fileURLToPath(new URL('../', import.meta.url));
 const pages = [
   ['index.html', './', 'home'],
@@ -19,7 +20,7 @@ let changed = false;
 for (const [path, prefix, page] of pages) {
   let html = readFileSync(resolve(root, path), 'utf8');
   const original = html;
-  const values = { root:prefix };
+  const values = { root:prefix, pixLoader: PIXIE_ENABLED ? '<script type="module" src="' + prefix + 'src/pix-guide.js"></script>' : '' };
   for (const name of ['home', 'catalog', 'math', 'workshop', 'library', 'faq']) {
     const active = page === name
       || (name === 'catalog' && (page === 'start' || page === 'lesson'))

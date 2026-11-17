@@ -30,10 +30,8 @@ jobs:
           python -m playwright install --with-deps chromium
       - name: Check real page navigation and lesson progress
         run: python tests/browser_smoke.py
-      - name: Check Pix and voluntary Cloudflare integration (mocked)
-        run: python tests/pix_browser.py
-      - name: Check themes, notification continuity and workshop AI (mocked)
-        run: python tests/site_features_browser.py
+      - name: Verify Pixie is suspended, workshop local and themes consistent
+        run: python tests/suspended_features_browser.py
   deploy:
     name: Publish to Pages
     needs: test

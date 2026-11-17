@@ -48,8 +48,11 @@ test('Site copy has no provider badges but retains privacy and personal origin',
   const html=read('index.html');assert.equal((html.match(/<li class="value-chip/g)||[]).length,4);
   assert.ok(html.includes('<ul class="value-strip"'));assert.ok(!html.includes('<span>Без опыта</span>'));
 });
-test('Browser hooks stop random activity when the page is hidden or motion is disabled',()=>{
-  const js=read('src/pix-guide.js');
-  for(const marker of ['syncMoodMotion','moodMotion.matches','moods.pause()',"pose('typing')","moods.setUnread(count, options)","attributeFilter:['class']"]){assert.ok(js.includes(marker),marker);}
-  assert.doesNotMatch(read('src/pix-moods.js'),/\b(fetch|XMLHttpRequest)\s*\(/);
+test('Portrait switching is disconnected from the dormant Pixie widget',()=>{
+ const js=read('src/pix-guide.js'),css=read('styles/pix.css');
+ assert.ok(!js.includes('pix-moods.js'));
+ assert.ok(!js.includes('createMoodController'));
+ assert.ok(!js.includes('spritePosition('));
+ assert.ok(!css.includes('[data-expression]'));
+ assert.ok(css.includes('assets/pix-guide.webp'));
 });

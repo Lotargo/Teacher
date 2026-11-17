@@ -160,3 +160,112 @@ html[data-theme='dark'][data-theme] :is(.catalog-explore-grid span,.paths-headin
 html[data-theme='dark'][data-theme] .stories-note{color:#e6edbc}
 html[data-theme='dark'][data-theme] .stories-note:before{background:#3d5734;border:1px solid #8fa164}
 html[data-theme='dark'][data-theme] .team-bubble:after{background:#344439}
+
+/* Shared accessible accents: blue in light mode, apricot in dark mode.
+   Legacy '.lime' selectors remain to keep existing pages and lessons compatible. */
+:root{
+  --accent:#3C9DD0;--accent-ink:#0c2b3b;--accent-soft:#e3f3fb;
+  --accent-border:#307eaa;--accent-shadow:#23698f;--accent-hover:#4baad9;
+  --lime:#3C9DD0;
+}
+html[data-theme='dark'][data-theme]{
+  --accent:#FFB782;--accent-ink:#302820;--accent-soft:#533d30;
+  --accent-border:#df9865;--accent-shadow:#a86a46;--accent-hover:#ffc293;
+  --lime:#FFB782;
+}
+html[data-theme='dark'] .chrome-brand img{content:url('../assets/mark-dark.svg')}
+:root .with-chrome a.button.lime,
+:root .with-chrome .header-action.button.lime,
+:root .with-chrome a.button.lime:visited,
+:root .button.lime,:root .atlas-page .button.lime{
+  background:var(--accent);color:var(--accent-ink);
+  border-color:var(--accent-border);box-shadow:0 4px 0 var(--accent-shadow);
+}
+:root .with-chrome a.button.lime:hover,:root .button.lime:hover{background:var(--accent-hover)}
+:root .with-chrome .portal-nav .nav-chip.is-active,
+:root .with-chrome .portal-nav .nav-chip[aria-current]{
+  background:var(--accent);color:var(--accent-ink);
+  border-color:var(--accent-border);box-shadow:0 3px 0 var(--accent-shadow);
+}
+:root .with-chrome .portal-nav .nav-chip.is-active:hover{color:var(--accent-ink)}
+:root .theme-toggle{
+  background:var(--accent-soft);border-color:var(--accent-border);
+  color:var(--accent-border);box-shadow:0 3px 0 var(--accent-shadow);
+}
+:root .theme-toggle:hover{background:var(--accent-soft);filter:brightness(.98)}
+:root .theme-toggle:focus-visible,
+:root :is(a,button,input,textarea,select,summary):focus-visible{outline-color:var(--accent-border)}
+:root .with-chrome .next-link:hover,:root .with-chrome .text-button:hover{border-color:var(--accent-border)}
+:root .with-chrome .lesson-nav a[aria-current],
+:root .lesson-page.with-chrome nav a[aria-current],
+:root .code-tabs button.active,
+:root .atlas-filter button[aria-pressed='true']{
+  background:var(--accent);color:var(--accent-ink);border-color:var(--accent-border);
+}
+:root .progress-track>span,:root .board-underline{background:var(--accent)}
+:root .counter button,:root .article-step-mark,:root .work-sticker{
+  background:var(--accent-soft);border-color:var(--accent-border);color:var(--accent-ink);
+}
+:root .value-strip .value-chip:not(.value-chip-make,.value-chip-free,.value-chip-own){
+  background:var(--accent-soft);border-color:var(--accent-border);
+  color:#185070;box-shadow:0 3px 0 var(--accent-shadow);
+}
+:root .stories-note:before{background:var(--accent-soft)}
+:root .stage-spark{color:var(--accent)}
+:root .book-layer.two{background:var(--accent);color:var(--accent-ink)}
+:root mark{
+  background:linear-gradient(transparent 61%,color-mix(in srgb,var(--accent) 68%,transparent) 61%,
+  color-mix(in srgb,var(--accent) 68%,transparent) 94%,transparent 94%);
+}
+/* Dark-mode contrast. Formerly light cards and white headings overlapped. */
+html[data-theme='dark'][data-theme] .atlas-steps article{
+  background:#273943;border-color:#4e6975;box-shadow:0 8px 18px #0d151b33;
+}
+html[data-theme='dark'][data-theme] .atlas-steps article h3{color:#f4f5f0}
+html[data-theme='dark'][data-theme] .atlas-steps article p{color:#c7d8df}
+html[data-theme='dark'][data-theme] .direction-card{
+  color:#f1f4f2;border-color:#526a70;
+}
+html[data-theme='dark'][data-theme] .direction-card strong{color:#f6f7f3}
+html[data-theme='dark'][data-theme] .direction-card .direction-eyebrow{color:#e5edf0}
+html[data-theme='dark'][data-theme] .direction-card>span:not(.direction-icon,.direction-eyebrow){color:#c9d8dc}
+html[data-theme='dark'][data-theme] .direction-card b{
+  color:var(--accent);text-decoration-thickness:2px;
+}
+html[data-theme='dark'][data-theme] .direction-icon{
+  background:#33464f;border-color:#637e87;color:var(--accent);
+}
+html[data-theme='dark'][data-theme] .catalog-explore-grid a strong{color:#f3f4f2}
+html[data-theme='dark'][data-theme] .catalog-explore-grid a span{color:#c8d7d8}
+html[data-theme='dark'][data-theme] .atlas-tile h3,
+html[data-theme='dark'][data-theme] .resource-card h3{color:#f4f5f1}
+html[data-theme='dark'][data-theme] .atlas-tile p,
+html[data-theme='dark'][data-theme] .resource-card p{color:#d0dddc}
+html[data-theme='dark'][data-theme] .with-chrome a.button.dark,
+html[data-theme='dark'][data-theme] .atlas-page .button.dark,
+html[data-theme='dark'][data-theme] .button.dark{
+  background:var(--accent);color:var(--accent-ink);
+  border-color:var(--accent-border);box-shadow:0 4px 0 var(--accent-shadow);
+}
+html[data-theme='dark'][data-theme] .with-chrome a.button.dark:hover,
+html[data-theme='dark'][data-theme] .button.dark:hover{background:var(--accent-hover)}
+html[data-theme='dark'][data-theme] :is(.footer-invite strong,.footer-signature,.atlas-formula b,.faq-list p a,.feedback.success,.use-cases .hand){color:var(--accent)}
+html[data-theme='dark'][data-theme] .value-strip .value-chip:not(.value-chip-make,.value-chip-free,.value-chip-own){
+  background:var(--accent-soft);border-color:var(--accent-border);color:#ffe2c7;
+}
+html[data-theme='dark'][data-theme] .stories-note:before{background:#694c37;border-color:var(--accent-border)}
+html[data-theme='dark'][data-theme] .atlas-filter button[aria-pressed='true'],
+html[data-theme='dark'][data-theme] .code-tabs button.active{
+  background:var(--accent);color:var(--accent-ink);border-color:var(--accent-border);
+}
+html[data-theme='dark'][data-theme] .theme-toggle{
+  color:var(--accent);background:#483a32;border-color:var(--accent-border);
+  box-shadow:0 3px 0 var(--accent-shadow);
+}
+html[data-theme='dark'][data-theme] .with-chrome .portal-nav .nav-chip[aria-current]{
+  background:var(--accent);color:var(--accent-ink);box-shadow:0 3px 0 var(--accent-shadow);
+}
+html[data-theme='dark'][data-theme] mark{
+  background:linear-gradient(transparent 63%,#ffb78289 63%,#ffb78289 94%,transparent 94%);
+  color:#f5f3ee;
+}

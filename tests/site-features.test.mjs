@@ -41,8 +41,10 @@ test('Workshop transmits all four fields at their maximum lengths without silent
  assert.equal(buildAiMessages('workshop',[],prompt,3000)[0].content,prompt);
  assert.throws(()=>workshopPrompt({...fields,idea:'x'.repeat(401)}));
  assert.throws(()=>workshopPrompt({...fields,check:''}));
- assert.ok(read('workshop/index.html').includes('Собрать без ИИ'));
- assert.ok(read('workshop/index.html').includes('четыре заполненных поля'));
+ assert.ok(read('workshop/index.html').includes('Собрать задание'));
+ assert.ok(!read('workshop/index.html').includes('id="idea-ai"'));
+ assert.ok(!read('src/workshop.js').includes('askWorkshopPixie'));
+ assert.ok(read('workshop/index.html').includes('Поля никуда не отправляются'));
 });
 
 test('FAQ keeps the privacy qualification and removes the crossed-out UI questions',()=>{
@@ -89,4 +91,17 @@ test('Worker SSE strips reasoning, identity and diagnostic errors, browser emits
  assert.ok(text.includes('blocked'));
  await assert.rejects(readCloudflareStream(sse([{choices:[{delta:{refusal:'PRIVATE refusal'}}]},'[DONE]'])),error=>error.code==='blocked');
  await assert.rejects(readCloudflareStream(sse([{choices:[{delta:{content:'unfinished'}}]}])),error=>error.code==='interrupted');
+});
+
+test('Disabled Pixie never appears in any published HTML',()=>{
+ const pages=['index.html','courses/index.html','courses/start/index.html','lessons/first-discovery/index.html','math/index.html','workshop/index.html','library/index.html','library/check-ai/index.html','faq/index.html'];
+ for(const page of pages)assert.ok(!read(page).includes('src/pix-guide.js'),page);
+ assert.match(read('src/features.js'),/PIXIE_ENABLED\s*=\s*false/);
+});
+test('Light and dark accents and explicit card contrast are maintained',()=>{
+ const css=read('styles/theme.css');
+ for(const hex of ['#3C9DD0','#FFB782'])assert.ok(css.includes(hex));
+ assert.ok(css.includes("html[data-theme='dark'][data-theme] .atlas-steps article{"));
+ assert.ok(css.includes("html[data-theme='dark'][data-theme] .direction-card strong"));
+ assert.ok(css.includes("html[data-theme='dark'][data-theme] .direction-card>span"));
 });

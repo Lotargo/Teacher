@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 76 76" role="img" aria-label="Логотип АГА!">
+  <rect width="76" height="76" rx="23" fill="#FFB782"/>
+  <path d="M39 11 45 26 61 22 54 37 66 46 48 47 44 65 33 52 17 62 22 44 9 36 28 32 27 14Z" fill="#273441" stroke="#273441" stroke-linejoin="round" stroke-width="2"/>
+  <circle cx="33" cy="39" r="2.7" fill="#FFB782"/><circle cx="45" cy="38" r="2.7" fill="#FFB782"/>
+  <path d="M34 47c3.6 3.8 8.5 3.5 11.5-.5" fill="none" stroke="#FFB782" stroke-linecap="round" stroke-width="2.7"/>
+</svg>

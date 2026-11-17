@@ -5,9 +5,6 @@
 .pix-guide :is(button,input,textarea){font:inherit}
 .pix-guide button{cursor:pointer}
 .pix-guide :is(button,a,[tabindex]):focus-visible{outline:3px solid #8a9d65;outline-offset:3px}
-.pix-guide[data-state="thinking"]{--frame:33.333333%}
-.pix-guide[data-state="idea"]{--frame:66.666667%}
-.pix-guide[data-state="guide"]{--frame:100%}
 .pix-pose{--pix-size:116px;display:block;width:var(--pix-size);height:var(--pix-size);flex:none;background:url('../assets/pix-guide.webp') var(--frame) bottom / 400% 100% no-repeat}
 /* The cut edge of the sprite sits ON the label's top border, not above it. */
 .pix-launcher{position:relative;display:flex;flex-direction:column;align-items:center;width:116px;padding:0;border:0;background:none;color:var(--pix-ink);isolation:isolate}
@@ -106,9 +103,6 @@ body.motion-ready:not(.still):not(.page-hidden) .pix-unread{animation:pix-unread
 @media(prefers-reduced-motion:reduce){.pix-guide *{animation:none!important;transition:none!important}}
 body.still .pix-guide *,body.page-hidden .pix-guide *{animation:none!important;transition:none!important}
 
-/* One local expression sheet; event states never wait for an AI pose classifier. */
-.pix-guide[data-expression] .pix-pose{background-image:url('../assets/pix/expressions.avif');background-size:500% 100%;background-position:var(--pix-x) 50%}
-
 /* Comfortable controls with visible icons and touch-sized targets. */
 .pix-panel-head{padding-right:158px}
 .pix-window-controls{gap:3px;right:12px;top:12px}
@@ -119,7 +113,6 @@ body.still .pix-guide *,body.page-hidden .pix-guide *{animation:none!important;t
 @media(max-width:600px){.pix-panel-head{padding-right:148px;min-height:105px}.pix-window-controls{right:7px;top:9px;gap:2px}.pix-panel-head .pix-head-pose{--pix-size:65px}.pix-identity{margin-left:6px}.pix-identity p{display:none}.pix-eyebrow{font-size:8px}}
 @media(max-width:390px){.pix-eyebrow{display:none}.pix-panel-head h2{font-size:22px}.pix-panel-head{padding-left:7px}.pix-panel-head .pix-head-pose{--pix-size:57px}}
 
-/* Load only the relevant row of the expression pack. */
-.pix-guide[data-expression="fix"] .pix-pose,.pix-guide[data-expression="reading"] .pix-pose,.pix-guide[data-expression="writing"] .pix-pose,.pix-guide[data-expression="coffee"] .pix-pose,.pix-guide[data-expression="cheer"] .pix-pose{background-image:url('../assets/pix/expressions-2.avif')}
-.pix-guide[data-expression="surprised"] .pix-pose,.pix-guide[data-expression="error"] .pix-pose,.pix-guide[data-expression="care"] .pix-pose,.pix-guide[data-expression="save"] .pix-pose,.pix-guide[data-expression="relax"] .pix-pose{background-image:url('../assets/pix/expressions-3.avif')}
-.pix-guide[data-expression="idle-a"] .pix-pose,.pix-guide[data-expression="idle-b"] .pix-pose,.pix-guide[data-expression="idle-c"] .pix-pose,.pix-guide[data-expression="idle-d"] .pix-pose,.pix-guide[data-expression="idle-e"] .pix-pose{background-image:url('../assets/pix/expressions-4.avif')}
+
+/* Static portrait (future reactivation): always show the original avatar. */
+.pix-guide .pix-pose{--frame:0%;background-image:url('../assets/pix-guide.webp');background-size:400% 100%;background-position:0% bottom}
