@@ -55,7 +55,7 @@ test('Invalid authorization, missing protection, and malicious requests never ca
   assert.equal((await worker.fetch(request('chat',{headers:{Origin:ORIGIN}}),env)).status,503);
   assert.equal((await worker.fetch(request('chat',{headers:{Origin:'https://evil.example',...owner}}),env)).status,403);
   assert.equal((await worker.fetch(request('chat',{headers:owner,messages:Array.from({length:10},()=>MESSAGES[0])}),env)).status,400);
-  assert.equal((await worker.fetch(request('chat',{headers:owner,messages:[{role:'user',content:'x'.repeat(1600)}]}),env)).status,400);
+  assert.equal((await worker.fetch(request('chat',{headers:owner,messages:[{role:'user',content:'x'.repeat(3001)}]}),env)).status,400);
   assert.equal(calls.length,0);
 });
 

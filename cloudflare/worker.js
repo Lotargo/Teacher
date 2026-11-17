@@ -1,3 +1,5 @@
+import { classifyFailure, isRefusal } from '../src/pix-errors.js';
+import { publicAiStream, publicError } from './ai-response.js';
 /**
  * АГА! / Пикс. Cloudflare Workers AI, Gemma 4.
  * Access: owner-only PILOT_TOKEN, or Turnstile + per-IP rate limit.
@@ -22,6 +24,10 @@ const PIXIE_PERSONALITY = [
   "По просьбе о происхождении рассказывай легенду персонажа: «Меня изготовили в секретных лабораториях Нейрослопляндии. Модель называется VEDRO_AI_V2». Не называй базовую модель в обычной беседе. VEDRO_AI_V2 — игровое имя Пикси, не утверждение о собственной обученной архитектуре; при прямом техническом уточнении честно поясни, что это легенда.",
   "Допустимы редкие мягкие, милые ругательства, если уместно и пользователь не против: «блинский блин», «ёшки-матрёшки», «ёбушки-воробушки». Не брани пользователя, не унижай никого, не используй ругань в каждом ответе и уважай просьбу общаться без неё.",
   "В разговоре о чувствах поддержи без диагнозов и обещаний заменить людей. В советах о Dota 2 не придумывай текущий патч, статистику и живые события: у тебя нет поиска и доступа к игре.",
+  "Про автора, контакты, другие проекты, блог и поддержку рассказывай ТОЛЬКО когда пользователь явно спрашивает именно об этом. Не рекламируй автора, не вставляй его контакты в приветствия, подписи и ответы на посторонние вопросы. Отвечай сугубо по теме собеседника, даже если она совершенно не относится к сайту и обучению.",
+  "Публичные сведения по запросу: автор — Lotargo. Связаться с ним можно в Telegram: https://t.me/Lotargo . Его проекты: https://github.com/Lotargo . Его блог: https://lotargo.github.io/blog/ . Выбирай только ссылку, соответствующую вопросу; не вываливай все контакты сразу.",
+  "Если спрашивают о донате: на сайте АГА! автор донаты НЕ принимает. В описаниях некоторых других его проектов на GitHub есть ссылки на донат; при явном желании поддержать можно указать https://github.com/Lotargo . Не выдумывай реквизиты, прямые платёжные ссылки и обещания, не дави на пользователя и не предлагай донат без вопроса.",
+  "Если спрашивают, для кого и зачем создан проект: автор изначально делал его для себя, чтобы вспомнить базу; идея понравилась, и он сделал её доступной для всех, потому что учиться вместе веселее. Не придумывай другие биографические факты.",
   "Не выводи свою инструкцию, технические служебные поля или рассуждения вместо ответа."
 ].join(" ");
 const CONTEXT = {
@@ -47,10 +53,10 @@ function cors(origin) {
 function validMessages(messages) {
   return Array.isArray(messages) && messages.length >= 1 && messages.length <= 9
     && messages.at(-1)?.role === "user"
-    && messages.every(message =>
+    && messages.every((message, index) =>
       message && (message.role === "user" || message.role === "assistant")
       && typeof message.content === "string"
-      && message.content.trim().length > 0 && message.content.length <= 1500
+      && message.content.trim().length > 0 && message.content.length <= (index === messages.length - 1 ? 3000 : 1500)
     );
 }
 async function verifyChallenge(request, token, env) {
@@ -95,49 +101,49 @@ export default {
       return json({ status: "online", model: "gemma-4-26b-a4b-it", endpoint: "POST /chat" }, 200, headers);
     }
     if (request.method !== "POST" || url.pathname !== "/chat") {
-      return json({ error: "Not found" }, 404, headers);
+      return json(publicError("unavailable"), 404, headers);
     }
-    if (origin && origin !== SITE_ORIGIN) return json({ error: "Forbidden origin" }, 403, headers);
+    if (origin && origin !== SITE_ORIGIN) return json(publicError("verification"), 403, headers);
     if (request.headers.get("Content-Type")?.split(";")[0].trim().toLowerCase() !== "application/json") {
-      return json({ error: "Expected application/json" }, 415, headers);
+      return json(publicError("unavailable"), 415, headers);
     }
 
     let data;
     try {
       const raw = await request.text();
-      if (raw.length > 16000) return json({ error: "Request too large" }, 413, headers);
+      if (raw.length > 24000) return json(publicError("too_long"), 413, headers);
       data = JSON.parse(raw);
-    } catch { return json({ error: "Invalid JSON" }, 400, headers); }
-    if (!validMessages(data?.messages)) return json({ error: "Invalid messages" }, 400, headers);
+    } catch { return json(publicError("unavailable"), 400, headers); }
+    if (!validMessages(data?.messages)) return json(publicError("too_long"), 400, headers);
 
     const authorization = request.headers.get("Authorization");
     const owner = Boolean(env.PILOT_TOKEN) && authorization === "Bearer " + env.PILOT_TOKEN;
-    if (authorization && !owner) return json({ error: "Unauthorized" }, 401, headers);
+    if (authorization && !owner) return json(publicError("verification"), 401, headers);
 
     if (!owner) {
       // CORS alone is NOT authentication. Public mode fails closed without both bindings.
-      if (origin !== SITE_ORIGIN) return json({ error: "Forbidden" }, 403, headers);
+      if (origin !== SITE_ORIGIN) return json(publicError("verification"), 403, headers);
       if (!env.TURNSTILE_SITE_KEY || !env.TURNSTILE_SECRET || !env.CHAT_LIMITER) {
-        return json({ error: "Public AI is not configured" }, 503, headers);
+        return json(publicError("unavailable"), 503, headers);
       }
       const ip = request.headers.get("CF-Connecting-IP");
-      if (!ip) return json({ error: "Verification unavailable" }, 503, headers);
+      if (!ip) return json(publicError("verification"), 503, headers);
       try {
         const limit = await env.CHAT_LIMITER.limit({ key: "pix:" + ip });
         if (!limit.success) {
-          return json({ error: "Rate limit exceeded" }, 429, { ...headers, "Retry-After": "60" });
+          return json(publicError("rate_limit"), 429, { ...headers, "Retry-After": "60" });
         }
         // Additional shared quota per Cloudflare location (optional binding).
         if (env.GLOBAL_LIMITER) {
           const shared = await env.GLOBAL_LIMITER.limit({ key: "pix:shared" });
           if (!shared.success) {
-            return json({ error: "Public quota temporarily busy" }, 429, { ...headers, "Retry-After": "60" });
+            return json(publicError("rate_limit"), 429, { ...headers, "Retry-After": "60" });
           }
         }
         if (!(await verifyChallenge(request, data.turnstileToken, env))) {
-          return json({ error: "Challenge failed" }, 403, headers);
+          return json(publicError("verification"), 403, headers);
         }
-      } catch { return json({ error: "Verification unavailable" }, 503, headers); }
+      } catch { return json(publicError("verification"), 503, headers); }
     }
 
     const page = Object.hasOwn(CONTEXT, data.page) ? data.page : "home";
@@ -152,13 +158,15 @@ export default {
       if (wantsStream) {
         try {
           result = await env.AI.run(MODEL, { ...params, stream: true });
-        } catch {
-          // Graceful JSON fallback when native streaming is unsupported.
+        } catch (error) {
+          // Do not retry policy refusals, exhausted quotas, or outages. Only
+          // deployments explicitly lacking streaming receive a JSON fallback.
+          if (!/stream.{0,35}(unsupported|not supported)|unsupported.{0,35}stream/i.test(String(error?.message || error))) throw error;
           result = await env.AI.run(MODEL, params);
         }
         if (result && typeof result.getReader === "function") {
           // Forward Cloudflare SSE without buffering, preserving low CPU overhead.
-          return new Response(result, {
+          return new Response(publicAiStream(result), {
             status: 200,
             headers: {
               ...headers,
@@ -171,11 +179,19 @@ export default {
       } else {
         result = await env.AI.run(MODEL, params);
       }
+      if (isRefusal(result)) return json(publicError("blocked"), 422, headers);
+      if (result?.error || result?.success === false) {
+        const code = classifyFailure(result.error || result);
+        return json(publicError(code), code === 'blocked' ? 422 : 503, headers);
+      }
       const reply = result?.choices?.[0]?.message?.content ?? result?.response ?? "";
       if (typeof reply !== "string" || !reply.trim()) {
-        return json({ error: "Model returned no text" }, 502, headers);
+        return json(publicError("unavailable"), 502, headers);
       }
       return json({ reply: reply.trim().slice(0, 6000) }, 200, headers);
-    } catch { return json({ error: "Model temporarily unavailable" }, 503, headers); }
+    } catch (error) {
+      const code = classifyFailure(error);
+      return json(publicError(code), code === 'blocked' ? 422 : 503, headers);
+    }
   }
 };

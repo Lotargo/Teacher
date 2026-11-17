@@ -1,3 +1,4 @@
+import { PixieError, classifyFailure, isRefusal } from './pix-errors.js';
 import { CLOUDFLARE_CHAT_URL } from "./cloudflare-config.js";
 
 const MAX_REPLY = 6000;
@@ -5,7 +6,7 @@ const MAX_REPLY = 6000;
 /** Parse Cloudflare SSE chunks, selecting only assistant text (never reasoning). */
 export async function readCloudflareStream(body, onDelta = () => {}) {
   if (!body || typeof body.getReader !== "function") {
-    throw new Error("Поток ответа недоступен.");
+    throw new PixieError("unavailable");
   }
   const reader = body.getReader();
   const decoder = new TextDecoder();
@@ -20,8 +21,9 @@ export async function readCloudflareStream(body, onDelta = () => {}) {
     if (data === "[DONE]") { complete = true; return; }
     let packet;
     try { packet = JSON.parse(data); }
-    catch { return; }
-    if (packet?.error) throw new Error("Облачная модель прервала ответ.");
+    catch { throw new PixieError("unavailable"); }
+    if (packet?.error) throw new PixieError(classifyFailure(packet.error));
+    if (isRefusal(packet)) throw new PixieError("blocked");
     const delta = packet?.choices?.[0]?.delta?.content;
     const text = typeof delta === "string" ? delta : typeof packet?.response === "string" ? packet.response : "";
     if (!text || reply.length >= MAX_REPLY) return;
@@ -44,13 +46,14 @@ export async function readCloudflareStream(body, onDelta = () => {}) {
         if (buffer.trim()) processEvent(buffer);
         break;
       }
-      if (buffer.length > 30000) throw new Error("Ошибка формата потока ИИ.");
+      if (buffer.length > 30000) throw new PixieError("unavailable");
     }
   } finally {
     if (!complete || reply.length >= MAX_REPLY) await reader.cancel().catch(() => {});
     reader.releaseLock();
   }
-  if (!reply.trim()) throw new Error("Модель не вернула текст. Попробуй ещё раз.");
+  if (!complete && reply.length < MAX_REPLY) throw new PixieError("interrupted");
+  if (!reply.trim()) throw new PixieError("unavailable");
   return reply.trim();
 }
 
@@ -59,7 +62,7 @@ export async function askCloudflare(messages, {
   page = "home", ownerToken = "", turnstileToken = "",
   onDelta = () => {}, signal, fetcher = fetch
 } = {}) {
-  if (!ownerToken && !turnstileToken) throw new Error("Подтверди доступ к ИИ.");
+  if (!ownerToken && !turnstileToken) throw new PixieError("verification");
   const headers = { "Content-Type":"application/json", "Accept":"text/event-stream" };
   if (ownerToken) headers.Authorization = "Bearer " + ownerToken;
   let response;
@@ -70,29 +73,33 @@ export async function askCloudflare(messages, {
     });
   } catch (error) {
     if (error?.name === "AbortError") throw error;
-    throw new Error("Не удалось подключиться к Cloudflare. Проверь соединение.");
+    throw new PixieError("network");
   }
   if (!response.ok) {
-    const map = {
-      400:"Неверный формат сообщения.",
-      401:"Неверный токен владельца.",
-      403:"Проверка Cloudflare не пройдена. Попробуй обновить её.",
-      413:"Слишком длинная переписка. Очисти диалог и попробуй снова.",
-      429:"Лимит запросов исчерпан. Попробуй через минуту.",
-      502:"ИИ не вернул текст.",
-      503:"ИИ временно недоступен или публичный доступ ещё не настроен."
-    };
-    throw new Error(map[response.status] || "Cloudflare вернул ошибку " + response.status + ".");
+    let data;
+    try { data = await response.json(); } catch { /* Proxy HTML is not UI copy. */ }
+    // Only our stable codes are accepted; arbitrary provider text never escapes.
+    const known = data?.error?.code;
+    const fallback = {401:'verification',403:'verification',413:'too_long',429:'rate_limit'};
+    const code = known && ['blocked','unavailable','verification','rate_limit','quota','timeout','too_long','interrupted'].includes(known)
+      ? known : fallback[response.status] || 'unavailable';
+    throw new PixieError(code);
   }
   const contentType = response.headers.get("Content-Type")?.toLowerCase() || "";
   if (contentType.includes("text/event-stream")) {
-    return readCloudflareStream(response.body, onDelta);
+    try { return await readCloudflareStream(response.body, onDelta); }
+    catch (error) {
+      if (error?.name === 'AbortError' || error instanceof PixieError) throw error;
+      throw new PixieError('interrupted');
+    }
   }
   let data;
   try { data = await response.json(); }
-  catch { throw new Error("Cloudflare вернул ответ в неизвестном формате."); }
+  catch { throw new PixieError("unavailable"); }
+  if (isRefusal(data)) throw new PixieError("blocked");
+  if (data?.error) throw new PixieError(classifyFailure(data.error));
   if (typeof data?.reply !== "string" || !data.reply.trim()) {
-    throw new Error("Модель не вернула текст. Попробуй переформулировать вопрос.");
+    throw new PixieError("unavailable");
   }
   const reply = data.reply.trim().slice(0, MAX_REPLY);
   onDelta(reply); // Smooth typewriter fallback for non-streaming responses.

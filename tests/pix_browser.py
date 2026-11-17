@@ -9,7 +9,7 @@ from playwright.sync_api import sync_playwright
 ROOT=Path(__file__).resolve().parents[1]
 BASE='https://aga.test/Teacher-/'
 OFFLINE=os.environ.get('PIX_OFFLINE')=='1'
-OUT=ROOT.parent/'pix-checks';OUT.mkdir(exist_ok=True)
+OUT=Path(os.environ.get('PIX_CHECKS_OUT',str(ROOT.parent/'pix-checks')));OUT.mkdir(exist_ok=True)
 PAGES=['','courses/','courses/start/','lessons/first-discovery/','math/','workshop/','library/','library/check-ai/','faq/']
 MOCK=r"""() => {
  window.__ai = {configCalls:0,challengeCalls:0,chatCalls:0,requests:[],mode:'stream',configReady:true};
@@ -61,6 +61,7 @@ with sync_playwright() as pw:
   page=load(route)
   assert page.locator('#pix-guide').count()==1,route
   assert page.locator('#pix-panel').is_hidden(),route
+  assert page.locator('#pix-guide').get_attribute('data-state')=='hello',route
   assert page.locator('#pix-unread').is_visible(),route
   assert 'Dota 2' in page.locator('#pix-chat-log').text_content(),route
   assert page.evaluate('window.__ai.chatCalls')==0
@@ -100,14 +101,18 @@ with sync_playwright() as pw:
  page.keyboard.press('Escape');assert page.locator('#pix-panel').is_hidden()
  assert page.locator('.pix-launcher').evaluate('(el)=>el===document.activeElement')
  page.locator('.pix-launcher').click()
+ page.evaluate("window.__poseHistory=[];new MutationObserver(()=>window.__poseHistory.push(document.querySelector('#pix-guide').dataset.state)).observe(document.querySelector('#pix-guide'),{attributes:true,attributeFilter:['data-state']})")
  # First send is the only point where configuration and challenge are requested.
  page.locator('#pix-chat-question').fill('Привет, как дела?');page.locator('#pix-send').click()
  page.locator('#pix-thinking').wait_for(state='visible')
+ assert page.locator('#pix-guide').get_attribute('data-state')=='thinking'
  page.locator('.pix-close').click()
  page.wait_for_function("!document.querySelector('#pix-send').disabled")
  assert page.locator('#pix-unread').is_visible()
  assert page.locator('#pix-unread b').text_content()=='1'
+ assert page.locator('#pix-guide').get_attribute('data-state')=='unread'
  assert 'Я рядом' in page.locator('#pix-chat-log').text_content()
+ assert 'typing' in page.evaluate('window.__poseHistory')
  assert 'DO_NOT_RENDER' not in page.locator('#pix-chat-log').text_content()
  assert page.locator('.pix-bubble img').count()==0
  request=page.evaluate('window.__ai.requests[0]')
@@ -130,7 +135,8 @@ with sync_playwright() as pw:
  assert 'остановлен' in page.locator('#pix-chat-status').inner_text()
  page.evaluate("window.__ai.mode='error'");page.locator('#pix-send').click()
  page.wait_for_function("!document.querySelector('#pix-send').disabled")
- assert 'недоступен' in page.locator('#pix-chat-status').inner_text()
+ assert 'временный сбой' in page.locator('#pix-chat-log').inner_text()
+ assert page.locator('#pix-guide').get_attribute('data-state')=='error'
  assert page.locator('#pix-chat-question').input_value()=='Отменяем этот вопрос'
  # Abort during the local typewriter fallback, not just during fetch.
  page.emulate_media(reduced_motion='no-preference');page.evaluate("document.body.classList.remove('still');window.__ai.mode='long'")
@@ -165,7 +171,7 @@ with sync_playwright() as pw:
  page.wait_for_function("!document.querySelector('#pix-send').disabled")
  assert page.evaluate('window.__ai.chatCalls')==0
  assert page.locator('#pix-chat-question').input_value()=='Не теряй мой вопрос'
- assert page.locator('#pix-chat-status').is_visible()
+ assert 'не получается получить ответ' in page.locator('#pix-chat-log').inner_text()
  assert not errors,errors
  assert not missing,missing
  browser.close()

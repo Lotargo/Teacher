@@ -6,7 +6,7 @@
 .faq-intro p{font-size:19px;line-height:1.66;color:#4b6660;max-width:640px;margin:0 0 26px}
 .faq-mascot{height:255px;position:relative;display:flex;align-items:center;justify-content:center}
 .faq-mascot:before{content:'';position:absolute;width:255px;height:245px;border-radius:55% 45% 58% 42%;background:#d5e3c9;transform:rotate(11deg)}
-.faq-mascot-pose{position:relative;width:215px;height:215px;background-image:url('../assets/pix-guide.webp');background-position:0% 50%;background-size:400% 100%;filter:drop-shadow(0 11px 5px #27384716)}
+
 .faq-speech{font-size:29px;position:absolute;right:0;top:-3px;transform:rotate(5deg);color:#527450;background:#fffefa;border:2px solid #344751;border-radius:20px;padding:8px 14px}
 .faq-section{margin:50px 0 72px}
 .faq-heading .hand{font-size:30px;color:#826a94}
@@ -29,6 +29,18 @@
 .faq-last h2{font-size:clamp(29px,3.4vw,43px);margin:11px 0}
 .faq-last p{font-size:18px;line-height:1.67;color:#686176}
 .faq-actions{display:flex;gap:13px;flex-wrap:wrap;margin-top:25px}
-@media(max-width:900px){.faq-main .faq-hero{grid-template-columns:1fr;gap:10px}.faq-mascot{height:190px}.faq-mascot-pose{width:180px;height:180px}}
-@media(max-width:600px){.faq-main{padding:0 16px}.faq-main .faq-hero{padding:30px 23px;border-radius:24px;margin:18px 0 45px}.faq-intro h1{font-size:39px}.faq-intro p{font-size:17px}.faq-mascot{height:160px}.faq-mascot-pose{width:160px;height:160px}.faq-speech{font-size:22px;right:1%;top:0}.faq-heading h2{font-size:33px}.faq-list summary{font-size:17px;padding:20px 52px 20px 18px}.faq-list p{font-size:16px;padding:0 19px 21px}.faq-highlight{padding:20px}.faq-highlight strong{font-size:20px}.faq-highlight p{font-size:16px}.faq-last{padding:29px 23px}.faq-actions .button{width:100%}}
+@media(max-width:900px){.faq-main .faq-hero{grid-template-columns:1fr;gap:10px}.faq-mascot{height:300px}}
+@media(max-width:600px){.faq-main{padding:0 16px}.faq-main .faq-hero{padding:30px 23px;border-radius:24px;margin:18px 0 45px}.faq-intro h1{font-size:39px}.faq-intro p{font-size:17px}.faq-mascot{height:300px}.faq-speech{font-size:22px;right:1%;top:0}.faq-heading h2{font-size:33px}.faq-list summary{font-size:17px;padding:20px 52px 20px 18px}.faq-list p{font-size:16px;padding:0 19px 21px}.faq-highlight{padding:20px}.faq-highlight strong{font-size:20px}.faq-highlight p{font-size:16px}.faq-last{padding:29px 23px}.faq-actions .button{width:100%}}
 @media(prefers-reduced-motion:reduce){.faq-main *{animation:none!important;transition:none!important}}
+
+/* The supplied tall portrait rests on a drawn base, rather than a floating cutout. */
+.faq-main .faq-hero{grid-template-columns:minmax(0,1.3fr) minmax(240px,.7fr);padding-top:34px;padding-bottom:0;gap:30px;overflow:hidden;min-height:440px}
+.faq-intro{padding-bottom:38px}
+.faq-mascot{height:430px;align-self:end;isolation:isolate;align-items:flex-end}
+.faq-mascot:before{width:250px;height:325px;bottom:15px;z-index:-1;background:#d1e3c5;border:1px solid #c7dbbd;border-radius:47% 53% 25% 23%;transform:rotate(-7deg)}
+.faq-mascot:after{content:"";position:absolute;bottom:0;left:50%;width:260px;height:10px;transform:translateX(-50%);background:#aac39b;border-radius:100% 100% 0 0;z-index:-1}
+.faq-portrait{height:365px;width:auto;max-width:100%;object-fit:contain;object-position:bottom;display:block;filter:drop-shadow(5px 7px 3px #425d3820)}
+.faq-speech{z-index:1;right:-12px;top:1px;font-size:25px;transform:rotate(6deg);white-space:nowrap;padding:7px 13px}
+.faq-section{scroll-margin-top:110px}
+@media(max-width:900px){.faq-main .faq-hero{grid-template-columns:minmax(0,1fr) 235px;gap:12px;padding-left:28px;padding-right:25px}.faq-mascot{height:395px}.faq-portrait{height:330px}.faq-speech{font-size:21px;right:-5px}.faq-intro h1{font-size:47px}.faq-intro p{font-size:17px}}
+@media(max-width:650px){.faq-main .faq-hero{grid-template-columns:1fr;padding:28px 23px 0;gap:0}.faq-intro{padding-bottom:12px}.faq-intro h1{font-size:39px}.faq-mascot{height:340px;width:255px;justify-self:center}.faq-portrait{height:275px}.faq-mascot:before{height:255px;width:215px;bottom:0}.faq-mascot:after{width:226px}.faq-speech{right:-15px;top:10px;font-size:22px}}

@@ -2,6 +2,9 @@ import { PATHS, getPageContext, buildAiMessages } from './pix-core.js';
 import { askCloudflare } from './cloudflare-adapter.js';
 import { TURNSTILE_SITE_KEY, CLOUDFLARE_CHAT_URL } from './cloudflare-config.js';
 import { clampPosition, createTextPresenter } from './pix-ui.js';
+import { createMoodController, spritePosition } from './pix-moods.js';
+import { claimGreeting } from './pix-session.js';
+import { PixieError, friendlyError } from './pix-errors.js';
 
 const page = getPageContext(document.body.dataset.page || 'home').route;
 const root = new URL('../', import.meta.url);
@@ -19,7 +22,7 @@ host.dataset.state = 'hello';
 host.setAttribute('aria-label', 'Помощница Пикси');
 host.innerHTML = `
   <button class="pix-launcher" type="button" aria-label="Открыть Пикси" aria-controls="pix-panel" aria-expanded="false">
-    <span class="pix-unread" id="pix-unread" aria-hidden="true"><span class="pix-unread-icon">✉</span><b>1</b></span>
+    <span class="pix-unread" id="pix-unread" aria-hidden="true" hidden><span class="pix-unread-icon">✉</span><b>1</b></span>
     <span class="pix-launch-art"><span class="pix-pose" aria-hidden="true"></span></span>
     <span class="pix-launch-label">Пикс <span aria-hidden="true">✦</span></span>
   </button>
@@ -63,10 +66,35 @@ get('#pix-faq-link').href = new URL(PATHS.faq.path, root).href;
 let turns = [], pending = false, activeRequest = null, unread = 0;
 let soundEnabled = true, audioContext = null;
 const AudioCtor = window.AudioContext || window.webkitAudioContext;
-function pose(state) { host.dataset.state = state; }
+const moods = createMoodController((state, expression) => {
+  host.dataset.state = state;
+  const position = spritePosition(expression);
+  if (position) {
+    host.dataset.expression = expression;
+    host.style.setProperty('--pix-x', position.x + '%');
+    host.style.setProperty('--pix-y', position.y + '%');
+  } else {
+    delete host.dataset.expression;
+    host.style.removeProperty('--pix-x'); host.style.removeProperty('--pix-y');
+  }
+});
+const moodMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+function syncMoodMotion() {
+  if (document.hidden || document.body.classList.contains('still') || moodMotion.matches) moods.pause();
+  else moods.resume();
+}
+const moodObserver = new MutationObserver(syncMoodMotion);
+moodObserver.observe(document.body, { attributes:true, attributeFilter:['class'] });
+moodMotion.addEventListener('change', syncMoodMotion);
+document.addEventListener('visibilitychange', syncMoodMotion);
+window.addEventListener('pagehide', () => moods.pause());
+window.addEventListener('pageshow', syncMoodMotion);
+syncMoodMotion();
+function pose(state) { moods.setActivity(state); }
 function isReading() { return !panel.hidden && !document.hidden; }
-function setUnread(count) {
+function setUnread(count, options = {}) {
   unread = count;
+  moods.setUnread(count, options);
   get('#pix-unread').hidden = count === 0;
   get('#pix-unread b').textContent = count > 9 ? '9+' : String(count);
   launcher.setAttribute('aria-label', 'Открыть Пикси' + (count ? `, непрочитанных сообщений: ${count}` : ''));
@@ -177,10 +205,10 @@ function loadTurnstile() {
   if (sdkPromise) return sdkPromise;
   sdkPromise = new Promise((resolve, reject) => {
     const script = document.createElement('script');
-    const timer = setTimeout(() => { script.remove(); reject(new Error('Проверка подключения не загрузилась. Попробуй ещё раз.')); }, 15000);
+    const timer = setTimeout(() => { script.remove(); reject(new PixieError('verification')); }, 15000);
     script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'; script.async = true;
-    script.onload = () => { clearTimeout(timer); window.turnstile?.render ? resolve(window.turnstile) : reject(new Error('Проверка подключения недоступна.')); };
-    script.onerror = () => { clearTimeout(timer); script.remove(); reject(new Error('Не удалось загрузить проверку подключения.')); };
+    script.onload = () => { clearTimeout(timer); window.turnstile?.render ? resolve(window.turnstile) : reject(new PixieError('verification')); };
+    script.onerror = () => { clearTimeout(timer); script.remove(); reject(new PixieError('verification')); };
     document.head.appendChild(script);
   }).catch(error => { sdkPromise = null; throw error; });
   return sdkPromise;
@@ -190,7 +218,7 @@ async function getChallenge(signal) {
     const endpoint = new URL(CLOUDFLARE_CHAT_URL); endpoint.pathname = '/config';
     const response = await fetch(endpoint, { cache:'no-store', signal });
     const config = response.ok ? await response.json() : null;
-    if (!config?.publicEnabled || typeof config.sitekey !== 'string' || !config.sitekey) throw new Error('Чат пока недоступен. Попробуй немного позже.');
+    if (!config?.publicEnabled || typeof config.sitekey !== 'string' || !config.sitekey) throw new PixieError('unavailable');
     publicSiteKey = config.sitekey;
   }
   const turnstile = await loadTurnstile(); signal.throwIfAborted();
@@ -201,18 +229,18 @@ async function getChallenge(signal) {
       error ? reject(error) : resolve(token);
     };
     const onAbort = () => finish(new DOMException('Cancelled', 'AbortError'));
-    const timer = setTimeout(() => finish(new Error('Проверка заняла слишком много времени. Повтори отправку.')), 45000);
+    const timer = setTimeout(() => finish(new PixieError('verification')), 45000);
     challengeWaiter = finish; signal.addEventListener('abort', onAbort, { once:true });
     try {
       if (widgetId === null) {
         widgetId = turnstile.render(get('#pix-turnstile'), {
-          sitekey:publicSiteKey, action:'pix_chat', theme:'light', size:'flexible', appearance:'interaction-only',
+          sitekey:publicSiteKey, action:'pix_chat', theme:document.documentElement.dataset.theme || 'auto', size:'flexible', appearance:'interaction-only',
           callback(token) { if (challengeWaiter) challengeWaiter(null, token); else challenge = token; },
           'expired-callback'() { challenge = ''; },
-          'error-callback'() { challenge = ''; challengeWaiter?.(new Error('Не удалось пройти проверку. Повтори отправку.')); }
+          'error-callback'() { challenge = ''; challengeWaiter?.(new PixieError('verification')); }
         });
       } else turnstile.reset(widgetId);
-    } catch { finish(new Error('Проверка подключения не запустилась.')); }
+    } catch { finish(new PixieError('verification')); }
   });
 }
 let followTail = true;
@@ -230,30 +258,34 @@ function bubble(role, text = '') {
 function resizeComposer() { input.style.height = 'auto'; input.style.height = Math.min(144, Math.max(64, input.scrollHeight)) + 'px'; }
 input.addEventListener('input', resizeComposer);
 function showError(text) { status.textContent = text; status.hidden = !text; }
-async function sendMessage() {
-  if (pending || !input.value.trim()) return;
-  const question = input.value.trim(), request = new AbortController();
+async function sendMessage(options = {}) {
+  if (pending) { if (options.external) throw new PixieError('busy'); return; }
+  const question = (options.question ?? input.value).trim();
+  if (!question) return;
+  const request = new AbortController();
+  let timedOut = false;
   activeRequest = request; pending = true; send.disabled = true; clear.disabled = true; input.disabled = true;
   stop.hidden = false; thinking.hidden = false; showError(''); input.value = ''; resizeComposer();
   get('#pix-privacy-notice').hidden = true;
   const user = bubble('user', question), assistant = bubble('assistant');
   assistant.card.classList.add('is-waiting'); assistant.body.classList.add('pix-typing-dots'); assistant.body.textContent = '•••';
   let presenter = null;
-  const timeout = setTimeout(() => request.abort(), 120000);
+  const timeout = setTimeout(() => { timedOut = true; request.abort(); }, 120000);
   pose('thinking'); get('#pix-thinking-text').textContent = 'Соединяюсь…';
   try {
     const token = await getChallenge(request.signal); request.signal.throwIfAborted();
     get('#pix-thinking-text').textContent = 'Пикси думает…';
-    const reply = await askCloudflare(buildAiMessages(page, turns, question), {
+    const reply = await askCloudflare(buildAiMessages(page, turns, question, options.external ? 3000 : 1200), {
       page, turnstileToken:token, signal:request.signal,
       onDelta(text) {
         request.signal.throwIfAborted();
         if (!presenter) {
           assistant.card.classList.remove('is-waiting'); assistant.body.classList.remove('pix-typing-dots');
-          assistant.body.textContent = ''; thinking.hidden = true;
+          assistant.body.textContent = ''; thinking.hidden = true; pose('typing');
           presenter = createTextPresenter(assistant.body, { signal:request.signal, onRender:() => { if (followTail) log.scrollTop = log.scrollHeight; } });
         }
         presenter.push(text);
+        options.onDelta?.(text);
       }
     });
     request.signal.throwIfAborted();
@@ -261,17 +293,30 @@ async function sendMessage() {
     await presenter.finish(); request.signal.throwIfAborted();
     turns.push({ role:'user', content:question }, { role:'assistant', content:reply }); turns = turns.slice(-8);
     pose('idea'); notify(); playSound('done'); announce('Пикси ответила.');
+    return reply;
   } catch (error) {
     presenter?.stop(); assistant.row.remove(); user.row.remove(); input.value = question; resizeComposer();
-    const cancelled = error?.name === 'AbortError';
-    showError(cancelled ? 'Ответ остановлен. Сообщение осталось в поле ввода.' : (error?.message || 'Не получилось получить ответ. Попробуй ещё раз.'));
-    pose('guide'); if (!cancelled) playSound('error');
+    const cancelled = error?.name === 'AbortError' && !timedOut;
+    const safeError = timedOut ? new PixieError('timeout') : error;
+    if (cancelled) showError('Ответ остановлен. Сообщение осталось в поле ввода.');
+    else { const text = friendlyError(safeError); bubble('assistant', text); notify(); announce(text); }
+    pose(cancelled ? 'hello' : 'error'); if (!cancelled) playSound('error');
+    if (options.external) throw safeError;
   } finally {
     clearTimeout(timeout); presenter?.stop(); pending = false; activeRequest = null;
     input.disabled = false; send.disabled = false; clear.disabled = false; stop.hidden = true; thinking.hidden = true;
     if (isReading()) input.focus({ preventScroll:true });
   }
 }
+// Only the workshop's explicit button dispatches this handoff. Never scrape forms.
+window.addEventListener('aga:workshop-help', event => {
+  if (page !== 'workshop' || typeof event.detail?.prompt !== 'string' || event.detail.prompt.length > 3000) return;
+  event.preventDefault();
+  open();
+  const {prompt, onDelta, resolve, reject} = event.detail;
+  if (typeof resolve !== 'function' || typeof reject !== 'function') return;
+  void sendMessage({question:prompt, external:true, onDelta: typeof onDelta === 'function' ? onDelta : undefined}).then(resolve,reject);
+});
 stop.addEventListener('click', () => activeRequest?.abort());
 get('#pix-chat-form').addEventListener('submit', e => { e.preventDefault(); void sendMessage(); });
 input.addEventListener('keydown', e => {
@@ -279,4 +324,4 @@ input.addEventListener('keydown', e => {
 });
 clear.addEventListener('click', () => { turns = []; log.replaceChildren(); bubble('assistant', 'Начнём с чистого листа. Я рядом ✨'); showError(''); pose('hello'); });
 bubble('assistant', GREETING);
-setUnread(1);
+setUnread(claimGreeting() ? 1 : 0, { initial:true });

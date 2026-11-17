@@ -48,19 +48,19 @@ test('Cloudflare adapter uses POST /chat, owner token only from local input, and
   assert.deepEqual(JSON.parse(called.options.body),{
     messages:[{role:'user',content:'привет'}],page:'math'
   });
-  await assert.rejects(askCloudflare([{role:'user',content:'hi'}],{fetcher}),/Подтверди доступ/);
+  await assert.rejects(askCloudflare([{role:'user',content:'hi'}],{fetcher}),/подтвердить подключение/);
 });
 
 test('Cloudflare adapter reports failures without echoing remote errors or secrets',async()=>{
   const fetcher=async()=>new Response(JSON.stringify({error:'Bearer secret should stay hidden'}),{status:401});
   await assert.rejects(
     askCloudflare([{role:'user',content:'hi'}],{ownerToken:'secret',fetcher}),
-    error=>/Неверный токен/.test(error.message)&&!/secret/i.test(error.message)
+    error=>/подтвердить подключение/.test(error.message)&&!/secret/i.test(error.message)
   );
   await assert.rejects(
     askCloudflare([{role:'user',content:'hi'}],{
       turnstileToken:'public-token',fetcher:async()=>new Response('{}',{status:503})
-    }),/временно недоступен/
+    }),/временный сбой/
   );
 });
 
@@ -84,7 +84,7 @@ test('No Puter code or client-side storage of sensitive data is shipped',()=>{
 
 test('FAQ and layout retain clear opt-in and privacy explanation',()=>{
   const faq=read('faq/index.html');
-  for(const marker of ['Бесплат','Cloudflare','приват','доброволь','Turnstile','квот']){
+  for(const marker of ['бесплатно','обработке данных','памяти текущей вкладки','внешний ИИ-сервис','дневной лимит']){
     assert.match(faq.toLowerCase(),new RegExp(marker.toLowerCase()),marker);
   }
   assert.ok((faq.match(/<details/g)||[]).length>=8);
@@ -157,7 +157,7 @@ test('Panel clamping keeps drag and keyboard moves inside the viewport',()=>{
 test('Greeting and unread state are local; provider chrome and non-AI mode are gone',()=>{
   const ui=read('src/pix-guide.js');
   assert.ok(ui.includes('let soundEnabled = true'));
-  assert.ok(ui.includes('setUnread(1)'));
+  assert.ok(ui.includes('setUnread(claimGreeting() ? 1 : 0, { initial:true })'));
   assert.ok(ui.includes("bubble('assistant', GREETING)"));
   assert.ok(ui.includes('setPointerCapture'));
   assert.ok(!ui.includes('pix-mode-switch'));

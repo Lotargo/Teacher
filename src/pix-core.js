@@ -100,9 +100,9 @@ export function guessLocalIntent(text, page = 'home') {
 }
 
 /** Server owns the system instruction. Browser sends only conversation text. */
-export function buildAiMessages(page, turns, question) {
+export function buildAiMessages(page, turns, question, maxQuestion = 1200) {
   const recent = Array.isArray(turns) ? turns.slice(-8).filter(turn =>
     (turn?.role === 'user' || turn?.role === 'assistant') && typeof turn.content === 'string'
   ).map(turn => ({ role:turn.role, content:turn.content.slice(0, 1500) })) : [];
-  return [...recent, { role:'user', content:String(question || '').slice(0, 1200) }];
+  return [...recent, { role:'user', content:String(question || '').slice(0, Math.min(3000, maxQuestion)) }];
 }

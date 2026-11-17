@@ -1,0 +1,226 @@
+{
+  "source": "User-provided Стикер-пак Пикс_ интерактивный гид АГА!.zip",
+  "cell": 192,
+  "columns": 5,
+  "rows": 4,
+  "poses": [
+    {
+      "name": "wave",
+      "index": 0,
+      "sourceBox": [
+        383,
+        0,
+        610,
+        269
+      ]
+    },
+    {
+      "name": "thinking",
+      "index": 1,
+      "sourceBox": [
+        622,
+        0,
+        847,
+        268
+      ]
+    },
+    {
+      "name": "idea",
+      "index": 2,
+      "sourceBox": [
+        850,
+        0,
+        1084,
+        269
+      ]
+    },
+    {
+      "name": "guide",
+      "index": 3,
+      "sourceBox": [
+        1086,
+        0,
+        1328,
+        269
+      ]
+    },
+    {
+      "name": "help",
+      "index": 4,
+      "sourceBox": [
+        1331,
+        0,
+        1536,
+        269
+      ]
+    },
+    {
+      "name": "fix",
+      "index": 5,
+      "sourceBox": [
+        410,
+        300,
+        636,
+        526
+      ]
+    },
+    {
+      "name": "reading",
+      "index": 6,
+      "sourceBox": [
+        640,
+        300,
+        847,
+        526
+      ]
+    },
+    {
+      "name": "writing",
+      "index": 7,
+      "sourceBox": [
+        852,
+        300,
+        1110,
+        526
+      ]
+    },
+    {
+      "name": "coffee",
+      "index": 8,
+      "sourceBox": [
+        1112,
+        300,
+        1315,
+        526
+      ]
+    },
+    {
+      "name": "cheer",
+      "index": 9,
+      "sourceBox": [
+        1317,
+        300,
+        1536,
+        526
+      ]
+    },
+    {
+      "name": "surprised",
+      "index": 10,
+      "sourceBox": [
+        393,
+        575,
+        592,
+        792
+      ]
+    },
+    {
+      "name": "error",
+      "index": 11,
+      "sourceBox": [
+        606,
+        575,
+        870,
+        794
+      ]
+    },
+    {
+      "name": "care",
+      "index": 12,
+      "sourceBox": [
+        873,
+        575,
+        1093,
+        794
+      ]
+    },
+    {
+      "name": "save",
+      "index": 13,
+      "sourceBox": [
+        1096,
+        575,
+        1325,
+        794
+      ]
+    },
+    {
+      "name": "relax",
+      "index": 14,
+      "sourceBox": [
+        1328,
+        575,
+        1536,
+        794
+      ]
+    },
+    {
+      "name": "idle-a",
+      "index": 15,
+      "sourceBox": [
+        326,
+        876,
+        448,
+        1004
+      ]
+    },
+    {
+      "name": "idle-b",
+      "index": 16,
+      "sourceBox": [
+        452,
+        876,
+        574,
+        1004
+      ]
+    },
+    {
+      "name": "idle-c",
+      "index": 17,
+      "sourceBox": [
+        578,
+        876,
+        700,
+        1004
+      ]
+    },
+    {
+      "name": "idle-d",
+      "index": 18,
+      "sourceBox": [
+        702,
+        876,
+        824,
+        1004
+      ]
+    },
+    {
+      "name": "idle-e",
+      "index": 19,
+      "sourceBox": [
+        826,
+        876,
+        949,
+        1004
+      ]
+    }
+  ],
+  "sprite": "expressions.avif",
+  "portrait": {
+    "file": "portrait.avif",
+    "width": 381,
+    "height": 880,
+    "sourceBox": [
+      0,
+      115,
+      400,
+      1024
+    ]
+  },
+  "spriteRows": [
+    "expressions.avif",
+    "expressions-2.avif",
+    "expressions-3.avif",
+    "expressions-4.avif"
+  ]
+}
