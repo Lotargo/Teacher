@@ -13,13 +13,15 @@ def document(path):
     html=(ROOT/path).read_text()
     html=re.sub(r'<link[^>]+>', '', html)
     html=re.sub(r'<script[^>]+src=[^>]+></script>', '', html)
-    html=html.replace('</head>','<style>'+ (ROOT/'styles/lesson.css').read_text()+(ROOT/'styles/portal.css').read_text()+((ROOT/'styles/home.css').read_text() if path=='index.html' else '')+'</style></head>')
-    names=['lesson-data.js','interpreter.js','grading.js','lesson-app.js'] if path.startswith('lessons/') else ['lesson-data.js','catalog.js','portal.js']
+    html=html.replace('</head>','<style>'+ (ROOT/'styles/lesson.css').read_text()+(ROOT/'styles/portal.css').read_text()+((ROOT/'styles/home.css').read_text() if path=='index.html' else '')+(ROOT/'styles/chrome.css').read_text()+'</style></head>')
+    names=['lesson-data.js','catalog.js','site-chrome.js','interpreter.js','grading.js','lesson-app.js'] if path.startswith('lessons/') else ['lesson-data.js','catalog.js','site-chrome.js','portal.js']
     modules=[]
     for name in names:
         code=(ROOT/'src'/name).read_text()
         code=re.sub(r'^import .*;\n','',code,flags=re.M)
         code=re.sub(r'^export ','',code,flags=re.M)
+        if name=='site-chrome.js':
+            code=code.replace("new URL('../' + introLesson.href + p.fragment, import.meta.url)","new URL(introLesson.href + p.fragment, 'https://aga.test/Teacher-/')")
         if name=='portal.js':
             code=code.replace("new URL('../', import.meta.url)","new URL('https://aga.test/Teacher-/')")
             # Only automatic legacy-anchor navigation is disabled in this offline test.
@@ -55,6 +57,27 @@ with sync_playwright() as pw:
                 page.evaluate('scrollTo(0,0)')
                 name=path.replace('/index.html','').replace('index.html','home').replace('/','-')
                 page.screenshot(path=str(OUT/f'{name}-{width}.png'),full_page=not path.startswith('lessons/'))
+    for path in PAGES:
+        page.set_viewport_size({'width':390,'height':844})
+        load(path)
+        assert page.locator('.site-header').count()==1
+        assert page.locator('.site-footer').count()==1
+        footer_box=page.locator('.site-footer').bounding_box()
+        brand_box=page.locator('.site-footer .brand').bounding_box()
+        assert brand_box['x'] - footer_box['x'] >= 18, 'Footer must retain its inner gutter'
+        assert page.locator('.site-header [aria-current]').count()==1
+        assert not page.locator('.site-menu').is_visible()
+        page.locator('.menu-toggle').click()
+        assert page.locator('.site-menu').is_visible()
+        assert page.locator('.menu-toggle').get_attribute('aria-expanded')=='true'
+        assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+        page.locator('.portal-nav a').first.focus();page.keyboard.press('Escape')
+        assert not page.locator('.site-menu').is_visible()
+        assert page.locator('.menu-toggle').evaluate('(n)=>n===document.activeElement')
+        page.locator('.menu-toggle').click()
+        page.set_viewport_size({'width':1440,'height':1000})
+        assert page.locator('.site-menu').is_visible()
+    page.set_viewport_size({'width':1440,'height':1000})
     load('index.html')
     assert page.locator('.story-card').count()==4
     for img in page.locator('.story-card img').all():
@@ -93,5 +116,5 @@ with sync_playwright() as pw:
     load('courses/start/index.html')
     assert page.locator('.lesson-row > a').inner_text().startswith('Начать')
     assert not errors,errors
-    print('PASS: offline renders at 5 widths, seven exercises, keyboard, hints, catalog progress with mock storage. Native navigation is tested separately in CI.')
+    print('PASS: shared header/footer, mobile disclosure, keyboard Escape; offline renders at 5 widths, seven exercises, keyboard, hints, catalog progress with mock storage. Native navigation is tested separately in CI.')
     browser.close()

@@ -1,3 +1,4 @@
+import './site-chrome.js';
 import { introLesson, learningPaths, readLessonProgress } from './catalog.js';
 const root = new URL('../', import.meta.url);
 const url = path => new URL(path, root).href;
@@ -8,7 +9,7 @@ const lessonCount = n => `${n} ${n % 100 >= 11 && n % 100 <= 14 ? 'заняти�
 const resumeText = p => p.complete ? 'Вернуться к знакомству' : p.count ? 'Продолжить знакомство' : 'Попробовать знакомство';
 function renderProgress() {
   const p = readLessonProgress(introLesson);
-  $$('[data-resume]').forEach(a => { a.href = url(introLesson.href + p.fragment); a.textContent = resumeText(p) + ' ↗'; });
+  $$('[data-resume]').forEach(a => { a.href = url(introLesson.href + p.fragment); a.textContent = (a.hasAttribute('data-resume-compact') ? (p.complete ? 'Повторить знакомство' : p.count ? 'Продолжить' : 'Попробовать') : resumeText(p)) + ' ↗'; });
   $$('[data-progress-text]').forEach(node => { node.textContent = p.complete ? 'Знакомство пройдено. Можно повторить.' : p.count ? `${p.count} из ${p.total} заданий пройдено` : 'Начни с одного небольшого открытия.'; });
   $$('[data-progress-bar]').forEach(node => { node.style.setProperty('--progress', (p.count / p.total * 100) + '%'); node.setAttribute('aria-valuenow', String(p.count)); node.setAttribute('aria-valuemax', String(p.total)); });
   $$('[data-started]').forEach(node => { node.hidden = p.count === 0; });
@@ -37,17 +38,6 @@ const oldAnchors = new Set(['intro','math','backward','language','code','transfe
 if (document.body.dataset.page === 'home' && oldAnchors.has(location.hash.slice(1))) {
   location.replace(url(introLesson.href + location.hash));
 }
-const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-let motion = true;
-try { motion = localStorage.getItem('aga-motion') !== 'off'; } catch {}
-function applyMotion() {
-  const enabled = motion && !reduced.matches;
-  document.body.classList.toggle('still', !enabled);
-  if (!enabled) document.getAnimations?.().forEach(a => a.cancel());
-  $$('[data-motion]').forEach(button => { button.setAttribute('aria-pressed', String(enabled)); button.disabled = reduced.matches; button.textContent = reduced.matches ? 'Движение выключено системой' : enabled ? 'Выключить движение' : 'Включить движение'; });
-}
-$$('[data-motion]').forEach(button => button.addEventListener('click', () => { motion = !motion; try { localStorage.setItem('aga-motion', motion ? 'on' : 'off'); } catch {} applyMotion(); }));
-reduced.addEventListener('change', applyMotion); applyMotion();
 if ('IntersectionObserver' in window) {
   document.body.classList.add('motion-ready');
   const observer = new IntersectionObserver(entries => entries.forEach(entry => {
@@ -60,9 +50,4 @@ if ('IntersectionObserver' in window) {
   $$('.reveal, .home-stage').forEach(element => observer.observe(element));
 }
 
-// Pause decorative motion while the document is in the background.
-function syncVisibility() {
-  document.body.classList.toggle('page-hidden', document.hidden);
-}
-document.addEventListener('visibilitychange', syncVisibility);
-syncVisibility();
+// Shared page visibility and motion preferences live in site-chrome.js.

@@ -1,3 +1,4 @@
+import './site-chrome.js';
 import { stories, codeTasks, taskIds, checkNumber } from './lesson-data.js';
 import { executeMiniPython, MiniPythonError } from './interpreter.js';
 import { gradeCode } from './grading.js';
@@ -7,18 +8,6 @@ const esc = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&
 let state = { done:[], drafts:{} }, activeCode = codeTasks[0], sandbox = false, toastTimer;
 try { const data = JSON.parse(localStorage.getItem(KEY)); if (data && typeof data === 'object') state = { done:Array.isArray(data.done) ? [...new Set(data.done.filter(id => taskIds.includes(id)))] : [], drafts:typeof data.drafts === 'object' && data.drafts ? data.drafts : {} }; } catch { /* Storage is optional. */ }
 const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch { /* The lesson still works. */ } };
-const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-let motionWanted = true;
-try { motionWanted = localStorage.getItem(MOTION) !== 'off'; } catch { /* Default. */ }
-function applyMotion() {
-  document.body.classList.toggle('still', !motionWanted || reduced.matches);
-  if (!motionWanted || reduced.matches) document.getAnimations?.().forEach(animation => animation.cancel());
-  $('#motion-toggle').setAttribute('aria-pressed', String(motionWanted && !reduced.matches));
-  $('#motion-toggle').textContent = reduced.matches ? 'Анимация: выкл. системой' : 'Анимация: ' + (motionWanted ? 'вкл.' : 'выкл.');
-  $('#motion-toggle').disabled = reduced.matches;
-}
-$('#motion-toggle').addEventListener('click', () => { motionWanted = !motionWanted; try { localStorage.setItem(MOTION, motionWanted ? 'on' : 'off'); } catch {} applyMotion(); });
-reduced.addEventListener('change', applyMotion); applyMotion();
 function message(node, text, ok = false) { node.textContent = text; node.classList.toggle('success', ok); }
 function toast(text) { clearTimeout(toastTimer); $('#toast').textContent = text; $('#toast').hidden = false; toastTimer = setTimeout(() => { $('#toast').hidden = true; }, 3500); }
 function celebrate(node) {
@@ -27,6 +16,7 @@ function celebrate(node) {
 }
 function updateProgress() {
   const count = state.done.length;
+  window.dispatchEvent(new Event('aga:progress'));
   $('#progress-label').textContent = count + ' из ' + taskIds.length + ' открытий';
   $('#progress-bar').setAttribute('aria-valuenow', count);
   $('#progress-bar').setAttribute('aria-valuemax', taskIds.length);

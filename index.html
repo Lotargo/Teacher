@@ -8,17 +8,32 @@
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&amp;family=Nunito:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./styles/lesson.css"><link rel="stylesheet" href="./styles/portal.css">
 <link rel="stylesheet" href="./styles/home.css">
-<script type="module" src="./src/portal.js"></script></head><body class="portal" data-page="home"><a class="skip" href="#main">Перейти к содержанию</a>
-<header class="site-header"><a class="brand" href="./" aria-label="АГА! — главная"><img src="./assets/mark.svg" alt="" width="48" height="48"><span><b>АГА!</b><small>лаборатория ясности</small></span></a>
-<nav class="portal-nav" aria-label="Главная навигация"><a href="./" aria-current="page">Главная</a><a href="./courses/">Курсы и уроки</a></nav>
-<a class="header-action" href="./lessons/first-discovery/" data-resume>Попробовать знакомство ↗</a></header><main id="main"><section class="home-hero" aria-labelledby="home-title">
+<script type="module" src="./src/portal.js"></script><link rel="stylesheet" href="./styles/chrome.css">
+</head><body class="portal with-chrome" data-page="home"><a class="skip" href="#main">Перейти к содержанию</a>
+<!-- site-header:start -->
+<div id="page-top" class="page-top-anchor" aria-hidden="true"></div>
+<header class="site-header">
+  <div class="chrome-inner">
+    <a class="brand chrome-brand" href="./" aria-label="АГА! — главная"><img src="./assets/mark.svg" alt="" width="48" height="48"><span><b>АГА!</b><small>лаборатория ясности</small></span></a>
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-menu" hidden><span class="menu-lines" aria-hidden="true"></span><span>Меню</span></button>
+    <div class="site-menu" id="site-menu">
+      <nav class="portal-nav" aria-label="Главная навигация">
+        <a class="nav-chip is-active" href="./" aria-current="page">Главная</a>
+        <a class="nav-chip" href="./courses/">Курсы и уроки</a>
+        <a class="nav-chip" href="./courses/start/">Знакомство</a>
+      </nav>
+      <a class="button lime header-action" href="./lessons/first-discovery/" data-resume data-resume-compact>Попробовать ↗</a>
+    </div>
+  </div>
+</header>
+<!-- site-header:end --><main id="main"><section class="home-hero" aria-labelledby="home-title">
   <div class="home-copy">
     <span class="eyebrow">Математика и код. Сначала — смысл.</span>
     <h1 id="home-title">От «кажется»<br>к <mark>«могу проверить».</mark></h1>
     <p>Ты умеешь задавать вопросы. Здесь научишься превращать догадки в понятные вычисления и первые строки кода. Даже если никогда их не писал.</p>
     <div class="home-actions">
       <a class="button dark" href="./courses/">Выбрать свой первый шаг <span aria-hidden="true">↗</span></a>
-      <a class="quiet-link" href="./courses/start/">Сначала познакомимся</a>
+      <a class="quiet-link button secondary" href="./courses/start/">Сначала познакомимся</a>
     </div>
     <p class="hand hero-signature">Не зубрить. Понимать, что происходит.</p>
   </div>
@@ -65,10 +80,39 @@
       <svg viewBox="0 0 110 45" width="110" height="45"><path d="M4 22c14-28 58-10 38 1-16 9-10-30 52 5m-12-14 13 16-21 3"/></svg>
     </span>
     <a class="button dark" href="./lessons/first-discovery/" data-resume>Попробовать знакомство ↗</a>
-    <a class="quiet-link" href="#how-it-works">Посмотреть, как это устроено</a>
+    <a class="quiet-link button secondary" href="#how-it-works">Посмотреть, как это устроено</a>
     <svg class="doodle-face" viewBox="0 0 100 80" width="100" height="80" aria-hidden="true"><path d="M19 38c-2-29 64-37 66-4 3 37-59 37-66 4Z"/><path d="m5 20 8 5m-10 17 9-1m78-23-5 8m11 17-8-2"/><circle cx="40" cy="30" r="3"/><circle cx="65" cy="28" r="3"/><path d="M37 44q17 15 32-1m-23 7q0 20 12 10l1-10"/></svg>
   </div>
 </section>
-<section class="resume-panel" data-started hidden aria-label="Твоё знакомство"><div><strong>Продолжим с твоего открытия?</strong><p data-progress-text></p><div class="mini-progress" data-progress-bar role="progressbar" aria-label="Прогресс знакомства" aria-valuemin="0" aria-valuemax="7" aria-valuenow="0"></div></div><a class="button dark" href="./lessons/first-discovery/" data-resume>Продолжить знакомство ↗</a></section><section class="portal-section reveal" id="how-it-works"><div class="section-head"><div><span class="hand">Хорошая точка старта</span><h2>Давай сначала познакомимся.</h2></div><a href="./courses/">К курсам и урокам ↗</a></div>
+<section class="resume-panel" data-started hidden aria-label="Твоё знакомство"><div><strong>Продолжим с твоего открытия?</strong><p data-progress-text></p><div class="mini-progress" data-progress-bar role="progressbar" aria-label="Прогресс знакомства" aria-valuemin="0" aria-valuemax="7" aria-valuenow="0"></div></div><a class="button dark" href="./lessons/first-discovery/" data-resume>Продолжить знакомство ↗</a></section><section class="portal-section reveal" id="how-it-works"><div class="section-head"><div><span class="hand">Хорошая точка старта</span><h2>Давай сначала познакомимся.</h2></div><a class="button secondary" href="./courses/">К курсам и урокам ↗</a></div>
 <article class="start-card"><div><span class="tag">Знакомство, не курс</span><h3>От догадки к проверке</h3><p>Одна коробка с яблоками связывает бытовое действие, математическую запись и первый код. Попробуй сам и почувствуй, как здесь устроено обучение.</p></div><div class="start-side"><span class="hand">Ничего знать заранее не нужно</span><a class="button dark" href="./courses/start/">Посмотреть занятие ↗</a><span class="small-copy">Одна история. Семь маленьких открытий.</span></div></article></section>
-<section class="about-block reveal"><span class="hand">Можно хорошо мыслить<br>и пока не знать,<br>как это записать.</span><div><h2>Для детей. Для взрослых.<br>Для тебя — с любого старта.</h2><p>АГА! соединяет знакомые ситуации с точным языком математики и кода. Чтобы не только доверять готовому ответу, но и понимать, откуда он взялся.</p><p>Здесь нет гонки за профессией или оценками. Есть вопросы, эксперименты, подсказки и спокойное право попробовать ещё раз.</p></div></section></main><footer class="site-footer"><span><b>АГА!</b> Для любопытных, а не для оценок.</span><a href="https://github.com/Lotargo/Teacher-" target="_blank" rel="noopener noreferrer">Открытый проект ↗</a><button type="button" data-motion aria-pressed="true">Выключить движение</button></footer></body></html>
+<section class="about-block reveal"><span class="hand">Можно хорошо мыслить<br>и пока не знать,<br>как это записать.</span><div><h2>Для детей. Для взрослых.<br>Для тебя — с любого старта.</h2><p>АГА! соединяет знакомые ситуации с точным языком математики и кода. Чтобы не только доверять готовому ответу, но и понимать, откуда он взялся.</p><p>Здесь нет гонки за профессией или оценками. Есть вопросы, эксперименты, подсказки и спокойное право попробовать ещё раз.</p></div></section></main><!-- site-footer:start -->
+<footer class="site-footer">
+  <div class="footer-main">
+    <div class="footer-about">
+      <a class="brand chrome-brand" href="./" aria-label="АГА! — главная"><img src="./assets/mark.svg" alt="" width="48" height="48"><span><b>АГА!</b><small>лаборатория ясности</small></span></a>
+      <p>От знакомой мысли<br>к понятной математике и коду.</p>
+      <span class="footer-signature hand">До следующего «ага!»</span>
+    </div>
+    <nav class="footer-nav" aria-label="Навигация внизу страницы">
+      <span class="footer-label">Куда отправимся?</span>
+      <a href="./">На главную <span aria-hidden="true">↗</span></a>
+      <a href="./courses/">Курсы и уроки <span aria-hidden="true">↗</span></a>
+      <a href="./courses/start/">Знакомство с лабораторией <span aria-hidden="true">↗</span></a>
+    </nav>
+    <div class="footer-invite">
+      <span class="footer-spark" aria-hidden="true">✳</span>
+      <p>Можно не знать.<br><strong>Можно разобраться.</strong></p>
+      <a class="button lime" href="./lessons/first-discovery/" data-resume data-resume-compact>Попробовать ↗</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-privacy">Без аккаунта. Прогресс остаётся в этом браузере.</span>
+    <div class="footer-tools">
+      <a class="footer-control" href="https://github.com/Lotargo/Teacher-" target="_blank" rel="noopener noreferrer" aria-label="Проект на GitHub — в новой вкладке">Проект на GitHub <span aria-hidden="true">↗</span></a>
+      <button class="footer-control" type="button" data-motion aria-pressed="true">Выключить движение</button>
+      <a class="footer-control to-top" href="#page-top">Наверх <span aria-hidden="true">↑</span></a>
+    </div>
+  </div>
+</footer>
+<!-- site-footer:end --></body></html>

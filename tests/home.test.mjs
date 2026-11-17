@@ -41,7 +41,7 @@ test('homepage styles stay isolated and motion requires an observer and user con
   assert.match(css,/prefers-reduced-motion:reduce/);
   assert.match(css,/animation-play-state:paused/);
   assert.match(css,/motion-ready:not\(\.still\)/);
-  assert.match(js,/visibilitychange/);
+  assert.match(readFileSync(new URL('src/site-chrome.js',root),'utf8'),/visibilitychange/);
   assert.match(js,/IntersectionObserver/);
   assert.ok(!readFileSync(new URL('courses/index.html',root),'utf8').includes('styles/home.css'));
   assert.ok(!readFileSync(new URL('lessons/first-discovery/index.html',root),'utf8').includes('styles/home.css'));

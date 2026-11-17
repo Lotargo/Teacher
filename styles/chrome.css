@@ -1,0 +1,94 @@
+/* Shared landmarks and route controls. Deliberately scoped: exercises keep their own layout. */
+:root{--site-header-height:96px}
+html{scroll-padding-top:calc(var(--site-header-height) + 18px)}
+.with-chrome section[id],.with-chrome #main{scroll-margin-top:18px}
+.with-chrome .skip{z-index:100}
+.page-top-anchor{height:0;pointer-events:none}
+body.with-chrome:is(.portal,.lesson-page) .site-header{position:sticky;top:0;z-index:30;display:block;max-width:none;margin:0;padding:12px 38px;border:0;border-bottom:1px solid #dedfd3;background:#f8f6eef5;backdrop-filter:blur(14px);box-shadow:0 4px 20px #27364205}
+.chrome-inner{max-width:1244px;margin:auto;display:flex;align-items:center;gap:28px}
+.with-chrome .chrome-brand{display:flex;align-items:center;gap:12px;margin:0;flex-shrink:0;text-decoration:none}
+.with-chrome .chrome-brand img{width:48px;height:48px}
+.with-chrome .chrome-brand b{font-size:34px;line-height:1.05;font-weight:900;letter-spacing:-.04em}
+.with-chrome .chrome-brand small{display:block;font-size:12px;line-height:1.4;color:#586a6d}
+.site-menu{display:flex;flex:1;align-items:center;justify-content:flex-end;gap:26px;min-width:0}
+.with-chrome .portal-nav{display:flex;flex-direction:row;align-items:center;gap:6px;overflow:visible;padding:5px;border-radius:18px;background:#eeeee4;border:1px solid #e3e3d7}
+.with-chrome .portal-nav .nav-chip{display:inline-flex;min-height:42px;align-items:center;justify-content:center;white-space:nowrap;border-radius:13px;padding:10px 15px;color:#4c5c5a;font-size:15px;font-weight:800;line-height:1.25;text-decoration:none;transition:background .18s,color .18s,transform .18s}
+.with-chrome .portal-nav .nav-chip:hover{background:#fffefa;color:#283642;transform:translateY(-1px)}
+.with-chrome .portal-nav .nav-chip.is-active{background:#283642;color:#f8f6ee;box-shadow:0 3px 0 #c3cabc}
+.with-chrome .header-action{max-width:none;text-align:center;margin:0;flex-shrink:0;font-size:15px;padding:13px 19px;border-radius:14px;white-space:nowrap;text-decoration:none}
+.with-chrome .menu-toggle{display:none;align-items:center;justify-content:center;gap:10px;min-height:46px;padding:10px 14px;border:1px solid #cad2bd;border-radius:13px;background:#e8efda;color:#283642;font-size:16px;font-weight:800}
+.menu-lines{width:17px;height:14px;border-top:2px solid currentColor;border-bottom:2px solid currentColor;position:relative}
+.menu-lines:before{content:'';position:absolute;top:4px;left:0;width:17px;border-top:2px solid currentColor}
+.menu-toggle[aria-expanded="true"] .menu-lines{border-bottom:0;transform:translateY(6px) rotate(45deg)}
+.menu-toggle[aria-expanded="true"] .menu-lines:before{top:-2px;transform:rotate(90deg)}
+/* Tactile route buttons: consistent shape, readable labels, native link semantics. */
+.with-chrome a.button,.with-chrome .next-link,.with-chrome .back-link,.with-chrome .quiet-link{min-height:48px;border:1px solid transparent;border-radius:14px;text-decoration:none!important;line-height:1.4;transition:transform .16s,box-shadow .16s,background .16s;white-space:normal}
+.with-chrome a.button.dark{background:#283642;color:#fffefa;border-color:#283642;box-shadow:0 4px 0 #c0c7b8}
+.with-chrome a.button.lime{background:#d9ef79;color:#283642;border-color:#bed461;box-shadow:0 4px 0 #b9cd6b}
+.with-chrome a.button.secondary,.with-chrome .quiet-link,.with-chrome .next-link{display:inline-flex;align-items:center;justify-content:center;gap:12px;padding:12px 18px;background:#fffdf5;color:#33493e;border:1px solid #cad2bd;box-shadow:0 3px 0 #dce1ce;font-size:16px;font-weight:800}
+.with-chrome a.button:hover,.with-chrome .next-link:hover{transform:translateY(-2px);filter:brightness(1.02)}
+.with-chrome a.button:active,.with-chrome .next-link:active{transform:translateY(2px);box-shadow:0 1px 0 #c0c7b8}
+.with-chrome .section-head>a.button{padding:12px 18px;font-size:16px}
+.with-chrome .text-button{border:1px solid #d0d8c5;background:#f7f9f0;border-radius:11px;padding:10px 15px;min-height:44px;text-decoration:none;font-size:15px;line-height:1.4}
+.with-chrome .editor .text-button{background:#384d58;color:#edf4e7;border-color:#617782}
+.with-chrome .text-button:hover{filter:brightness(.97)}
+.with-chrome #motion-toggle{min-height:40px;padding:9px 13px;border:1px solid #d1d9c5;border-radius:12px;background:#eff3e7;text-decoration:none;color:#4c614d;font-size:14px}
+/* Breadcrumbs are quiet route chips, not primary calls to action. */
+.with-chrome .crumbs,.with-chrome .lesson-crumbs{display:flex;flex-direction:row;align-items:center;gap:8px;flex-wrap:wrap;overflow:visible}
+.with-chrome .crumbs a,.with-chrome .lesson-crumbs a{display:inline-flex;align-items:center;justify-content:center;padding:8px 12px;min-height:40px;border:1px solid #dce0d1;border-radius:11px;background:#f1f3e9;font-size:14px;line-height:1.4;font-weight:800;text-decoration:none;color:#4d6353}
+.with-chrome .crumbs a:hover,.with-chrome .lesson-crumbs a:hover{background:#e4edcf}
+.with-chrome .crumbs>span,.with-chrome .lesson-crumbs>span{font-size:14px;background:none}
+/* Header + lesson rail coexist without hiding anchored exercise headings. */
+.lesson-page.with-chrome .sidebar{top:var(--site-header-height);height:calc(100dvh - var(--site-header-height));min-height:0;overflow-y:auto;padding-top:27px;padding-bottom:28px}
+.lesson-page.with-chrome .lesson-back{display:flex;align-items:center;justify-content:center;margin:0 0 25px;padding:12px 14px;border:1px solid #667d7e;background:#3b515a;color:#f0f7e5;border-radius:13px;font-size:15px;font-weight:800;text-decoration:none;min-height:46px}
+.lesson-page.with-chrome .lesson-back:hover{background:#4b646a}
+.lesson-page.with-chrome .sidebar-note{margin-top:auto}
+.lesson-page.with-chrome .shell{min-height:0}
+/* A real footer, not a line of legal links. */
+body.with-chrome:is(.portal,.lesson-page) .site-footer{display:block;max-width:1244px;margin:72px auto 24px;padding:40px 38px 22px;border:1px solid #354c56;border-radius:30px;background:#283b45;color:#edf3e8;overflow:hidden;position:relative;font-size:16px;line-height:1.6}
+.footer-main{display:grid;grid-template-columns:1.1fr 1fr 1fr;align-items:start;gap:44px}
+body.with-chrome:is(.portal,.lesson-page) .site-footer .chrome-brand{color:#fffefa}
+body.with-chrome:is(.portal,.lesson-page) .site-footer .chrome-brand small{color:#bfd1cc}
+.footer-about p{margin:20px 0 15px;font-size:17px;line-height:1.65;color:#ccdad5;max-width:300px}
+.footer-signature{display:inline-block;transform:rotate(-3deg);color:#d9ef79;font-size:30px}
+.footer-label{display:block;color:#b9ceca;font-size:14px;font-weight:800;margin:2px 0 13px}
+.with-chrome .footer-nav{display:flex;flex-direction:column;gap:9px;min-width:0}
+.with-chrome .footer-nav a{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 15px;min-height:47px;border:1px solid #536b71;border-radius:12px;background:#324b55;color:#eff4e9;font-size:15px;font-weight:800;line-height:1.4;text-decoration:none;transition:background .18s,transform .18s}
+.with-chrome .footer-nav a:hover{background:#405e65;transform:translateX(2px)}
+.with-chrome .footer-nav a>span{flex:none;width:auto;height:auto;display:inline;background:none;padding:0;border-radius:0;font:inherit;color:#d9ef79}
+.footer-invite{padding:22px;border:1px solid #60756c;border-radius:21px;background:#374f54;position:relative;isolation:isolate}
+.footer-invite p{position:relative;margin:0 0 22px;font-size:23px;line-height:1.35;letter-spacing:-.03em;font-weight:600}
+.footer-invite strong{font-weight:900;color:#e3f1ac}
+.footer-invite .button{font-size:16px;padding:12px 17px}
+.footer-spark{position:absolute;right:14px;top:2px;z-index:-1;font-size:75px;line-height:1;color:#91ab7a;opacity:.2;transform:rotate(14deg)}
+.footer-bottom{display:flex;flex-direction:column;align-items:stretch;gap:15px;margin-top:32px;padding-top:20px;border-top:1px solid #536b70}
+.footer-privacy{font-size:14px;color:#bccdc9}
+.footer-tools{display:flex;align-items:center;flex-wrap:wrap;gap:10px}
+body.with-chrome:is(.portal,.lesson-page) .site-footer .footer-control{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:42px;padding:9px 14px;border:1px solid #607779;border-radius:11px;color:#e5eee6;background:#304850;font-size:14px;font-weight:700;line-height:1.4;text-decoration:none}
+body.with-chrome:is(.portal,.lesson-page) .site-footer .footer-control:hover:not(:disabled){background:#435f65}
+body.with-chrome:is(.portal,.lesson-page) .site-footer .footer-control:disabled{opacity:.75}
+body.with-chrome:is(.portal,.lesson-page) .site-footer .to-top{margin-left:auto}
+body.with-chrome:is(.portal,.lesson-page) .site-footer :focus-visible{outline-color:#d9ef79}
+@media(min-width:1600px){.lesson-page.with-chrome .site-footer{max-width:calc(100% - 100px)}}
+@media(max-width:1320px){body.with-chrome:is(.portal,.lesson-page) .site-footer{margin-left:38px;margin-right:38px}.chrome-inner{gap:20px}.site-menu{gap:16px}.with-chrome .portal-nav .nav-chip{padding:10px 12px}.footer-main{gap:28px}}
+@media(max-width:1100px){body.with-chrome:is(.portal,.lesson-page) .site-header{padding-left:28px;padding-right:28px}.with-chrome .chrome-brand small{font-size:11px}body.with-chrome:is(.portal,.lesson-page) .site-footer{margin-left:28px;margin-right:28px;padding:34px 28px 22px}.with-chrome .header-action{padding:12px 14px}.site-menu{gap:12px}.with-chrome .portal-nav .nav-chip{font-size:14px;padding:10px}.footer-main{gap:22px}.footer-invite{padding:19px}.footer-invite p{font-size:22px}}
+@media(max-width:900px){
+ body.with-chrome:is(.portal,.lesson-page) .site-header{padding:12px 24px}.chrome-inner{flex-wrap:wrap;justify-content:space-between;gap:14px}.with-chrome .menu-toggle{display:inline-flex}
+ .site-menu{flex-basis:100%;flex-direction:column;align-items:stretch;gap:12px;padding-bottom:4px}
+ body.with-chrome:is(.portal,.lesson-page) .site-header[data-enhanced] .site-menu:not(.is-open){display:none}
+ .with-chrome .portal-nav{width:100%;order:0;justify-content:stretch;flex-wrap:wrap;padding:5px}.with-chrome .portal-nav .nav-chip{flex:1;min-height:46px;font-size:15px}.with-chrome .header-action{align-self:stretch;font-size:16px}
+ .footer-main{grid-template-columns:1fr 1fr;gap:30px}.footer-invite{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:20px}.footer-invite p{margin:0;font-size:25px}.footer-invite p br{display:none}.footer-invite strong:before{content:' '}.footer-invite .button{flex-shrink:0}
+}
+@media(max-width:800px){
+ .lesson-page.with-chrome .sidebar{position:relative;top:auto;height:auto;min-height:0;overflow:visible;padding:18px}.lesson-page.with-chrome .lesson-back{display:inline-flex;margin:0 0 12px}.lesson-page.with-chrome .lesson-nav{overflow-x:auto;padding-bottom:8px}.lesson-page.with-chrome .sidebar-note{display:none}
+}
+@media(max-width:600px){
+ body.with-chrome:is(.portal,.lesson-page) .site-header{padding:10px 18px}.with-chrome .chrome-brand b{font-size:30px}.with-chrome .chrome-brand img{width:43px;height:43px}.with-chrome .chrome-brand small{font-size:11px}
+ body.with-chrome:is(.portal,.lesson-page) .site-footer{margin:52px 18px 18px;padding:28px 22px 20px;border-radius:24px}.footer-main{grid-template-columns:1fr;gap:28px}.footer-invite{grid-column:auto;display:block}.footer-invite p{margin-bottom:20px;font-size:26px}.footer-invite p br{display:initial}.footer-about p{max-width:100%;font-size:17px;margin:18px 0 12px}.footer-signature{font-size:30px}.footer-nav .footer-label{margin-bottom:6px}.footer-bottom{margin-top:26px}.footer-tools{display:grid;grid-template-columns:1fr;gap:9px}body.with-chrome:is(.portal,.lesson-page) .site-footer .footer-control{justify-content:center;min-height:45px}body.with-chrome:is(.portal,.lesson-page) .site-footer .to-top{margin:0}.footer-privacy{font-size:14px}
+ .with-chrome .section-head{align-items:flex-start;flex-direction:column;gap:18px}.with-chrome .section-head>a.button{align-self:flex-start;white-space:normal}
+ .with-chrome .home-actions{align-items:stretch}.with-chrome .home-actions>.button{max-width:100%}.with-chrome .crumbs,.with-chrome .lesson-crumbs{gap:6px}.with-chrome .lesson-crumbs{padding-top:18px}.with-chrome .crumbs a,.with-chrome .lesson-crumbs a{font-size:13px;padding:7px 9px;min-height:38px}
+}
+@media(max-width:360px){body.with-chrome:is(.portal,.lesson-page) .site-header{padding-left:14px;padding-right:14px}.with-chrome .portal-nav{flex-direction:column;align-items:stretch}.with-chrome .portal-nav .nav-chip{width:100%}body.with-chrome:is(.portal,.lesson-page) .site-footer{margin-left:13px;margin-right:13px;padding:25px 18px}.with-chrome .chrome-brand small{font-size:10px}.with-chrome .menu-toggle{padding:10px 12px}.with-chrome .footer-invite .button{width:100%}}
+@media(prefers-reduced-motion:reduce){body.with-chrome:is(.portal,.lesson-page) .site-header{backdrop-filter:none}.with-chrome a.button,.with-chrome .next-link,.with-chrome .portal-nav a,.with-chrome .footer-nav a{transition:none;transform:none!important}}
+.with-chrome.still a.button,.with-chrome.still .next-link,.with-chrome.still .portal-nav a,.with-chrome.still .footer-nav a{transition:none;transform:none!important}
+.page-hidden .bobbing{animation-play-state:paused!important}

@@ -36,6 +36,32 @@ with sync_playwright() as pw:
     def follow(locator):
         locator.click()
         page.wait_for_load_state('networkidle')
+    # Shared header/footer, mobile disclosure, native links and keyboard behavior.
+    for path in PAGES:
+        go(path)
+        assert page.locator('.site-header').count()==1
+        assert page.locator('.site-footer').count()==1
+        footer_box=page.locator('.site-footer').bounding_box()
+        brand_box=page.locator('.site-footer .brand').bounding_box()
+        assert brand_box['x'] - footer_box['x'] >= 18, 'Footer must retain its inner gutter'
+        assert page.locator('.site-header [aria-current]').count()==1
+        page.set_viewport_size({'width':390,'height':844})
+        assert page.locator('.menu-toggle').is_visible()
+        assert not page.locator('.site-menu').is_visible()
+        page.locator('.menu-toggle').click()
+        assert page.locator('.menu-toggle').get_attribute('aria-expanded')=='true'
+        page.locator('.portal-nav a').first.focus();page.keyboard.press('Escape')
+        assert not page.locator('.site-menu').is_visible()
+        assert page.locator('.menu-toggle').evaluate('(n)=>n===document.activeElement')
+        page.locator('.menu-toggle').click()
+        follow(page.locator('.portal-nav a').nth(1))
+        assert page.url==BASE+'courses/'
+        assert page.locator('.menu-toggle').get_attribute('aria-expanded')=='false'
+        page.locator('.site-footer').scroll_into_view_if_needed()
+        page.locator('.to-top').click()
+        page.wait_for_function('scrollY < 5')
+        page.set_viewport_size({'width':1440,'height':1000})
+        assert page.locator('.site-menu').is_visible()
     go();assert page.locator('h1').count()==1
     assert page.locator('.story-card').count()==4
     assert page.locator('.home-team').evaluate('(im)=>im.complete && im.naturalWidth===640')
@@ -136,6 +162,12 @@ with sync_playwright() as pw:
     ap.locator('.site-footer').scroll_into_view_if_needed()
     ap.wait_for_timeout(200)
     assert ap.locator('.home-team').evaluate('(im)=>getComputedStyle(im).animationPlayState')=='paused'
+    ap.goto(BASE+'lessons/first-discovery/',wait_until='networkidle')
+    ap.locator('#motion-toggle').click()
+    assert ap.locator('[data-motion]').get_attribute('aria-pressed')=='false'
+    ap.locator('[data-motion]').click()
+    assert ap.locator('#motion-toggle').get_attribute('aria-pressed')=='true'
+    ap.goto(BASE,wait_until='networkidle')
     ap.add_init_script('delete window.IntersectionObserver')
     ap.reload(wait_until='networkidle')
     assert ap.locator('.story-card').count()==4
@@ -148,5 +180,5 @@ with sync_playwright() as pw:
     np.locator('.path-ready a').click();np.locator('.lesson-row > a').click()
     assert np.url==BASE+'lessons/first-discovery/'
     assert np.locator('noscript').is_visible()
-    print('PASS: four pages, nested paths, seven exercises, native storage/history, resume, mobile layouts, no-JS navigation, reduced motion and blocked storage.')
+    print('PASS: shared chrome, mobile menu, footer controls; four pages, nested paths, seven exercises, native storage/history, resume, mobile layouts, no-JS navigation, reduced motion and blocked storage.')
     browser.close()
