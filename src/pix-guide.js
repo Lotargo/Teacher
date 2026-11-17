@@ -1,5 +1,5 @@
 import { PATHS, getPageContext, getSuggestions, getLocalAnswer, guessLocalIntent, buildAiMessages } from './pix-core.js';
-import { loadPuter, askPuter } from './puter-adapter.js';
+import { loadPuter, askPuter, explainPuterAuthError } from './puter-adapter.js';
 
 const page = getPageContext(document.body.dataset.page || 'home').route;
 const root = new URL('../', import.meta.url);
@@ -50,6 +50,7 @@ host.innerHTML = `
           <button type="button" id="pix-load-puter" class="pix-primary">Загрузить Puter.js</button>
           <button type="button" id="pix-login" class="pix-primary" hidden>Войти через Puter</button>
           <p id="pix-connect-status" class="pix-status" role="status" aria-live="polite"></p>
+          <p id="pix-login-help" class="pix-login-help" hidden>Уже есть аккаунт? Нажми «Log In» в окне Puter. Можно проверить вход отдельно на <a href="https://puter.com/" target="_blank" rel="noopener noreferrer">Puter.com ↗</a>. Если регистрация не работает и там, обратись в <a href="mailto:support@puter.com">поддержку Puter</a> с кодом из окна ошибки. АГА! не управляет регистрацией.</p>
         </div>
         <div id="pix-ai-chat" class="pix-ai-chat" hidden>
           <div class="pix-chat-log" id="pix-chat-log" role="log" aria-label="Диалог с Пикс" aria-live="polite" aria-relevant="additions text">
@@ -138,6 +139,7 @@ host.querySelectorAll('[data-pix-mode]').forEach(button => button.addEventListen
 const status = get('#pix-connect-status');
 function setStatus(text) { status.textContent = text; }
 function showConnected() {
+  get('#pix-login-help').hidden = true;
   get('#pix-ai-consent').hidden = true;
   get('#pix-ai-chat').hidden = false;
   pose('idea'); get('#pix-chat-question').focus();
@@ -167,12 +169,15 @@ get('#pix-login').addEventListener('click', async event => {
   const button = event.currentTarget;
   button.disabled = true;
   setStatus('Ожидаю подтверждения входа в Puter…');
+  get('#pix-login-help').hidden = true;
   try {
     const signInPromise = puterClient.auth.signIn();
     await signInPromise;
     showConnected();
   } catch (error) {
-    setStatus('Вход не завершён. Можно попробовать ещё раз или использовать Пикс без ИИ. ' + (error?.code === 'popup_blocked' ? 'Разреши всплывающее окно Puter.' : ''));
+    setStatus(explainPuterAuthError(error));
+    get('#pix-login-help').hidden = false;
+    pose('guide');
   } finally { button.disabled = false; }
 });
 
