@@ -19,26 +19,27 @@ export function depthOffsets(pointerX, pointerY, scrollY = 0) {
   };
 }
 
+// Each animal travels with its support and contact shadow: no floating feet.
+const turf = '<span class="forest-turf"></span>';
+const rock = `<svg class="forest-support forest-support-rock" viewBox="0 0 240 75" preserveAspectRatio="none" focusable="false"><path d="M5 65 28 35 64 12 139 8 202 29 236 65Z" fill="#949391" stroke="#514c48" stroke-width="3" stroke-linejoin="round"/><path d="m28 35 72 9 39-36m-39 36 23 24m16-60 24 36 39-15" fill="none" stroke="#68645e" stroke-width="3"/><path d="m33 33 32-21 75-4 41 14-40 1-37 13-42-7Z" fill="#9db276"/></svg>`;
+const stump = `<svg class="forest-support forest-support-stump" viewBox="0 0 200 98" preserveAspectRatio="none" focusable="false"><path d="M39 22 29 78 12 91 185 91 165 77 158 22Z" fill="#b87955" stroke="#654531" stroke-width="3" stroke-linejoin="round"/><path d="m52 30-7 49m28-43-2 42m40-43 6 48m23-51 7 46" fill="none" stroke="#885335" stroke-width="4" stroke-linecap="round"/><ellipse cx="98" cy="23" rx="62" ry="18" fill="#e4b987" stroke="#654531" stroke-width="3"/><ellipse cx="98" cy="23" rx="37" ry="10" fill="none" stroke="#bc895d" stroke-width="2"/><path d="m14 90 14-14 7 9 8-12 8 17m100 0 8-15 9 8 7-11 12 18" fill="#728d51" stroke="#4d653d" stroke-width="2" stroke-linejoin="round"/></svg>`;
+function forestSpot(name, support = turf) {
+  return `<div class="forest-spot forest-spot-${name}" data-forest-character="${name}">
+    ${support}<span class="forest-contact-shadow"></span>
+    <div class="forest-animal forest-${name}"></div><span class="forest-foot-grass"></span>
+  </div>`;
+}
 const sceneHTML = `
-  <div class="aga-depth-layer aga-depth-far" data-depth="far">
-    <div class="forest-landscape"></div>
-  </div>
-  <div class="aga-depth-layer aga-depth-middle" data-depth="trees">
-    <div class="forest-trees"></div>
-  </div>
+  <div class="aga-depth-layer aga-depth-far" data-depth="far"><div class="forest-landscape"></div></div>
+  <div class="aga-depth-layer aga-depth-middle" data-depth="trees"><div class="forest-trees"></div></div>
+  <div class="aga-depth-layer aga-depth-foreground" data-depth="foreground"><div class="forest-grass"></div></div>
+  <div class="forest-reading-wash"></div>
   <div class="aga-depth-layer aga-depth-animals-back" data-depth="animals-back">
-    <div class="forest-animal forest-fox"></div>
-    <div class="forest-animal forest-squirrel"></div>
+    ${forestSpot('fox', rock)}${forestSpot('squirrel', stump)}
   </div>
   <div class="aga-depth-layer aga-depth-animals-front" data-depth="animals-front">
-    <div class="forest-animal forest-bear"></div>
-    <div class="forest-animal forest-rabbit"></div>
-    <div class="forest-animal forest-hedgehog"></div>
-  </div>
-  <div class="aga-depth-layer aga-depth-foreground" data-depth="foreground">
-    <div class="forest-grass"></div>
-  </div>
-  <div class="forest-reading-wash"></div>`;
+    ${forestSpot('bear')}${forestSpot('rabbit')}${forestSpot('hedgehog')}
+  </div>`;
 
 const heroHTML = `
   <span class="aga-hero-backdrop"></span>

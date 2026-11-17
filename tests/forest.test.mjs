@@ -25,7 +25,7 @@ test('background is fixed for long scrolling, every asset moves in its own plane
   for (const name of images) assert.match(css, new RegExp('forest/' + name + '\\.webp'));
   for (const cls of ['aga-depth-far','aga-depth-middle','aga-depth-animals-back',
     'aga-depth-animals-front','aga-depth-foreground']) assert.ok(css.includes('.' + cls));
-  for (const name of ['fox','bear','squirrel','rabbit','hedgehog']) assert.ok(js.includes('forest-' + name));
+  for (const name of ['fox','bear','squirrel','rabbit','hedgehog']) assert.ok(js.includes("forestSpot('" + name + "'"), name);
   assert.ok(js.includes('forest-reading-wash'));
   assert.ok(css.includes('mask-image'));
   assert.ok(css.includes('pointer-events:none'));
@@ -40,4 +40,19 @@ test('diorama never uploads data and Pixie remains inactive', () => {
   assert.ok(!source.includes('localStorage'));
   assert.ok(!source.includes('document.cookie'));
   assert.ok(read('src/features.js').includes('PIXIE_ENABLED = false'));
+});
+
+
+test('animals keep their own grounding and cannot be buried under the grass layer', () => {
+  const css = read('styles/depth.css'), js = read('src/depth-scene.js');
+  assert.ok(js.includes('data-forest-character'));
+  assert.ok(js.includes('forest-contact-shadow'));
+  assert.ok(js.includes("forestSpot('fox', rock)"));
+  assert.ok(js.includes("forestSpot('squirrel', stump)"));
+  const scene = js.slice(js.indexOf('const sceneHTML'), js.indexOf('const heroHTML'));
+  assert.ok(scene.indexOf('forest-grass') < scene.indexOf('aga-depth-animals-back'));
+  assert.ok(scene.indexOf('forest-reading-wash') < scene.indexOf('aga-depth-animals-back'));
+  assert.ok(css.includes('.aga-depth-animals-back,.aga-depth-animals-front{inset:0;transform:none}'));
+  assert.ok(css.includes('--forest-rail:clamp(276px,'));
+  assert.ok(css.includes('body.still .forest-spot'));
 });

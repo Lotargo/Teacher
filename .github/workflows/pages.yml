@@ -32,6 +32,8 @@ jobs:
         run: python tests/browser_smoke.py
       - name: Verify Pixie is suspended, workshop local and themes consistent
         run: python tests/suspended_features_browser.py
+      - name: Check forest cast composition and grounding
+        run: python tests/forest_composition_browser.py
   deploy:
     name: Publish to Pages
     needs: test

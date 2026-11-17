@@ -28,14 +28,8 @@ body.lesson-page>.shell{position:relative;z-index:1}
 .aga-depth-middle{
   transform:translate3d(calc(var(--aga-depth-x) * .38),calc(var(--aga-depth-y) * .32 - var(--aga-depth-scroll) * .20),-35px);
 }
-.aga-depth-animals-back{
-  transform:translate3d(calc(var(--aga-depth-x) * .65),calc(var(--aga-depth-y) * .56 - var(--aga-depth-scroll) * .37),10px)
-    rotateY(calc(var(--aga-depth-tilt-y) * .10));
-}
-.aga-depth-animals-front{
-  transform:translate3d(calc(var(--aga-depth-x) * 1.08),calc(var(--aga-depth-y) * 1.02 - var(--aga-depth-scroll) * .49),65px)
-    rotateX(calc(var(--aga-depth-tilt-x) * .07));
-}
+/* Cast uses viewport coordinates, unlike the oversized scenery planes. */
+.aga-depth-animals-back,.aga-depth-animals-front{inset:0;transform:none}
 .aga-depth-foreground{
   transform:translate3d(calc(var(--aga-depth-x) * 1.2),calc(var(--aga-depth-y) * .91 - var(--aga-depth-scroll) * .42),85px);
 }
@@ -54,16 +48,43 @@ body.lesson-page>.shell{position:relative;z-index:1}
   background-image:url('../assets/forest/grass.webp');background-position:center bottom;
   opacity:.82;mask-image:linear-gradient(90deg,#000 0%,#000 15%,#0009 23%,transparent 38%,transparent 62%,#0009 77%,#000 85%,#000);
 }
-.forest-animal{
-  width:clamp(100px,12vw,178px);height:clamp(135px,15vw,224px);
-  background-repeat:no-repeat;background-size:contain;background-position:center;
-  filter:drop-shadow(0 8px 5px #16232625);opacity:.94;
+/* Two grounded banks: fox above the bear on the left; squirrel on a stump,
+   rabbit in a jump, hedgehog in the nearest grass on the right. */
+:root{--forest-rail:clamp(276px,calc((100vw - 1360px)/2),400px)}
+.forest-spot{
+  --cast-width:210px;--support-height:18px;--contact-overlap:0px;--cast-depth:.45;
+  width:var(--cast-width);height:calc(var(--cast-width)*1.25 + var(--support-height));
+  transform:translate(calc(var(--aga-depth-x)*var(--cast-depth)),calc(var(--aga-depth-y)*.25 - var(--aga-depth-scroll)*.10));
 }
-.forest-fox{background-image:url('../assets/forest/fox.webp');left:6.1%;top:12%;width:clamp(125px,13vw,182px);height:clamp(156px,16vw,222px);}
-.forest-squirrel{background-image:url('../assets/forest/squirrel.webp');right:6.1%;top:13%;width:clamp(120px,13vw,177px);height:clamp(160px,17vw,230px);}
-.forest-bear{background-image:url('../assets/forest/bear.webp');left:6.4%;bottom:8%;width:clamp(128px,14vw,198px);height:clamp(160px,17vw,238px);}
-.forest-rabbit{background-image:url('../assets/forest/rabbit.webp');right:6%;bottom:6%;width:clamp(115px,12.5vw,180px);height:clamp(145px,16vw,221px);}
-.forest-hedgehog{background-image:url('../assets/forest/hedgehog.webp');right:7%;top:43%;width:clamp(100px,10vw,150px);height:clamp(118px,13vw,188px);}
+.forest-animal{
+  position:absolute;left:0;bottom:calc(var(--support-height) - var(--contact-overlap));width:100%;height:calc(var(--cast-width)*1.25);
+  background-repeat:no-repeat;background-size:contain;background-position:center bottom;
+  filter:drop-shadow(0 3px 2px #1623261a);opacity:.98;
+}
+.forest-spot-fox{--cast-width:clamp(216px,11.7vw,260px);--support-height:clamp(100px,12vh,140px);--contact-overlap:25px;--cast-depth:.30;left:calc(var(--forest-rail)*.48 - var(--cast-width)/2);bottom:30vh}
+.forest-spot-bear{--cast-width:clamp(250px,13.5vw,310px);--cast-depth:.45;left:calc(var(--forest-rail)*.50 - var(--cast-width)/2);bottom:22px}
+.forest-spot-squirrel{--cast-width:clamp(200px,10.9vw,245px);--support-height:clamp(135px,16vh,190px);--contact-overlap:18px;--cast-depth:.34;right:calc(var(--forest-rail)*.47 - var(--cast-width)/2);bottom:32vh}
+.forest-spot-rabbit{--cast-width:clamp(204px,11.1vw,250px);--support-height:22px;--cast-depth:.52;right:calc(var(--forest-rail)*.58 - var(--cast-width)/2);bottom:17vh}
+.forest-spot-hedgehog{--cast-width:clamp(168px,9.3vw,210px);--support-height:14px;--cast-depth:.78;right:calc(var(--forest-rail)*.40 - var(--cast-width)/2);bottom:16px}
+.forest-fox{background-image:url('../assets/forest/fox.webp')}
+.forest-squirrel{background-image:url('../assets/forest/squirrel.webp')}
+.forest-bear{background-image:url('../assets/forest/bear.webp')}
+.forest-rabbit{background-image:url('../assets/forest/rabbit.webp')}
+.forest-hedgehog{background-image:url('../assets/forest/hedgehog.webp')}
+.forest-support{position:absolute;bottom:0;left:0;width:100%;height:var(--support-height);overflow:visible}
+.forest-support-stump{left:12%;width:76%}
+.forest-contact-shadow{position:absolute;bottom:calc(var(--support-height) - var(--contact-overlap) - 6px);left:18%;width:64%;height:15px;border-radius:50%;background:radial-gradient(ellipse,#263c3755,transparent 72%)}
+.forest-spot-rabbit .forest-contact-shadow{left:28%;width:53%;opacity:.75}
+.forest-turf{position:absolute;bottom:0;left:8%;width:84%;height:30px;background:radial-gradient(ellipse,#748e5155,transparent 70%)}
+.forest-foot-grass{position:absolute;bottom:6px;left:22%;width:62%;height:14px;background:#769351;clip-path:polygon(0 100%,8% 32%,10% 82%,20% 8%,22% 85%,35% 55%,38% 90%,58% 35%,63% 88%,75% 12%,77% 82%,91% 24%,100% 100%);opacity:.8}
+.forest-spot-fox .forest-foot-grass,.forest-spot-squirrel .forest-foot-grass{left:8%;width:84%;bottom:0}
+@media(min-width:1601px){
+  /* Reserve actual scenery gutters instead of clipping enlarged animals behind cards. */
+  body.portal>main{max-width:min(1320px,calc(100% - var(--forest-rail)*2 + 76px))}
+  body.portal[data-page="home"]>main{max-width:min(1504px,calc(100% - var(--forest-rail)*2 + 64px))}
+  body.portal.with-chrome>.site-footer{max-width:min(1244px,calc(100% - var(--forest-rail)*2))}
+  body.portal[data-page="home"].with-chrome>.site-footer{max-width:min(1440px,calc(100% - var(--forest-rail)*2))}
+}
 /* A quiet reading corridor keeps articles legible while the forest frames the sides. */
 .forest-reading-wash{
   position:absolute;inset:0;pointer-events:none;
@@ -77,7 +98,8 @@ body.lesson-page>.shell{position:relative;z-index:1}
 html[data-theme='dark'] .forest-landscape{filter:brightness(.43) saturate(.71);opacity:.63}
 html[data-theme='dark'] .forest-trees{filter:brightness(.62) saturate(.77);opacity:.8}
 html[data-theme='dark'] .forest-grass{filter:brightness(.62) saturate(.78);opacity:.84}
-html[data-theme='dark'] .forest-animal{filter:brightness(.8) saturate(.86);opacity:.88}
+html[data-theme='dark'] .forest-animal{filter:brightness(.86) saturate(.86);opacity:.98}
+html[data-theme='dark'] :is(.forest-support,.forest-turf,.forest-foot-grass){filter:brightness(.66) saturate(.75)}
 /* Avoid typography or widgets competing with a dense cartoon background. */
 @media(max-width:1600px){
   .aga-depth-animals-back,.aga-depth-animals-front{display:none}
@@ -136,6 +158,7 @@ html[data-theme='dark'] .forest-animal{filter:brightness(.8) saturate(.86);opaci
   .aga-hero-paper-a{width:36px;height:36px;font-size:24px;left:0}
   .aga-hero-paper-b{width:36px;height:35px;font-size:25px;right:1%}
 }
+body.still .forest-spot,body.page-hidden .forest-spot,
 body.still .aga-depth-layer,body.page-hidden .aga-depth-layer,
 body.still .aga-hero-planes>*,body.page-hidden .aga-hero-planes>*{
   transform:none!important;transition:none!important;
@@ -143,7 +166,12 @@ body.still .aga-hero-planes>*,body.page-hidden .aga-hero-planes>*{
 body.still .home-stage :is(.home-team,.team-caption,.team-bubble,.stage-spark),
 body.page-hidden .home-stage :is(.home-team,.team-caption,.team-bubble,.stage-spark){translate:none!important}
 @media(prefers-reduced-motion:reduce){
-  .aga-depth-layer,.aga-hero-planes>*,.home-stage :is(.home-team,.team-caption,.team-bubble,.stage-spark){
+  .forest-spot,.aga-depth-layer,.aga-hero-planes>*,.home-stage :is(.home-team,.team-caption,.team-bubble,.stage-spark){
     transform:none!important;translate:none!important;transition:none!important;animation:none!important;
   }
+}
+
+@media(min-width:1601px) and (max-width:1800px){
+ .portal[data-page="home"] .home-actions{gap:12px}
+ .portal[data-page="home"] .home-actions .button{font-size:15px;padding:14px 16px}
 }
