@@ -19,7 +19,9 @@ body.motion-ready:not(.still):not(.page-hidden) .pix-launcher{animation:pix-hell
 .pix-panel-head>div{min-width:0;flex:1}
 .pix-panel-head h2{font:900 23px/1.08 Nunito,'Segoe UI',sans-serif;margin:0 0 4px;letter-spacing:-.03em}
 .pix-panel-head p{font-size:12px;line-height:1.35;margin:0;color:#647767}
-.pix-close{display:grid;place-items:center;width:37px;height:37px;align-self:start;border:1px solid #bbceb0;border-radius:13px;background:#f8fdf1;color:#2d3b43;font-size:29px!important;font-weight:600!important;line-height:1;cursor:pointer}
+.pix-close{position:relative;display:grid;place-items:center;flex:0 0 40px;width:40px;height:40px;align-self:start;border:1px solid #bbceb0;border-radius:13px;background:#f8fdf1;color:#2d3b43;font-size:0!important;line-height:0;cursor:pointer}
+.pix-close::before,.pix-close::after{content:"";position:absolute;top:50%;left:50%;width:20px;height:2.6px;background:currentColor;border-radius:4px;transform:translate(-50%,-50%) rotate(45deg)}
+.pix-close::after{transform:translate(-50%,-50%) rotate(-45deg)}
 .pix-close:hover{background:#fff}
 .pix-mode-switch{display:flex;background:#f3f0e6;padding:9px;gap:8px;border-bottom:1px solid #dddaca}
 .pix-mode{flex:1;min-width:0;border:1px solid #dadaca;background:#fffdf9;border-radius:11px;padding:9px 8px;font-size:13px!important;font-weight:900!important;cursor:pointer;color:#5b6a61}
@@ -38,6 +40,8 @@ body.motion-ready:not(.still):not(.page-hidden) .pix-launcher{animation:pix-hell
 .pix-answer-links a{display:inline-flex;align-items:center;padding:8px 10px;background:#fffdf7;border:1px solid #ccd6c7;border-radius:9px;color:#344942;font-size:12px;font-weight:900;text-decoration:none}
 .pix-answer-links a:hover{background:#e5f1d9}
 .pix-local-note,.pix-status{margin:12px 1px 0;font-size:12px;line-height:1.55;color:#727d76}
+.pix-login-help{font-size:13px;line-height:1.65;color:#516660;margin:12px 0 0;padding:12px 14px;background:#f1f6e6;border:1px solid #dce9c7;border-radius:12px}
+.pix-login-help a{color:#2e514a;font-weight:900;text-underline-offset:3px}
 .pix-consent{background:#fffaf1;border:1px solid #ebe2d5;border-radius:17px;padding:15px 17px}
 .pix-ai-sticker{background:#dbe9a0;border-radius:50%;width:40px;height:40px;display:grid;place-items:center;font-size:30px;color:#577053;margin-bottom:8px}
 .pix-consent h3{font:900 20px/1.2 Nunito,sans-serif;letter-spacing:-.025em;margin:0 0 10px}
