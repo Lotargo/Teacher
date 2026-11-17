@@ -1,3 +1,4 @@
+import './depth-scene.js';
 // Shared progressive enhancement. No HTML injection: landmarks are present in every document.
 import { introLesson, readLessonProgress } from './catalog.js';
 const header = document.querySelector('.site-header');

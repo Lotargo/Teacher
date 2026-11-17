@@ -48,7 +48,8 @@ for (const [path, prefix, page] of pages) {
   const titleAt = html.indexOf('<title>');
   html = html.slice(0, titleAt) + theme + html.slice(titleAt);
   html = html.replace(/<link rel="stylesheet" href="[^"\n]*styles\/theme.css">\n?/g, '');
-  html = html.replace('</head>', '<link rel="stylesheet" href="' + prefix + 'styles/theme.css">\n</head>');
+  html = html.replace(/<link rel="stylesheet" href="[^"\n]*styles\/depth.css">\n?/g, '');
+  html = html.replace('</head>', '<link rel="stylesheet" href="' + prefix + 'styles/theme.css">\n<link rel="stylesheet" href="' + prefix + 'styles/depth.css">\n</head>');
   if (html !== original) {
     changed = true;
     if (!check) writeFileSync(resolve(root, path), html);
