@@ -1,77 +1,26 @@
-import { test } from "node:test";
-import assert from "node:assert/strict";
-import { readFileSync, existsSync } from "node:fs";
-import { executeMiniPython, MiniPythonError } from "../src/interpreter.js";
-
-const run = (program) => executeMiniPython(program).output;
-
-test("prints a friendly first message", () => {
-  assert.equal(run('print("Привет, мир!")'), "Привет, мир!");
-});
-
-test("can solve the apple-box example using a Unicode variable", () => {
-  assert.equal(run("яблоки = 5\nprint(яблоки + 3)"), "8");
-});
-
-test("handles parentheses and arithmetic precedence", () => {
-  assert.equal(run("print(2 + 3 * 4)"), "14");
-  assert.equal(run("print((2 + 3) * 4)"), "20");
-  assert.equal(run("print(-9 / 3 + 5)"), "2");
-});
-
-test("supports single quotes, string joining, blank print, and comments", () => {
-  assert.equal(run("print('А' + 'Б') # two letters\nprint()"), "АБ\n");
-  assert.equal(run('print("решётка # внутри строки")'), "решётка # внутри строки");
-});
-
-test("gives a human-readable error with the correct line number", () => {
-  assert.throws(
-    () => run('print(3)\nprint("потерянная кавычка)'),
-    (error) => error instanceof MiniPythonError && error.line === 2 && /кавычк/u.test(error.message)
-  );
-});
-
-test("detects unknown names and teaches when to use quotes", () => {
-  assert.throws(() => run("print(hello)"), /кавычки/u);
-});
-
-test("forbids division by zero", () => {
-  assert.throws(() => run("print(5 / 0)"), /ноль/u);
-});
-
-test("forbids JavaScript, loops, imports, and function calls", () => {
-  for (const code of [
-    "alert(1)",
-    "import os",
-    "while True: print(1)",
-    "print(window.location)",
-    "print(1); alert(2)",
-    "print(eval(123))"
-  ]) {
-    assert.throws(() => run(code), MiniPythonError, code);
-  }
-});
-
-test("limits the size and the number of lines", () => {
-  assert.throws(() => run("p".repeat(4001)), /4000/u);
-  assert.throws(() => run("\n".repeat(25)), /25/u);
-});
-
-test("only explicit print statements generate output", () => {
-  assert.equal(run("яблоки = 5"), "");
-  assert.equal(run("print()"), "");
-  assert.equal(executeMiniPython("яблоки = 5").lines.length, 0);
-  assert.equal(executeMiniPython("print()").lines.length, 1);
-});
-
-test("page includes required learning sections and local assets", () => {
-  const root = new URL("../", import.meta.url);
-  const html = readFileSync(new URL("index.html", root), "utf8");
-  for (const id of ["intro", "math", "language", "code", "code-editor", "code-output", "math-feedback", "progress-bar"]) {
-    assert.ok(html.includes('id="' + id + '"'), "Missing id: " + id);
-  }
-  for (const asset of ["styles/main.css", "src/app.js", "assets/mark.svg", "assets/mascot.svg", "assets/hero-lab.svg", "assets/badge.png"]) {
-    assert.ok(existsSync(new URL(asset, root)), "Missing asset: " + asset);
-  }
-  assert.ok(!html.includes("https://cdn."), "First lesson should not depend on a CDN");
-});
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync, existsSync } from 'node:fs';
+import { executeMiniPython, MiniPythonError } from '../src/interpreter.js';
+import { stories, codeTasks, taskIds, checkNumber } from '../src/lesson-data.js';
+import { gradeCode } from '../src/grading.js';
+const run = code => executeMiniPython(code);
+const grade = (id, code) => gradeCode(codeTasks.find(t => t.id === id), run(code));
+test('prints text and Unicode variables', () => { assert.equal(run('print("Привет, мир!")').output, 'Привет, мир!'); assert.equal(run('яблоки = 5\nprint(яблоки + 3)').output, '8'); });
+test('arithmetic precedence, unary, parentheses, decimal and division', () => { for (const [code, expected] of [['2+3*4','14'], ['(2+3)*4','20'], ['-9/3+5','2'], ['2.5+1','3.5']]) assert.equal(run('print(' + code + ')').output, expected); });
+test('strings, escapes and comments are not executable syntax', () => { assert.equal(run('print("a#b") # note').output, 'a#b'); assert.equal(run("print('А' + 'Б')\nprint()").output, 'АБ\n'); assert.equal(run('print("a\\nb")').output, 'a\nb'); });
+test('helpful errors have correct line', () => { assert.throws(() => run('print(3)\nprint("x)'), e => e instanceof MiniPythonError && e.line === 2 && /кавычки/.test(e.message)); assert.throws(() => run('print(hello)'), /кавычки/); });
+test('blocks non-subset code', () => { for (const code of ['alert(1)','import os','while True: print(1)','print(window.location)','print(1); alert(2)','print(eval(123))']) assert.throws(() => run(code), MiniPythonError); });
+test('bounds source, lines, tokens, depth, numbers and strings', () => { for (const code of ['x'.repeat(4001),'\n'.repeat(25),'print(' + '-'.repeat(45) + '1)','print(1/0)','print(9999999999999)','s="' + 'x'.repeat(2100) + '"\nprint(s+s)']) assert.throws(() => run(code), MiniPythonError); });
+test('empty program differs from empty printed line', () => { assert.equal(run('яблоки=5').lines.length,0); assert.equal(run('print()').lines.length,1); });
+test('each connected code task has a working solution', () => { assert.ok(grade('show','print(8)').ok); assert.ok(grade('add-code','print(5+3)').ok); assert.ok(grade('undo-code','print(8-3)').ok); });
+test('allows swapped summands, parentheses and variables', () => { for (const code of ['print(3+5)','print((5+3))','было=5\nновые=3\nитог=было+новые\nprint(итог)']) assert.ok(grade('add-code',code).ok); });
+test('does not accept arithmetic hidden in a comment', () => { assert.equal(grade('add-code','print(8) # 5+3').ok,false); });
+test('does not accept arithmetic hidden in a string', () => { assert.equal(grade('add-code','print("8") # 5+3').ok,false); assert.equal(grade('add-code','print("5+3")').ok,false); });
+test('does not accept an unused calculation', () => { assert.equal(grade('add-code','unused=5+3\nprint(8)').ok,false); });
+test('requires one numeric result and the requested operation', () => { for (const code of ['print(8)\nprint(5+3)','print(6+2)','print(8)','print("8")']) assert.equal(grade('add-code',code).ok,false); });
+test('detects a runnable but logically wrong program', () => { assert.equal(run('print(8+3)').output,'11'); assert.equal(grade('undo-code','print(8+3)').ok,false); });
+test('all seven discoveries are unique and have full explanations', () => { assert.equal(taskIds.length,7); assert.equal(new Set(taskIds).size,7); for (const task of [...stories,...codeTasks]) { for (const key of ['purpose','hints','insight','formula','life','code','codeMeaning']) assert.ok(task[key], task.id+': '+key); assert.equal(task.hints.length,3); run(task.code); } });
+test('numeric checks reject blanks and noninteger answers', () => { const task=stories[0]; for (const value of ['', ' ', '8abc','8.5','-8','21']) assert.equal(checkNumber(task,value).ok,false); assert.ok(checkNumber(task,'8').ok); });
+test('transfer requires both subtraction and the correct number', () => { const task=stories.at(-1); assert.equal(checkNumber(task,'6','+').ok,false); assert.equal(checkNumber(task,'5','-').ok,false); assert.ok(checkNumber(task,'6','-').ok); });
+test('site assets, accessible controls and no numbered section labels', () => { const root=new URL('../',import.meta.url), html=readFileSync(new URL('index.html',root),'utf8'); for (const id of ['main','code-editor','code-output','progress-bar','motion-toggle']) assert.ok(html.includes('id="'+id+'"')); for (const path of ['assets/pix.webp','assets/mark.svg','src/lesson-app.js','src/lesson-data.js','styles/lesson.css']) assert.ok(existsSync(new URL(path,root))); assert.ok(!html.includes('КУРС 01')); assert.ok(!html.includes('nav-number')); });

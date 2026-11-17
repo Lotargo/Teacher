@@ -1,205 +1,59 @@
 <!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f7f5ee">
-  <meta name="description" content="АГА! — дружелюбная лаборатория математики и кода с самого нуля. Для детей и взрослых, которые умеют задавать вопросы, но пока не умеют записывать и проверять свои идеи.">
-  <meta property="og:title" content="АГА! — от мысли к формуле, от формулы к коду">
-  <meta property="og:description" content="Интерактивные уроки без стыда за ошибки. Думай, пробуй, проверяй.">
-  <meta property="og:type" content="website">
-  <link rel="icon" href="./assets/mark.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./styles/main.css">
-  <title>АГА! — лаборатория ясности</title>
-  <script type="module" src="./src/app.js"></script>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f7f5ee">
+<meta name="description" content="Одна понятная история: от яблок и бытовых примеров до первого вычисления в коде. Математика с нуля для детей и взрослых.">
+<title>АГА! — от догадки к проверке</title>
+<link rel="icon" href="./assets/mark.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./styles/lesson.css"><script type="module" src="./src/lesson-app.js"></script>
 </head>
 <body>
-  <a class="skip-link" href="#main">Перейти к уроку</a>
-  <div class="shell" id="top">
-    <aside class="sidebar" aria-label="Навигация по уроку">
-      <a class="brand" href="#top" aria-label="АГА! — наверх">
-        <img src="./assets/mark.svg" width="53" height="53" alt="">
-        <span class="brand-copy"><strong>АГА!</strong><small>лаборатория ясности</small></span>
-      </a>
-      <div class="sidebar-label">ТВОЙ ПЕРВЫЙ МАРШРУТ</div>
-      <nav class="lesson-nav" aria-label="Этапы занятия">
-        <a class="lesson-nav__link active" href="#intro"><span class="nav-number">00</span><span>Начнём с тебя<small>Введение</small></span></a>
-        <a class="lesson-nav__link" href="#math"><span class="nav-number">01</span><span>Коробка с яблоками<small>Учимся рассуждать</small></span></a>
-        <a class="lesson-nav__link" href="#language"><span class="nav-number">02</span><span>Знакомство с x<small>Записываем мысль</small></span></a>
-        <a class="lesson-nav__link" href="#code"><span class="nav-number">03</span><span>Мой первый код<small>Проверяем в деле</small></span></a>
-      </nav>
-      <div class="sidebar-pep">
-        <img src="./assets/mascot.svg" alt="" width="96" height="96" loading="lazy">
-        <p>Тут не ругают за ошибки. Тут с ними знакомятся.</p>
-        <span>— Пикс, твой напарник</span>
-      </div>
-      <a class="sidebar-source" href="https://github.com/Lotargo/Teacher-" target="_blank" rel="noopener noreferrer">Исходный код проекта <span aria-hidden="true">↗</span></a>
-    </aside>
-
-    <main class="main" id="main">
-      <header class="topbar">
-        <div class="breadcrumb"><span class="breadcrumb-dot"></span>КУРС 01 <span class="slash">/</span> ПЕРВЫЙ ШАГ</div>
-        <div class="progress-pill"><span class="progress-pill__dot"></span><span id="header-progress">0 из 3 открытий</span></div>
-      </header>
-
-      <section class="hero" id="intro" aria-labelledby="hero-title">
-        <div class="hero-copy">
-          <div class="eyebrow"><span class="eyebrow-sun">✳</span> Для тех, кто начинает с абсолютного нуля</div>
-          <h1 id="hero-title">Ты уже умеешь <span class="wavy">думать.</span><br>Научимся <span class="marker">проверять.</span></h1>
-          <p class="hero-lead">Не нужно помнить школьную программу. Не нужно знать ни одной команды. Здесь мысль сначала становится понятной, потом — формулой и только после этого — кодом.</p>
-          <div class="hero-actions">
-            <a class="btn btn-dark btn-large" href="#math">Давай попробуем <span aria-hidden="true">↗</span></a>
-            <span class="hero-time">Первый урок · 5–10 минут<br><small>Можно медленнее. Можно вернуться.</small></span>
-          </div>
-          <div class="hero-doodle" aria-hidden="true">↳ никакой гонки за оценками</div>
-        </div>
-        <div class="hero-art"><img src="./assets/hero-lab.svg" alt="Персонаж Пикс показывает на доску с загадкой: неизвестное число плюс три равно восьми" width="760" height="600"></div>
-      </section>
-
-      <section class="how-it-works" aria-label="Как устроено обучение">
-        <div class="small-card"><span class="small-card__icon small-card__icon--pink" aria-hidden="true">?</span><div><strong>Сначала вопрос</strong><p>Что происходит и почему?</p></div></div>
-        <div class="small-card"><span class="small-card__icon small-card__icon--purple" aria-hidden="true">=</span><div><strong>Потом мысль</strong><p>Находим точную запись.</p></div></div>
-        <div class="small-card"><span class="small-card__icon small-card__icon--lime" aria-hidden="true">▶</span><div><strong>Затем проверка</strong><p>Пробуем в настоящем действии.</p></div></div>
-      </section>
-
-      <section class="chapter" id="math" aria-labelledby="math-title">
-        <div class="chapter-heading">
-          <div><div class="section-kicker"><span class="section-index">01</span> МЫСЛИМ БЕЗ ФОРМУЛ</div><h2 id="math-title">У коробки есть секрет <span aria-hidden="true">🍎</span></h2><p>Не вспоминай правила. Просто представь ситуацию.</p></div>
-          <div class="checkpoint" id="math-checkpoint"><span class="checkpoint__icon" aria-hidden="true">○</span> Открытие №1</div>
-        </div>
-        <div class="math-grid">
-          <div class="puzzle-card">
-            <div class="puzzle-tag">МИНИ-ЗАДАЧА <span aria-hidden="true">✦</span></div>
-            <p class="puzzle-question">В закрытой коробке были яблоки. Мы положили туда ещё <strong>3 яблока</strong>. Теперь их <strong>8</strong>.</p>
-            <p class="puzzle-prompt">Сколько яблок было в коробке сначала?</p>
-            <div class="visual-equation" aria-label="Число в коробке плюс три равно восьми">
-              <div class="basket">
-                <span class="basket-label">БЫЛО</span>
-                <span class="basket-apples" id="basket-apples" aria-hidden="true"></span>
-                <span class="basket-number" id="guess-preview">?</span>
-              </div>
-              <span class="equation-operator">+</span>
-              <div class="given-apples" aria-label="Три яблока"><span aria-hidden="true">🍎🍎🍎</span><strong>3</strong></div>
-              <span class="equation-operator">=</span>
-              <div class="total-apples"><span>СТАЛО</span><strong>8</strong></div>
-            </div>
-            <div class="guess-panel">
-              <div><span class="guess-caption">МОЯ ДОГАДКА</span><strong>Яблок было...</strong></div>
-              <div class="counter" aria-label="Количество яблок">
-                <button id="guess-minus" type="button" aria-label="Уменьшить на один" title="Уменьшить">−</button>
-                <output id="guess-value" aria-live="polite">0</output>
-                <button id="guess-plus" type="button" aria-label="Увеличить на один" title="Увеличить">+</button>
-              </div>
-            </div>
-            <div class="puzzle-actions">
-              <button id="check-math" type="button" class="btn btn-coral">Проверить догадку <span aria-hidden="true">→</span></button>
-              <p class="feedback" id="math-feedback" role="status" aria-live="polite">Не бойся ошибиться. Проверка здесь важнее угадывания.</p>
-            </div>
-          </div>
-          <aside class="explainer">
-            <div class="explainer-label">ПОДСКАЗКА ОТ ПИКСА <span aria-hidden="true">✳</span></div>
-            <img src="./assets/mascot.svg" alt="" width="166" height="166" loading="lazy">
-            <div class="speech">Ты знаешь, сколько стало. И знаешь, сколько добавили. Можно мысленно <mark>убрать добавленное</mark>!</div>
-            <div class="note-scribble">Думать можно вслух. Можно по пальцам. Можно медленно.</div>
-          </aside>
-        </div>
-      </section>
-
-      <section class="chapter" id="language" aria-labelledby="language-title">
-        <div class="chapter-heading">
-          <div><div class="section-kicker"><span class="section-index">02</span> ПЕРЕВОДИМ МЫСЛЬ</div><h2 id="language-title">У загадки появляется имя</h2><p>Теперь запишем ту же историю короче. Никакой новой задачи.</p></div>
-          <div class="checkpoint" id="language-checkpoint"><span class="checkpoint__icon" aria-hidden="true">○</span> Открытие №2</div>
-        </div>
-        <div class="language-card">
-          <div class="language-top">
-            <div class="equation-big" aria-label="Икс плюс три равно восемь"><span class="x-box">x</span> <span>+</span> <span>3</span> <span>=</span> <span>8</span></div>
-            <div class="equation-explanation"><span class="hand-arrow" aria-hidden="true">↖</span><strong>Это всё та же коробка!</strong><p><b>x</b> — просто имя неизвестного количества. <b>+</b> — добавили. <b>=</b> — с обеих сторон одно и то же число.</p></div>
-          </div>
-          <div class="quiz">
-            <h3>Так что же означает <span class="inline-x">x</span>?</h3>
-            <div class="answers" role="group" aria-label="Выбери значение икс">
-              <button type="button" class="answer" data-answer="symbol">Сложный математический знак</button>
-              <button type="button" class="answer" data-answer="unknown">То, чего мы пока не знаем</button>
-              <button type="button" class="answer" data-answer="multiply">Всегда означает умножение</button>
-            </div>
-            <p class="feedback" id="language-feedback" role="status" aria-live="polite">Выбери ответ. У тебя нет лимита попыток.</p>
-          </div>
-        </div>
-      </section>
-
-      <section class="chapter" id="code" aria-labelledby="code-title">
-        <div class="chapter-heading">
-          <div><div class="section-kicker"><span class="section-index">03</span> ТЕПЕРЬ ЗАПУСТИМ МЫСЛЬ</div><h2 id="code-title">Код — это просто инструкция</h2><p>Компьютер не догадывается о твоих намерениях. Он читает точную запись.</p></div>
-          <div class="checkpoint" id="code-checkpoint"><span class="checkpoint__icon" aria-hidden="true">○</span> Открытие №3</div>
-        </div>
-        <div class="code-grid">
-          <div class="editor-window">
-            <div class="editor-titlebar">
-              <span class="window-lights" aria-hidden="true"><i></i><i></i><i></i></span>
-              <span>моя_первая_программа.py</span><span class="editor-status">● ТРЕНАЖЁР</span>
-            </div>
-            <div class="editor-preset-label">ПОПРОБУЙ ГОТОВЫЙ ПРИМЕР</div>
-            <div class="examples" role="group" aria-label="Примеры кода">
-              <button type="button" class="example is-active" data-example="hello" aria-pressed="true">👋 Привет</button>
-              <button type="button" class="example" data-example="sum" aria-pressed="false">➕ Сложение</button>
-              <button type="button" class="example" data-example="box" aria-pressed="false">📦 Коробка</button>
-            </div>
-            <div class="editor-surface">
-              <div id="line-numbers" class="line-numbers" aria-hidden="true">1</div>
-              <label class="sr-only" for="code-editor">Редактор кода</label>
-              <textarea id="code-editor" rows="5" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" aria-describedby="editor-description">print("Привет, мир!")</textarea>
-            </div>
-            <div class="editor-toolbar">
-              <button id="run-code" type="button" class="btn btn-lime"><span aria-hidden="true">▶</span> Запустить</button>
-              <button id="restore-example" type="button" class="btn btn-ghost">Вернуть пример</button>
-              <kbd class="shortcut">Ctrl / ⌘ + Enter</kbd>
-            </div>
-            <div class="terminal">
-              <div class="terminal-header"><span><span class="terminal-dot"></span> ЧТО ОТВЕТИЛ КОМПЬЮТЕР</span><button type="button" id="clear-output" aria-label="Очистить результат">Очистить</button></div>
-              <pre id="code-output" class="terminal-content" aria-live="polite">Нажми «Запустить» — здесь появится результат.</pre>
-            </div>
-          </div>
-          <aside class="code-aside">
-            <div class="code-note">
-              <div class="code-note__icon" aria-hidden="true">✳</div><h3>Читай как обычную фразу</h3>
-              <p><code>print</code> — «покажи на экране».</p>
-              <p><code>( )</code> — что именно показать.</p>
-              <p><code>" "</code> — между кавычками находится текст.</p>
-              <p><code>+</code> — сложи числа.</p>
-              <div class="note-divider"></div>
-              <p class="code-note__small">Поменяй слова, цифры или убери кавычку и запусти снова. Ошибка — тоже результат эксперимента.</p>
-            </div>
-            <div class="simulator-disclaimer"><strong>Что это за редактор?</strong><p>Это небольшой безопасный тренажёр с командами, которые нужны для урока, а не полный Python. Позже мы дойдём до настоящей среды.</p></div>
-          </aside>
-        </div>
-        <div class="mission">
-          <div class="mission-copy">
-            <div class="mission-label">ФИНАЛЬНАЯ МИНИ-МИССИЯ <span>✦</span></div>
-            <h3>Пусть компьютер сложит <em>4 и 3</em></h3>
-            <p>Измени код так, чтобы он <strong>сам сложил числа</strong> и показал <strong>7</strong>. Можно начать с примера «Сложение». Потом нажми «Запустить» и «Проверить решение».</p>
-            <button id="toggle-hint" type="button" class="hint-toggle" aria-controls="code-hint" aria-expanded="false">Хочу маленькую подсказку <span aria-hidden="true">↓</span></button>
-            <p id="code-hint" class="hint-text" hidden>Вместо готового ответа внутри <code>print( )</code> напиши <code>4 + 3</code>. Кавычки для чисел не нужны.</p>
-          </div>
-          <div class="mission-actions"><button id="check-code" type="button" class="btn btn-dark">Проверить решение <span aria-hidden="true">↗</span></button><p class="feedback" id="code-feedback" role="status" aria-live="polite">Здесь важно действие, а не скорость.</p></div>
-        </div>
-      </section>
-
-      <section class="finish" id="finish" aria-labelledby="finish-heading">
-        <div class="finish-top"><img src="./assets/badge.png" alt="Нарисованная улыбающаяся звёздочка — значок первого открытия" width="112" height="112"><span class="finish-tag">ТВОИ ОТКРЫТИЯ</span></div>
-        <h2 id="finish-heading">Не нужно понимать всё сразу.</h2>
-        <p id="finish-text">Одно понятное действие важнее десяти непонятных лекций. Можно вернуться к любому шагу и попробовать снова.</p>
-        <div class="progress-track" role="progressbar" aria-label="Прогресс вводного урока" aria-valuemin="0" aria-valuemax="3" aria-valuenow="0" id="progress-bar"><div id="progress-fill"></div></div>
-        <div class="finish-bottom"><strong id="progress-count">0 из 3 открытий</strong><button type="button" id="reset-progress">Начать урок заново <span aria-hidden="true">↺</span></button></div>
-      </section>
-
-      <section class="manifesto" aria-labelledby="manifesto-title">
-        <div class="manifesto-graphic" aria-hidden="true"><span>?</span><span>→</span><span>=</span><span>→</span><span>✓</span></div>
-        <div><div class="section-kicker">ЗАЧЕМ ЭТА ЛАБОРАТОРИЯ</div><h2 id="manifesto-title">Уметь рассуждать — начало.<br>Уметь проверять — следующий шаг.</h2><p>Здесь учатся дети и взрослые. Те, кто не знает код. Те, кто создаёт проекты с ИИ, но хочет понимать решения, замечать ошибки и не зависеть от чужой уверенности. Мы не обещаем сделать из тебя «сеньора за месяц». Мы учимся превращать догадки в проверяемые действия.</p></div>
-      </section>
-      <footer class="footer"><div><strong>АГА!</strong> Сделано для любопытных. Ошибаться разрешается.</div><span>Первый урок · без аккаунтов, рекламы и ИИ-агента</span></footer>
-    </main>
-  </div>
-  <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true" hidden><span class="toast-icon" aria-hidden="true">✦</span><span id="toast-text"></span></div>
-  <div id="confetti-layer" aria-hidden="true"></div>
-</body>
-</html>
+<a class="skip" href="#main">Перейти к уроку</a>
+<div class="shell">
+<aside class="sidebar">
+<a href="#intro" class="brand"><img src="./assets/mark.svg" width="50" height="50" alt=""><span><b>АГА!</b><small>лаборатория ясности</small></span></a>
+<p class="nav-label">Одна история, шаг за шагом</p>
+<nav aria-label="Маршрут урока">
+<a href="#intro" aria-current="location"><span aria-hidden="true">✳</span>Начнём с тебя</a>
+<a href="#math"><span aria-hidden="true">+</span>Что изменилось?</a>
+<a href="#backward"><span aria-hidden="true">↶</span>А сколько было?</a>
+<a href="#language"><span aria-hidden="true">x</span>Дадим неизвестному имя</a>
+<a href="#code"><span aria-hidden="true">&gt;_</span>Та же мысль в коде</a>
+<a href="#transfer"><span aria-hidden="true">↗</span>Теперь без яблок</a>
+</nav>
+<div class="sidebar-note"><img src="./assets/pix.webp" width="112" height="112" alt="" class="bobbing"><p>Не «вспомни правило»,<br>а «давай разберёмся».</p><small>Пикс на твоей стороне</small></div>
+<a class="source" href="https://github.com/Lotargo/Teacher-" target="_blank" rel="noopener noreferrer">Открытый проект ↗</a>
+</aside>
+<main id="main">
+<header class="topbar"><span>Твоя первая лаборатория</span><div class="top-actions"><button id="motion-toggle" type="button" aria-pressed="true">Анимация: вкл.</button><span id="progress-label" class="progress-label">Начнём?</span></div></header>
+<section class="hero" id="intro">
+<div class="hero-copy"><span class="eyebrow">Ничего знать заранее не нужно</span><h1>Ты уже умеешь думать.<br>Научимся <mark>проверять.</mark></h1><p>Разберём одну историю с яблоками. Сначала поймём её на пальцах, потом запишем числами и поручим компьютеру проверить расчёт.</p><a class="button dark" href="#math">Открыть коробку <span aria-hidden="true">↗</span></a><p class="hand hero-note">Столько времени, сколько тебе нужно</p></div>
+<div class="hero-stage" aria-label="Пять яблок плюс три яблока — восемь">
+<div class="stage-orbit"></div><div class="blackboard"><span class="board-dots" aria-hidden="true">● ● ●</span><span class="board-caption hand">Всё начинается с вопроса</span><strong>5 + 3 = 8</strong><span class="board-underline"></span><small>было · добавили · стало</small></div>
+<img class="hero-pix bobbing" src="./assets/pix.webp" width="320" height="320" alt="Пикс, оранжевый персонаж с целым тёмным контуром, радостно поднимает руки">
+<span class="spark spark-one" aria-hidden="true">✦</span><span class="spark spark-two" aria-hidden="true">✧</span><div class="floating-note hand">А почему<br>именно восемь?</div>
+</div>
+</section>
+<div class="route-note reveal"><span class="hand">Сначала увидим.</span><span aria-hidden="true">→</span><span class="hand">Потом объясним.</span><span aria-hidden="true">→</span><span class="hand">И проверим в деле.</span></div>
+<noscript><p class="notice">Для заданий нужен JavaScript. Включи его в браузере. Идея урока: 5 + 3 = 8; чтобы узнать, сколько было, убери добавленное: 8 − 3 = 5. Команда print(8 - 3) показывает этот же результат.</p></noscript>
+<div id="story-exercises"></div>
+<section class="chapter reveal" id="code" aria-labelledby="code-title">
+<div class="chapter-intro"><span class="kicker">Не новая задача, а новый способ записи</span><h2 id="code-title">Коробка переезжает в код</h2><p>Мы уже умеем рассуждать про 5, 3 и 8. Теперь объясним компьютеру, что показать и что посчитать. Он не угадывает намерение: выполняет записанную команду.</p></div>
+<div class="code-layout"><div class="code-main">
+<div class="code-tabs" role="group" aria-label="Практика кода"><button type="button" data-code="show">Показать ответ</button><button type="button" data-code="add-code">Посчитать сумму</button><button type="button" data-code="undo-code">Найти, сколько было</button></div>
+<div class="code-task"><span class="hand" id="code-purpose"></span><h3 id="code-task-title"></h3><p id="code-task-text"></p></div>
+<div class="editor"><div class="editor-heading"><span>Моя первая программа</span><span class="editor-badge">Учебный тренажёр</span></div><label for="code-editor" class="sr-only">Твой код</label><textarea id="code-editor" spellcheck="false" autocapitalize="off" autocomplete="off" aria-describedby="editor-help" maxlength="4000" rows="4">print(5)</textarea><div class="editor-actions"><button id="run-code" class="button lime" type="button">▶ Запустить и проверить</button><button id="restore-code" class="text-button" type="button">Вернуть заготовку</button></div><div class="terminal"><span>Что показал компьютер</span><pre id="code-output" aria-live="polite">Результат появится здесь.</pre></div></div>
+<p class="feedback" id="code-feedback" role="status"></p><div id="code-hints" class="hint-host"></div><div id="code-result" class="result" hidden></div>
+</div><aside class="code-notes"><div class="paper-note"><span class="hand">Перевод с компьютерного</span><p><code>print</code> читается «принт» и означает «покажи».</p><p><code>( )</code> отделяют то, что нужно показать.</p><p><code>+</code> складывает, <code>-</code> вычитает.</p><p><code>" "</code> превращают содержимое в текст: <code>print("5 + 3")</code> покажет запись <b>5 + 3</b>, а не посчитает её.</p></div><p id="editor-help" class="editor-help">Пиши сам или вставляй готовые кусочки кнопками ниже. Ctrl / ⌘ + Enter запускает код. Tab переводит фокус, как обычно.</p><div id="code-tokens" class="tokens" role="group" aria-label="Вставить в код"><button type="button" data-token="print()">print( )</button><button type="button" data-token="5">5</button><button type="button" data-token="3">3</button><button type="button" data-token="8">8</button><button type="button" data-token=" + ">+</button><button type="button" data-token=" - ">−</button></div><p class="scope-note">Это ограниченный тренажёр, не полный Python. Нет доступа к файлам, сети или оборудованию.</p></aside></div>
+<details class="optional-note"><summary>А зачем вообще нужны имена в коде?</summary><p>Это необязательный мостик к следующему уроку. Вместо числа можно использовать понятное имя.</p><pre>яблоки = 5
+print(яблоки + 3)</pre><p>Первая строка сохраняет число 5 под именем «яблоки». Вторая прибавляет 3 и показывает 8. В коде <code>=</code> здесь означает <b>сохранить значение</b>, а не «найти неизвестное». В уравнении <code>x + 3 = 8</code> равенство сообщает, что обе стороны имеют одинаковое значение.</p><button type="button" id="try-variable" class="button secondary">Попробовать в редакторе</button></details>
+</section>
+<div id="transfer-exercise"></div>
+<section class="finish reveal" id="finish"><img src="./assets/pix.webp" width="100" height="100" alt=""><div><span class="hand">Вот что остаётся с тобой</span><h2 id="finish-title">Не ответ «пять», а способ думать.</h2><p>Что известно? Что изменилось? Что я ищу? Как проверю ответ? Эти вопросы работают и с коробкой, и с программой.</p><div id="progress-bar" class="progress-track" role="progressbar" aria-label="Прогресс урока" aria-valuemin="0" aria-valuemax="7" aria-valuenow="0"><span id="progress-fill"></span></div><p id="finish-progress">Можно проходить частями.</p><button type="button" id="reset-progress" class="text-button">Начать заново</button></div></section>
+<section class="manifesto reveal"><span class="hand">Умение мыслить и знание записи — не одно и то же.</span><h2>Для любопытных.<br>Не только для детей.</h2><p>Для тех, кто рассуждает, задаёт вопросы и создаёт проекты с ИИ, но пока не умеет читать код и проверять вычисления самостоятельно. Здесь не обещают профессию за месяц. Здесь можно спокойно освоить точную запись своих идей.</p></section>
+<footer><b>АГА!</b><span>Без аккаунта и ИИ-агента. Прогресс хранится в этом браузере.</span></footer>
+</main></div><div id="toast" class="toast" role="status" hidden></div>
+</body></html>

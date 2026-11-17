@@ -1,226 +1,99 @@
-/**
- * АГА! Mini Python — a deliberately small, local teaching interpreter.
- * Supports: print(expression), Unicode-named variables, numbers, strings,
- * parentheses, + - * /, unary +/-, and comments.
- * It NEVER evaluates JavaScript or loads Python from a remote server.
- * This is NOT a complete Python interpreter.
- */
-
+/** Deliberately bounded teaching subset, NOT a complete Python implementation.
+ * No eval/Function, DOM, network, imports or arbitrary execution.
+ * Each printed value carries the operations that actually produced it. */
 export class MiniPythonError extends Error {
-  constructor(message, line = 1) {
-    super(message);
-    this.name = "MiniPythonError";
-    this.line = line;
-  }
+  constructor(message, line = 1) { super(message); this.name = 'MiniPythonError'; this.line = line; }
 }
-
-const MAX_LINES = 25;
-const MAX_SOURCE_LENGTH = 4000;
-const MAX_TOKENS = 200;
-const isNameStart = (char) => /^[\p{L}_]$/u.test(char);
-const isNamePart = (char) => /^[\p{L}\p{N}_]$/u.test(char);
-const isDigit = (char) => /^[0-9]$/.test(char);
-
-function lex(input, line) {
-  const chars = [...input];
-  const tokens = [];
-  let i = 0;
-  const fail = (message) => { throw new MiniPythonError(message, line); };
-
-  while (i < chars.length) {
-    const char = chars[i];
-    if (/\s/u.test(char)) { i++; continue; }
-    if (char === "#") break;
-
-    if (char === '"' || char === "'") {
-      const quote = char;
-      let value = "";
-      let finished = false;
-      i++;
-      while (i < chars.length) {
-        const next = chars[i++];
-        if (next === quote) { finished = true; break; }
-        if (next === "\\") {
-          const escaped = chars[i++];
-          if (escaped === undefined) fail("После обратного слэша нужен символ.");
-          const replacements = { n: "\n", t: "\t", "\\": "\\", '"': '"', "'": "'" };
-          value += Object.hasOwn(replacements, escaped) ? replacements[escaped] : "\\" + escaped;
-        } else {
-          value += next;
-        }
-      }
-      if (!finished) fail('Кажется, потерялась закрывающая кавычка. Попробуй: print("Привет")');
-      tokens.push({ type: "string", value });
-    } else if (isDigit(char)) {
-      let raw = "";
-      while (i < chars.length && isDigit(chars[i])) raw += chars[i++];
-      if (chars[i] === "." && isDigit(chars[i + 1] ?? "")) {
-        raw += chars[i++];
-        while (i < chars.length && isDigit(chars[i])) raw += chars[i++];
-      }
-      tokens.push({ type: "number", value: Number(raw) });
-    } else if (isNameStart(char)) {
-      let name = "";
-      while (i < chars.length && isNamePart(chars[i])) name += chars[i++];
-      tokens.push({ type: "name", value: name });
-    } else if ("+-*/()=".includes(char)) {
-      tokens.push({ type: char, value: char });
-      i++;
-    } else if (char === ",") {
-      fail('В этом первом тренажёре print() показывает одно значение. Например: print(5 + 3)');
-    } else {
-      fail("Символ «" + char + "» пока незнаком тренажёру. Для начала попробуй цифры, + и print().");
-    }
-
-    if (tokens.length > MAX_TOKENS) fail("Слишком длинная команда для первого урока. Раздели её на части.");
-  }
-  return tokens;
-}
-
-class Parser {
-  constructor(tokens, variables, line) {
-    this.tokens = tokens;
-    this.variables = variables;
-    this.line = line;
-    this.position = 0;
-    this.depth = 0;
-  }
-
-  current() { return this.tokens[this.position]; }
-  read(type) {
-    if (this.current()?.type === type) {
-      return this.tokens[this.position++];
-    }
-    return null;
-  }
-  require(type, message) {
-    const token = this.read(type);
-    if (!token) throw new MiniPythonError(message, this.line);
-    return token;
-  }
-  end() {
-    if (this.current()) {
-      const token = this.current();
-      throw new MiniPythonError("После команды осталось «" + token.value + "». Проверь скобки и знаки.", this.line);
-    }
-  }
-
-  parseExpression() { return this.parseSum(); }
-
-  parseSum() {
-    let value = this.parseProduct();
-    while (this.current()?.type === "+" || this.current()?.type === "-") {
-      const operator = this.tokens[this.position++].type;
-      const right = this.parseProduct();
-      if (operator === "+" && typeof value === "string" && typeof right === "string") {
-        value += right;
-      } else if (typeof value === "number" && typeof right === "number") {
-        value = operator === "+" ? value + right : value - right;
-      } else {
-        throw new MiniPythonError("Здесь смешались текст и число. В первом уроке складывай числа с числами.", this.line);
-      }
-      this.safeNumber(value);
-    }
-    return value;
-  }
-
-  parseProduct() {
-    let value = this.parseUnary();
-    while (this.current()?.type === "*" || this.current()?.type === "/") {
-      const operator = this.tokens[this.position++].type;
-      const right = this.parseUnary();
-      if (typeof value !== "number" || typeof right !== "number") {
-        throw new MiniPythonError("Умножать и делить здесь можно только числа.", this.line);
-      }
-      if (operator === "/" && right === 0) {
-        throw new MiniPythonError("На ноль делить нельзя. Попробуй другое число.", this.line);
-      }
-      value = operator === "*" ? value * right : value / right;
-      this.safeNumber(value);
-    }
-    return value;
-  }
-
-  parseUnary() {
-    if (this.read("+")) {
-      const value = this.parseUnary();
-      if (typeof value !== "number") throw new MiniPythonError("Знак + перед числом работает только с числами.", this.line);
-      return value;
-    }
-    if (this.read("-")) {
-      const value = this.parseUnary();
-      if (typeof value !== "number") throw new MiniPythonError("Знак − перед числом работает только с числами.", this.line);
-      return -value;
-    }
-    return this.parseAtom();
-  }
-
-  parseAtom() {
-    this.depth++;
-    if (this.depth > 40) throw new MiniPythonError("Очень много скобок. Начни с одной пары: print(4 + 3)", this.line);
-    try {
-      const token = this.current();
-      if (!token) throw new MiniPythonError("Здесь не хватает числа, текста или имени переменной.", this.line);
-      if (token.type === "number" || token.type === "string") {
-        this.position++;
-        this.safeNumber(token.value);
-        return token.value;
-      }
-      if (token.type === "name") {
-        this.position++;
-        if (this.variables.has(token.value)) return this.variables.get(token.value);
-        throw new MiniPythonError("«" + token.value + "» пока не задано. Если это слово, возьми его в кавычки. Если переменная — сначала дай ей значение.", this.line);
-      }
-      if (this.read("(")) {
-        const result = this.parseExpression();
-        this.require(")", "Похоже, не хватает закрывающей скобки ).");
-        return result;
-      }
-      throw new MiniPythonError("Здесь ожидалось число, слово в кавычках или переменная, но встретилось «" + token.value + "».", this.line);
-    } finally {
-      this.depth--;
-    }
-  }
-
-  safeNumber(value) {
-    if (typeof value === "number" && (!Number.isFinite(value) || Math.abs(value) > 1e12)) {
-      throw new MiniPythonError("Число получилось слишком большим для этого тренажёра.", this.line);
-    }
-  }
-}
-
 export function executeMiniPython(source) {
-  if (typeof source !== "string") throw new MiniPythonError("Программа должна быть текстом.");
-  if (source.length > MAX_SOURCE_LENGTH) throw new MiniPythonError("Для первого урока хватит короткой программы — до 4000 символов.");
-  const lines = source.replace(/\r\n?/g, "\n").split("\n");
-  if (lines.length > MAX_LINES) throw new MiniPythonError("Пока тренируем короткие программы: не больше 25 строк.");
-
-  const variables = new Map();
-  const output = [];
-  let statements = 0;
-
-  for (let index = 0; index < lines.length; index++) {
-    const lineNumber = index + 1;
-    const tokens = lex(lines[index], lineNumber);
-    if (tokens.length === 0) continue;
-    const parser = new Parser(tokens, variables, lineNumber);
-    const first = parser.read("name");
-    if (!first) throw new MiniPythonError("Начни с команды print( ) или с имени переменной, например: яблоки = 5", lineNumber);
-
-    if (first.value === "print") {
-      parser.require("(", 'Для print нужны скобки. Например: print("Привет, мир!")');
-      const value = parser.current()?.type === ")" ? "" : parser.parseExpression();
-      parser.require(")", "Кажется, не хватает закрывающей скобки ) после print.");
-      parser.end();
-      output.push(String(value));
-    } else {
-      parser.require("=", "Если хочешь сохранить число, напиши " + first.value + " = 5. Для вывода используй print( ).");
-      const value = parser.parseExpression();
-      parser.end();
-      variables.set(first.value, value);
+  if (typeof source !== 'string') throw new MiniPythonError('Программа должна быть текстом.');
+  if (source.length > 4000) throw new MiniPythonError('Пока не больше 4000 символов.');
+  const lines = source.replace(/\r\n?/g, '\n').split('\n');
+  if (lines.length > 25) throw new MiniPythonError('Пока не больше 25 строк.');
+  const variables = new Map(), printed = []; let statements = 0, operationId = 0;
+  lines.forEach((line, index) => {
+    const fail = message => { throw new MiniPythonError(message, index + 1); };
+    const tokens = []; let i = 0;
+    while (i < line.length) {
+      const c = line[i];
+      if (/\s/u.test(c)) { i++; continue; }
+      if (c === '#') break;
+      if (c === '"' || c === "'") {
+        let text = '', closed = false; i++;
+        while (i < line.length) {
+          const d = line[i++];
+          if (d === c) { closed = true; break; }
+          if (d === '\\') {
+            const next = line[i++];
+            if (next === undefined) fail('После обратного слэша нужен символ.');
+            const escapes = { n:'\n', t:'\t', '\\':'\\', '"':'"', "'":"'" };
+            text += Object.hasOwn(escapes, next) ? escapes[next] : '\\' + next;
+          } else text += d;
+        }
+        if (!closed) fail('Не хватает закрывающей кавычки. Например: print("Привет").');
+        tokens.push({ type:'value', value:text });
+      } else {
+        const number = line.slice(i).match(/^\d+(?:\.\d+)?/u);
+        const name = line.slice(i).match(/^[\p{L}_][\p{L}\p{N}_]*/u);
+        if (number) { tokens.push({ type:'value', value:Number(number[0]) }); i += number[0].length; }
+        else if (name) { tokens.push({ type:'name', value:name[0] }); i += name[0].length; }
+        else if ('+-*/()='.includes(c)) { tokens.push({ type:c, value:c }); i++; }
+        else fail('Символ «' + c + '» пока не поддерживается. Попробуй число, +, - или print().');
+      }
+      if (tokens.length > 200) fail('Команда слишком длинная. Раздели её на короткие строки.');
     }
+    if (!tokens.length) return;
+    let position = 0, depth = 0;
+    const current = () => tokens[position];
+    const read = type => current()?.type === type ? tokens[position++] : null;
+    const requireToken = (type, message) => read(type) || fail(message);
+    const make = (value, operations = new Map()) => {
+      if (typeof value === 'number' && (!Number.isFinite(value) || Math.abs(value) > 1e12)) fail('Число слишком большое для тренажёра.');
+      if (typeof value === 'string' && value.length > 4096) fail('Текст слишком длинный для тренажёра.');
+      return { value, operations };
+    };
+    function atom() {
+      if (++depth > 40) fail('Слишком много вложенных скобок или знаков.');
+      try {
+        const unary = read('+') || read('-');
+        if (unary) { const a = atom(); if (typeof a.value !== 'number') fail('Этот знак нужен перед числом.'); return make(unary.type === '-' ? -a.value : a.value, a.operations); }
+        const value = read('value'); if (value) return make(value.value);
+        const name = read('name');
+        if (name) {
+          if (!variables.has(name.value)) fail('«' + name.value + '» пока не задано. Слово возьми в кавычки, а переменной сначала дай значение.');
+          return variables.get(name.value);
+        }
+        if (read('(')) { const a = expression(); requireToken(')', 'Не хватает закрывающей скобки ).'); return a; }
+        fail('Здесь нужно число, текст в кавычках или имя переменной.');
+      } finally { depth--; }
+    }
+    function combine(left, operator, right) {
+      const a = left.value, b = right.value;
+      let value;
+      if (typeof a === 'string' && typeof b === 'string' && operator === '+') value = a + b;
+      else {
+        if (typeof a !== 'number' || typeof b !== 'number') fail('Здесь смешались текст и число. Для вычисления убери кавычки вокруг чисел.');
+        if (operator === '/' && b === 0) fail('На ноль делить нельзя.');
+        value = operator === '+' ? a + b : operator === '-' ? a - b : operator === '*' ? a * b : a / b;
+      }
+      const operations = new Map([...left.operations, ...right.operations]);
+      operations.set(++operationId, { operator, left:a, right:b, result:value });
+      return make(value, operations);
+    }
+    function product() { let a = atom(); while (['*','/'].includes(current()?.type)) { const op = tokens[position++].type; a = combine(a, op, atom()); } return a; }
+    function expression() { let a = product(); while (['+','-'].includes(current()?.type)) { const op = tokens[position++].type; a = combine(a, op, product()); } return a; }
+    const name = requireToken('name', 'Начни с print( ) или с имени: яблоки = 5.');
+    if (name.value === 'print') {
+      requireToken('(', 'После print нужны скобки: print(5).');
+      const result = current()?.type === ')' ? make('') : expression();
+      requireToken(')', 'Не хватает закрывающей скобки ) после print.');
+      printed.push({ value:result.value, operations:[...result.operations.values()] });
+    } else {
+      requireToken('=', 'Для сохранения значения напиши, например: яблоки = 5.');
+      variables.set(name.value, expression());
+    }
+    if (current()) fail('После команды осталось «' + current().value + '». Проверь запись.');
     statements++;
-  }
-
-  return { output: output.join("\n"), lines: output, statements };
+  });
+  const output = printed.map(p => String(p.value));
+  return { output:output.join('\n'), lines:output, statements, printed };
 }
