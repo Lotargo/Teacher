@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
 import { getPageContext, getSuggestions, getLocalAnswer, guessLocalIntent, buildAiMessages, getAiText, PATHS } from '../src/pix-core.js';
-import { PUTER_CDN, askPuter } from '../src/puter-adapter.js';
+import { PUTER_CDN, askPuter, explainPuterAuthError } from '../src/puter-adapter.js';
 const root = new URL('../', import.meta.url);
 const read = file => readFileSync(new URL(file,root),'utf8');
 
@@ -37,6 +37,16 @@ test('Puter response normalization supports text and content blocks without mark
   assert.equal(answer,'Готово');
   assert.deepEqual(called[1],{normalize:true});
   assert.equal(PUTER_CDN,'https://js.puter.com/v2/');
+});
+
+test('Puter auth failures explain signup issue without leaking backend data',()=>{
+  assert.match(explainPuterAuthError({error:'signup_failed',msg:'Your account could not be created',debug_token:'secret'}),/Puter не смог создать/);
+  assert.match(explainPuterAuthError({error:'popup_blocked'}),/заблокировал окно/);
+  assert.match(explainPuterAuthError({error:'auth_window_closed'}),/Окно Puter закрыто/);
+  assert.match(explainPuterAuthError({error:'unsupported_origin'}),/адрес страницы/);
+  assert.ok(!explainPuterAuthError({msg:'Bearer secret-key'}).includes('secret-key'));
+  assert.ok(read('styles/pix.css').includes('.pix-close::before'));
+  assert.ok(read('src/pix-guide.js').includes('id="pix-login-help"'));
 });
 
 test('Puter is loaded only from the opt-in handler and no secrets are embedded',()=>{
