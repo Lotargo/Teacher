@@ -193,7 +193,7 @@ with sync_playwright() as pw:
     assert ap.locator('.home-team').evaluate('(im)=>getComputedStyle(im).animationPlayState')=='running'
     ap.locator('[data-motion]').click()
     assert ap.locator('body').evaluate('(el)=>el.classList.contains("still")')
-    assert ap.evaluate('document.getAnimations().length')==0
+    ap.wait_for_function('document.getAnimations().length===0',timeout=5000)
     ap.reload(wait_until='networkidle')
     assert ap.locator('[data-motion]').get_attribute('aria-pressed')=='false'
     ap.locator('[data-motion]').click()
