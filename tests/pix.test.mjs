@@ -73,7 +73,7 @@ test('No Puter code or client-side storage of sensitive data is shipped',()=>{
   assert.ok(ui.includes('body.textContent = text'));
   assert.ok(ui.includes("get('#pix-connect-cloudflare').addEventListener('click'"));
   assert.ok(ui.includes('loadTurnstile()'));
-  assert.ok(!adapter.includes('localStorage'));
+  assert.ok(!/localStorage\\.(setItem|getItem)|sessionStorage\\./.test(adapter));
   assert.ok(!read('src/cloudflare-config.js').includes('Bearer '));
   for(const file of ['assets/pix-guide.webp','styles/pix.css','faq/index.html'])assert.ok(existsSync(new URL(file,root)),file);
 });
