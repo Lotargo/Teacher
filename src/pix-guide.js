@@ -306,7 +306,7 @@ get('#pix-connect-cloudflare').addEventListener('click', async event => {
     } else {
       const key = get('#pix-owner-key');
       const token = key.value.trim();
-      if (!token) { setStatus('Введи личный PILOT_TOKEN для тестирования.'); key.focus(); return; }
+      if (!token) { get('#pix-owner-entry').open = true; setStatus('Введи личный PILOT_TOKEN для тестирования.'); key.focus(); return; }
       ownerToken = token;
       key.value = '';
       accessMode = 'owner';

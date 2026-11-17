@@ -75,8 +75,8 @@ try:
   assert 'Cloudflare' in page.locator('#pix-ai-consent').inner_text()
   assert not requests
   page.locator('#pix-connect-cloudflare').click()
-  assert 'Введи личный' in page.locator('#pix-connect-status').inner_text()
-  page.locator('#pix-owner-entry summary').click()
+  page.wait_for_function("() => document.querySelector('#pix-connect-status')?.textContent.includes('Введи личный')")
+  assert page.locator('#pix-owner-entry').get_attribute('open') is not None
   page.locator('#pix-owner-key').fill('test-pilot-secret')
   page.locator('#pix-connect-cloudflare').click()
   page.locator('#pix-chat-question').wait_for(state='visible')
