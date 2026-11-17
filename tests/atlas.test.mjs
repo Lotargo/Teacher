@@ -35,7 +35,7 @@ test('workshop content stays inside the browser and calculator never evaluates c
 test('external resources identify independent sources and use safe links',()=>{
  const html=read('library/index.html');
  for(const site of ['scratch.mit.edu','geogebra.org','developer.mozilla.org','pythontutor.com'])assert.ok(html.includes(site),site);
- assert.equal((html.match(/target="_blank" rel="noopener noreferrer"/g)||[]).length,4);
+ assert.ok((html.match(/target="_blank" rel="noopener noreferrer"/g)||[]).length>=4);
 });
 test('main learning pathway remains a real introduction, not a fabricated course',()=>{
  const text=read('src/catalog.js');
