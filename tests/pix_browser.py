@@ -18,7 +18,7 @@ class Handler(SimpleHTTPRequestHandler):
 
 SDK="""window.__signInCalls = 0;
 window.puter = {
- auth: {isSignedIn: () => false, signIn: () => {window.__signInCalls++;return Promise.resolve({username:'test'});}},
+ auth: {isSignedIn: () => false, signIn: () => {window.__signInCalls++;return window.__failSignup ? Promise.reject({error:'signup_failed',msg:'Your account could not be created'}) : Promise.resolve({username:'test'});}},
  ai: {chat: async (messages, options) => {
   window.__puterCall = {messages,options};
   return {message:{content:'<img src=x onerror=alert(1)> Ответ Пикс: проверь решение.'}};
@@ -64,9 +64,15 @@ try:
   page.locator('#pix-load-puter').click()
   page.locator('#pix-login').wait_for(state='visible')
   assert len(puter_requests)==1
+  page.evaluate('window.__failSignup=true')
+  page.locator('#pix-login').click()
+  page.locator('#pix-login-help').wait_for(state='visible')
+  assert 'Puter не смог создать' in page.locator('#pix-connect-status').inner_text()
+  assert page.locator('#pix-login').is_enabled()
+  page.evaluate('window.__failSignup=false')
   page.locator('#pix-login').click()
   page.locator('#pix-chat-question').wait_for(state='visible')
-  assert page.evaluate('window.__signInCalls')==1
+  assert page.evaluate('window.__signInCalls')==2
   page.locator('#pix-chat-question').fill('Объясни на бытовом примере')
   page.locator('#pix-chat-question').press('Enter')
   page.locator('.pix-bubble.is-pix').wait_for()
