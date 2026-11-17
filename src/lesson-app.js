@@ -5,7 +5,7 @@ const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAl
 const KEY = 'aga-connected-story-v2', MOTION = 'aga-motion';
 const esc = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let state = { done:[], drafts:{} }, activeCode = codeTasks[0], sandbox = false, toastTimer;
-try { const data = JSON.parse(localStorage.getItem(KEY)); if (data && typeof data === 'object') state = { done:Array.isArray(data.done) ? data.done.filter(id => taskIds.includes(id)) : [], drafts:typeof data.drafts === 'object' && data.drafts ? data.drafts : {} }; } catch { /* Storage is optional. */ }
+try { const data = JSON.parse(localStorage.getItem(KEY)); if (data && typeof data === 'object') state = { done:Array.isArray(data.done) ? [...new Set(data.done.filter(id => taskIds.includes(id)))] : [], drafts:typeof data.drafts === 'object' && data.drafts ? data.drafts : {} }; } catch { /* Storage is optional. */ }
 const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch { /* The lesson still works. */ } };
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 let motionWanted = true;
@@ -55,7 +55,7 @@ function mountStory(task, host) {
   const section = document.createElement('section'); section.id = task.section; section.className = 'chapter reveal'; section.setAttribute('aria-labelledby', task.id + '-title');
   const visual = task.visual.map((v,i) => '<div class="equation-cell ' + (i % 2 ? 'operator' : '') + '"><small>' + esc(task.labels[i]) + '</small><b>' + esc(v) + '</b></div>').join('');
   const input = task.choices ? '<div class="choices" role="group" aria-label="Что обозначает x?">' + task.choices.map((v,i) => '<button type="button" data-choice="' + i + '">' + esc(v) + '</button>').join('') + '</div>' : (task.needsOperation ? '<fieldset class="operation"><legend>Какое действие вернёт нас к началу?</legend><label><input type="radio" name="transfer-operation" value="+"> Прибавить ещё</label><label><input type="radio" name="transfer-operation" value="-"> Убрать добавленное</label></fieldset>' : '') + '<form class="answer-form"><label for="answer-' + task.id + '">Твой ответ</label><div class="counter"><button type="button" data-delta="-1" aria-label="Уменьшить ответ на один">−</button><input id="answer-' + task.id + '" type="number" min="0" max="20" step="1" placeholder="?" inputmode="numeric" autocomplete="off" aria-describedby="feedback-' + task.id + '"><button type="button" data-delta="1" aria-label="Увеличить ответ на один">+</button></div><button type="submit" class="button coral">Проверить мысль ↗</button></form>';
-  section.innerHTML = '<div class="chapter-intro"><span class="kicker">' + esc(task.kicker) + '</span><h2 id="' + task.id + '-title">' + esc(task.title) + '</h2><p>' + esc(task.bridge) + '</p></div><div class="exercise-layout"><div class="exercise-card"><p class="purpose"><span aria-hidden="true">✳</span> Зачем: ' + esc(task.purpose) + '</p><h3>' + esc(task.question) + '</h3><div class="visual-equation" aria-label="' + esc(task.visual.join(' ')) + '">' + visual + '</div>' + (task.counts ? '<div class="apple-groups" aria-label="Пять яблок и три яблока"><span aria-hidden="true">🍎🍎🍎🍎🍎</span><b aria-hidden="true">+</b><span aria-hidden="true">🍎🍎🍎</span></div>' : '') + input + '<p class="feedback" id="feedback-' + task.id + '" role="status">Можно попробовать, проверить и изменить ответ.</p></div><aside class="hint-card"><img src="./assets/pix.webp" width="130" height="130" alt="" loading="lazy" class="bobbing"><div class="hint-host"></div></aside></div><div class="result" hidden></div>';
+  section.innerHTML = '<div class="chapter-intro"><span class="kicker">' + esc(task.kicker) + '</span><h2 id="' + task.id + '-title">' + esc(task.title) + '</h2><p>' + esc(task.bridge) + '</p></div><div class="exercise-layout"><div class="exercise-card"><p class="purpose"><span aria-hidden="true">✳</span> Зачем: ' + esc(task.purpose) + '</p><h3>' + esc(task.question) + '</h3><div class="visual-equation" aria-label="' + esc(task.visual.join(' ')) + '">' + visual + '</div>' + (task.counts ? '<div class="apple-groups" aria-label="Пять яблок и три яблока"><span aria-hidden="true">🍎🍎🍎🍎🍎</span><b aria-hidden="true">+</b><span aria-hidden="true">🍎🍎🍎</span></div>' : '') + input + '<p class="feedback" id="feedback-' + task.id + '" role="status">Можно попробовать, проверить и изменить ответ.</p></div><aside class="hint-card"><img src="../../assets/pix.webp" width="130" height="130" alt="" loading="lazy" class="bobbing"><div class="hint-host"></div></aside></div><div class="result" hidden></div>';
   host.append(section); attachHints(section.querySelector('.hint-host'), task);
   const feedback = section.querySelector('.feedback'), result = section.querySelector('.result');
   function reveal() { result.innerHTML = resultHTML(task, '<a class="next-link" href="' + task.next + '">' + esc(task.nextText) + ' <span aria-hidden="true">→</span></a>'); result.hidden = false; }
@@ -119,7 +119,8 @@ $('#try-variable').addEventListener('click', () => {
   $$('[data-code]').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-pressed','false'); }); $('#code-hints').replaceChildren(); dirtyCode(); editor.focus();
 });
 $('#reset-progress').addEventListener('click', () => { if (!confirm('Сбросить отметки и черновики этого урока?')) return; state = { done:[], drafts:{} }; persist(); location.reload(); });
-selectCode('show'); updateProgress();
+const resumeCode = location.hash === '#code' ? codeTasks.find(t => !state.done.includes(t.id))?.id : null;
+selectCode(resumeCode || 'show'); updateProgress();
 // Content remains visible without JS or observer support. Only animate on entry.
 if ('IntersectionObserver' in window) {
   const reveal = new IntersectionObserver(entries => entries.forEach(entry => {
@@ -130,6 +131,6 @@ if ('IntersectionObserver' in window) {
     }
   }), { threshold:0, rootMargin:'0px 0px -30px 0px' });
   $$('.reveal, .hero, .sidebar-note').forEach(node => reveal.observe(node));
-  const navigation = new IntersectionObserver(entries => { const entry = entries.find(e => e.isIntersecting); if (!entry) return; $$('nav a').forEach(a => { if (a.hash === '#' + entry.target.id) a.setAttribute('aria-current','location'); else a.removeAttribute('aria-current'); }); }, { rootMargin:'-5% 0px -75% 0px', threshold:0 });
+  const navigation = new IntersectionObserver(entries => { const entry = entries.find(e => e.isIntersecting); if (!entry) return; $$('.lesson-nav a').forEach(a => { if (a.hash === '#' + entry.target.id) a.setAttribute('aria-current','location'); else a.removeAttribute('aria-current'); }); }, { rootMargin:'-5% 0px -75% 0px', threshold:0 });
   ['intro','math','backward','language','code','transfer'].forEach(id => navigation.observe($('#' + id)));
 }

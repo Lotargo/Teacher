@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f7f5ee">
+<meta name="description" content="Одна понятная история: от яблок и бытовых примеров до первого вычисления в коде. Математика с нуля для детей и взрослых.">
+<title>От догадки к проверке · Знакомство — АГА!</title>
+<link rel="icon" href="../../assets/mark.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../styles/lesson.css"><link rel="stylesheet" href="../../styles/portal.css"><script type="module" src="../../src/lesson-app.js"></script>
+</head>
+<body class="lesson-page">
+<a class="skip" href="#main">Перейти к уроку</a>
+<div class="shell">
+<aside class="sidebar">
+<a href="../../" class="brand" aria-label="АГА! — главная"><img src="../../assets/mark.svg" width="50" height="50" alt=""><span><b>АГА!</b><small>лаборатория ясности</small></span></a>
+<a class="lesson-back" href="../../courses/start/">← К выбору занятия</a><p class="nav-label">Одна история, шаг за шагом</p>
+<nav class="lesson-nav" aria-label="Маршрут урока">
+<a href="#intro" aria-current="location"><span aria-hidden="true">✳</span>Начнём с тебя</a>
+<a href="#math"><span aria-hidden="true">+</span>Что изменилось?</a>
+<a href="#backward"><span aria-hidden="true">↶</span>А сколько было?</a>
+<a href="#language"><span aria-hidden="true">x</span>Дадим неизвестному имя</a>
+<a href="#code"><span aria-hidden="true">&gt;_</span>Та же мысль в коде</a>
+<a href="#transfer"><span aria-hidden="true">↗</span>Теперь без яблок</a>
+</nav>
+<div class="sidebar-note"><img src="../../assets/pix.webp" width="112" height="112" alt="" class="bobbing"><p>Не «вспомни правило»,<br>а «давай разберёмся».</p><small>Пикс на твоей стороне</small></div>
+<a class="source" href="https://github.com/Lotargo/Teacher-" target="_blank" rel="noopener noreferrer">Открытый проект ↗</a>
+</aside>
+<main id="main"><div class="lesson-crumbs" aria-label="Путь к занятию"><a href="../../">Главная</a><span aria-hidden="true">/</span><a href="../../courses/">Курсы и уроки</a><span aria-hidden="true">/</span><a href="../../courses/start/">Знакомство</a><span aria-hidden="true">/</span><span>От догадки к проверке</span></div>
+<header class="topbar"><span>Вводное занятие · Знакомство</span><div class="top-actions"><button id="motion-toggle" type="button" aria-pressed="true">Анимация: вкл.</button><span id="progress-label" class="progress-label">Начнём?</span></div></header>
+<section class="hero" id="intro">
+<div class="hero-copy"><span class="eyebrow">Ничего знать заранее не нужно</span><h1>От догадки<br>к <mark>проверке.</mark></h1><p>Разберём одну историю с яблоками. Сначала поймём её на пальцах, потом запишем числами и поручим компьютеру проверить расчёт.</p><a class="button dark" href="#math">Открыть коробку <span aria-hidden="true">↗</span></a><p class="hand hero-note">Столько времени, сколько тебе нужно</p></div>
+<div class="hero-stage" aria-label="Пять яблок плюс три яблока — восемь">
+<div class="stage-orbit"></div><div class="blackboard"><span class="board-dots" aria-hidden="true">● ● ●</span><span class="board-caption hand">Всё начинается с вопроса</span><strong>5 + 3 = 8</strong><span class="board-underline"></span><small>было · добавили · стало</small></div>
+<img class="hero-pix bobbing" src="../../assets/pix.webp" width="320" height="320" alt="Пикс, оранжевый персонаж с целым тёмным контуром, радостно поднимает руки">
+<span class="spark spark-one" aria-hidden="true">✦</span><span class="spark spark-two" aria-hidden="true">✧</span><div class="floating-note hand">А почему<br>именно восемь?</div>
+</div>
+</section>
+<div class="route-note reveal"><span class="hand">Сначала увидим.</span><span aria-hidden="true">→</span><span class="hand">Потом объясним.</span><span aria-hidden="true">→</span><span class="hand">И проверим в деле.</span></div>
+<noscript><p class="notice">Для заданий нужен JavaScript. Включи его в браузере. Идея урока: 5 + 3 = 8; чтобы узнать, сколько было, убери добавленное: 8 − 3 = 5. Команда print(8 - 3) показывает этот же результат.</p></noscript>
+<div id="story-exercises"></div>
+<section class="chapter reveal" id="code" aria-labelledby="code-title">
+<div class="chapter-intro"><span class="kicker">Не новая задача, а новый способ записи</span><h2 id="code-title">Коробка переезжает в код</h2><p>Мы уже умеем рассуждать про 5, 3 и 8. Теперь объясним компьютеру, что показать и что посчитать. Он не угадывает намерение: выполняет записанную команду.</p></div>
+<div class="code-layout"><div class="code-main">
+<div class="code-tabs" role="group" aria-label="Практика кода"><button type="button" data-code="show">Показать ответ</button><button type="button" data-code="add-code">Посчитать сумму</button><button type="button" data-code="undo-code">Найти, сколько было</button></div>
+<div class="code-task"><span class="hand" id="code-purpose"></span><h3 id="code-task-title"></h3><p id="code-task-text"></p></div>
+<div class="editor"><div class="editor-heading"><span>Моя первая программа</span><span class="editor-badge">Учебный тренажёр</span></div><label for="code-editor" class="sr-only">Твой код</label><textarea id="code-editor" spellcheck="false" autocapitalize="off" autocomplete="off" aria-describedby="editor-help" maxlength="4000" rows="4">print(5)</textarea><div class="editor-actions"><button id="run-code" class="button lime" type="button">▶ Запустить и проверить</button><button id="restore-code" class="text-button" type="button">Вернуть заготовку</button></div><div class="terminal"><span>Что показал компьютер</span><pre id="code-output" aria-live="polite">Результат появится здесь.</pre></div></div>
+<p class="feedback" id="code-feedback" role="status"></p><div id="code-hints" class="hint-host"></div><div id="code-result" class="result" hidden></div>
+</div><aside class="code-notes"><div class="paper-note"><span class="hand">Перевод с компьютерного</span><p><code>print</code> читается «принт» и означает «покажи».</p><p><code>( )</code> отделяют то, что нужно показать.</p><p><code>+</code> складывает, <code>-</code> вычитает.</p><p><code>" "</code> превращают содержимое в текст: <code>print("5 + 3")</code> покажет запись <b>5 + 3</b>, а не посчитает её.</p></div><p id="editor-help" class="editor-help">Пиши сам или вставляй готовые кусочки кнопками ниже. Ctrl / ⌘ + Enter запускает код. Tab переводит фокус, как обычно.</p><div id="code-tokens" class="tokens" role="group" aria-label="Вставить в код"><button type="button" data-token="print()">print( )</button><button type="button" data-token="5">5</button><button type="button" data-token="3">3</button><button type="button" data-token="8">8</button><button type="button" data-token=" + ">+</button><button type="button" data-token=" - ">−</button></div><p class="scope-note">Это ограниченный тренажёр, не полный Python. Нет доступа к файлам, сети или оборудованию.</p></aside></div>
+<details class="optional-note"><summary>А зачем вообще нужны имена в коде?</summary><p>Это необязательный мостик к следующему уроку. Вместо числа можно использовать понятное имя.</p><pre>яблоки = 5
+print(яблоки + 3)</pre><p>Первая строка сохраняет число 5 под именем «яблоки». Вторая прибавляет 3 и показывает 8. В коде <code>=</code> здесь означает <b>сохранить значение</b>, а не «найти неизвестное». В уравнении <code>x + 3 = 8</code> равенство сообщает, что обе стороны имеют одинаковое значение.</p><button type="button" id="try-variable" class="button secondary">Попробовать в редакторе</button></details>
+</section>
+<div id="transfer-exercise"></div>
+<section class="finish reveal" id="finish"><img src="../../assets/pix.webp" width="100" height="100" alt=""><div><span class="hand">Вот что остаётся с тобой</span><h2 id="finish-title">Не ответ «пять», а способ думать.</h2><p>Что известно? Что изменилось? Что я ищу? Как проверю ответ? Эти вопросы работают и с коробкой, и с программой.</p><div id="progress-bar" class="progress-track" role="progressbar" aria-label="Прогресс урока" aria-valuemin="0" aria-valuemax="7" aria-valuenow="0"><span id="progress-fill"></span></div><p id="finish-progress">Можно проходить частями.</p><div class="lesson-exit"><a class="button dark" href="../../courses/start/">К выбору занятия ↗</a><a class="button secondary" href="../../courses/">Все курсы и уроки</a></div><button type="button" id="reset-progress" class="text-button">Начать заново</button></div></section>
+<section class="manifesto reveal"><span class="hand">Умение мыслить и знание записи — не одно и то же.</span><h2>Для любопытных.<br>Не только для детей.</h2><p>Для тех, кто рассуждает, задаёт вопросы и создаёт проекты с ИИ, но пока не умеет читать код и проверять вычисления самостоятельно. Здесь не обещают профессию за месяц. Здесь можно спокойно освоить точную запись своих идей.</p></section>
+<footer><b>АГА!</b><span>Без аккаунта и ИИ-агента. Прогресс хранится в этом браузере.</span></footer>
+</main></div><div id="toast" class="toast" role="status" hidden></div>
+</body></html>

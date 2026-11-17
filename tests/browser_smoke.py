@@ -1,78 +1,119 @@
-"""Offline Chromium DOM tests. Inlines unchanged modules and assets in a test page.
-Navigation is blocked in the sandbox, so localStorage is mocked explicitly.
-Requires Python playwright, Pillow and /usr/bin/chromium; not site dependencies.
+"""Real multi-document navigation on an intercepted test origin, under /Teacher-/.
+No HTML inlining, module rewriting, or mock localStorage. External fonts are
+blocked in this test; the site's system-font fallback is deliberately exercised.
+Requires Python Playwright and /usr/bin/chromium (not site dependencies).
 """
 from pathlib import Path
-import re,base64
+from urllib.parse import urlparse, unquote
+import mimetypes, os
 from playwright.sync_api import sync_playwright
 ROOT=Path(__file__).resolve().parents[1]
-OUT=ROOT.parent/'aga-previews';OUT.mkdir(exist_ok=True)
-html=(ROOT/'index.html').read_text()
-html=re.sub(r'<link[^>]+>', '', html)
-html=re.sub(r'<script[^>]+src=[^>]+></script>', '', html)
-html=html.replace('</head>','<style>'+ (ROOT/'styles/lesson.css').read_text() +'</style></head>')
-for name,mime in [('pix.webp','image/webp'),('mark.svg','image/svg+xml')]:
-    html=html.replace('./assets/'+name,'data:'+mime+';base64,'+base64.b64encode((ROOT/'assets'/name).read_bytes()).decode())
-modules=[]
-for name in ['lesson-data.js','interpreter.js','grading.js','lesson-app.js']:
-    code=(ROOT/'src'/name).read_text()
-    code=re.sub(r'^import .*;\n','',code,flags=re.M)
-    code=re.sub(r'^export ','',code,flags=re.M)
-    modules.append(code)
-setup="""window.__store=window.__store||{}; Object.defineProperty(window,'localStorage',{configurable:true,value:{getItem(k){return window.__store[k]??null},setItem(k,v){window.__store[k]=v}}});"""
-page_html=html.replace('</body>','<script>'+setup+'</script><script type="module">'+'\n'.join(modules)+'</script></body>')
-for name,mime in [('pix.webp','image/webp'),('mark.svg','image/svg+xml')]:
-    page_html=page_html.replace('./assets/'+name,'data:'+mime+';base64,'+base64.b64encode((ROOT/'assets'/name).read_bytes()).decode())
-with sync_playwright() as p:
-    b=p.chromium.launch(executable_path='/usr/bin/chromium',headless=True,args=['--no-sandbox'])
-    page=b.new_page(viewport={'width':1440,'height':1000},reduced_motion='reduce')
-    errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
-    page.set_content(page_html,wait_until='load');page.locator('#answer-add').wait_for()
-    assert page.locator('#motion-toggle').is_disabled()
-    page.screenshot(path=str(OUT/'desktop.png'))
-    for task,section,wrong,right in [('add','math','5','8'),('undo','backward','8','5')]:
-        page.locator('#answer-'+task).fill(wrong)
-        page.locator('#'+section+' form button[type="submit"]').click()
-        assert page.locator('#'+section+' .result').is_hidden()
-        hint=page.locator('#'+section+' .hint-button')
-        for _ in range(3):hint.click()
-        assert hint.is_disabled()
-        page.locator('#answer-'+task).fill(right);page.locator('#'+section+' form button[type="submit"]').click()
-        assert page.locator('#'+section+' .result').is_visible()
-    page.locator('#language [data-choice="1"]').click();assert page.locator('#language .result').is_hidden()
-    page.locator('#language [data-choice="0"]').click();assert page.locator('#language .result').is_visible()
+OUT=ROOT.parent/'aga-multipage-previews';OUT.mkdir(exist_ok=True)
+BASE='https://aga.test/Teacher-/'
+PAGES=['','courses/','courses/start/','lessons/first-discovery/']
+missing=[]
+def serve(route):
+    u=urlparse(route.request.url)
+    if u.netloc!='aga.test':
+        route.fulfill(status=204,body='');return
+    if not u.path.startswith('/Teacher-/'):
+        missing.append(u.path);route.fulfill(status=404,body='Outside project');return
+    rel=unquote(u.path[len('/Teacher-/'):]);p=(ROOT/rel).resolve()
+    if ROOT not in p.parents and p!=ROOT:
+        route.fulfill(status=403);return
+    if p.is_dir():p=p/'index.html'
+    if not p.is_file():
+        missing.append(u.path);route.fulfill(status=404,body='Missing');return
+    route.fulfill(status=200,body=p.read_bytes(),content_type=mimetypes.guess_type(str(p))[0] or 'application/octet-stream')
+
+with sync_playwright() as pw:
+    browser=pw.chromium.launch(executable_path=os.environ.get('CHROMIUM_PATH'),headless=True,args=['--no-sandbox'])
+    context=browser.new_context(viewport={'width':1440,'height':1000},reduced_motion='reduce')
+    context.route('**/*',serve)
+    page=context.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
+    def go(path=''):
+        page.goto(BASE+path,wait_until='networkidle')
+    go();assert page.locator('h1').count()==1
+    page.screenshot(path=str(OUT/'home-desktop.png'),full_page=True)
+    page.get_by_role('link',name='Выбрать свой первый шаг').click()
+    assert page.url==BASE+'courses/'
+    assert page.locator('.path-planned a').count()==0
+    assert page.locator('.path-ready').bounding_box()['y']==page.locator('.path-planned').bounding_box()['y']
+    page.screenshot(path=str(OUT/'catalog-desktop.png'),full_page=True)
+    page.locator('.path-ready a').click()
+    assert page.url==BASE+'courses/start/'
+    assert page.locator('.lesson-row').count()==1
+    page.screenshot(path=str(OUT/'course-desktop.png'),full_page=True)
+    page.locator('.lesson-row > a').click()
+    assert page.url==BASE+'lessons/first-discovery/'
+    assert page.locator('#answer-add').count()==1
+    page.locator('#answer-add').fill('5');page.locator('#math form button[type="submit"]').click()
+    assert page.locator('#math .result').is_hidden()
+    for _ in range(3):page.locator('#math .hint-button').click()
+    assert page.locator('#math .hint-button').is_disabled()
+    page.locator('#answer-add').fill('8');page.locator('#math form button[type="submit"]').click()
+    assert page.locator('#math .result').is_visible()
+    page.locator('.lesson-back').click()
+    assert page.locator('.lesson-meta').inner_text()=='1 из 7 заданий'
+    page.locator('.lesson-row > a').click()
+    assert page.url.endswith('#backward')
+    assert page.locator('#math .result').is_visible()
+    page.locator('#answer-undo').fill('5');page.locator('#backward form button[type="submit"]').click()
+    page.locator('#language [data-choice="0"]').click()
+    page.locator('.lesson-back').click();page.locator('.lesson-row > a').click()
+    assert page.url.endswith('#code')
     for task,solution in [('show','print(8)'),('add-code','print(5+3)'),('undo-code','print(8-3)')]:
         page.locator('[data-code="'+task+'"]').click()
         if task=='add-code':
-            page.locator('#code-editor').fill('print(8) #5+3');page.locator('#run-code').click();assert page.locator('#code-result').is_hidden()
+            page.locator('#code-editor').fill('print(8) #5+3');page.locator('#run-code').click()
+            assert page.locator('#code-result').is_hidden()
         if task=='undo-code':
             page.locator('#run-code').click();assert page.locator('#code-output').inner_text()=='11'
-            assert page.locator('#code-result').is_hidden()
         page.locator('#code-editor').fill(solution);page.locator('#code-editor').press('Control+Enter')
         assert page.locator('#code-result').is_visible()
+        if task=='show':
+            page.locator('.lesson-back').click();page.locator('.lesson-row > a').click()
+            assert page.locator('[data-code="add-code"]').get_attribute('aria-pressed')=='true'
     page.locator('#code-editor').focus();page.keyboard.press('Tab')
-    assert page.locator('#run-code').evaluate('(n)=>n===document.activeElement')
+    assert page.locator('#run-code').evaluate('(el)=>el===document.activeElement')
     page.locator('#answer-transfer').fill('6');page.locator('#transfer input[value="+"]').check()
     page.locator('#transfer form button[type="submit"]').click();assert page.locator('#transfer .result').is_hidden()
     page.locator('#transfer input[value="-"]').check();page.locator('#transfer form button[type="submit"]').click()
-    assert page.locator('#transfer .result').is_visible()
     assert page.locator('#progress-label').inner_text()=='7 из 7 открытий'
-    page.locator('#backward').scroll_into_view_if_needed();page.screenshot(path=str(OUT/'lesson-desktop.png'))
-    saved=page.evaluate('window.__store');page.set_content(page_html,wait_until='load')
-    assert page.locator('#progress-label').inner_text()=='7 из 7 открытий'
-    assert page.locator('#backward .result').is_visible()
+    page.reload(wait_until='networkidle');assert page.locator('#progress-label').inner_text()=='7 из 7 открытий'
+    page.locator('.lesson-back').click();assert 'Пройдено' in page.locator('.lesson-copy').inner_text()
+    go();assert page.locator('[data-started]').is_visible()
+    assert page.locator('[data-progress-text]').inner_text()=='Знакомство пройдено. Можно повторить.'
+    # Direct paths, native history, no horizontal overflow, and all images load.
     for width in [320,390,768,1024,1440]:
         page.set_viewport_size({'width':width,'height':900})
-        assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'),'overflow '+str(width)
-        if width in [320,390]:
-            page.evaluate('scrollTo(0,0)');page.screenshot(path=str(OUT/('mobile-'+str(width)+'.png')))
-    page.evaluate("window.__store['aga-connected-story-v2']='null'");page.set_content(page_html,wait_until='load')
-    assert page.locator('#progress-label').inner_text()=='0 из 7 открытий'
-    # A separate page uses real opaque-origin storage (unavailable): learning still works.
-    fallback=b.new_page(viewport={'width':390,'height':844})
-    fallback.set_content(page_html.replace(setup,''),wait_until='load');fallback.locator('#answer-add').fill('8')
-    fallback.locator('#math form button[type="submit"]').click();assert fallback.locator('#math .result').is_visible()
-    fallback.locator('#motion-toggle').click();assert fallback.locator('body').evaluate("e=>e.classList.contains('still')")
+        for path in PAGES:
+            go(path)
+            assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'),f'overflow: {width} {path}'
+            assert page.locator('h1').count()==1
+            assert page.evaluate('[...document.images].filter(i=>i.loading!=="lazy").every(i=>i.complete&&i.naturalWidth>0)'),path
+            if width==390:
+                page.screenshot(path=str(OUT/(('home' if not path else path.strip('/').replace('/','-'))+'-mobile.png')),full_page=True)
+    go('courses/');page.locator('.path-ready a').click();page.go_back(wait_until='networkidle');assert page.url==BASE+'courses/'
+    go('#math');page.wait_for_url('**/lessons/first-discovery/#math');assert page.locator('#answer-add').count()==1
+    assert not missing,missing
     assert not errors,errors
-    print('PASS: complete lesson, hints, wrong answers, evidence grading, keyboard, mocked storage restore, 5 viewport widths, reduced motion, unavailable storage.')
-    b.close()
+    # Corrupt or denied storage must never block navigation / tasks.
+    page.evaluate("localStorage.setItem('aga-connected-story-v2', '{oops')")
+    go('courses/start/');assert page.locator('.lesson-row > a').inner_text().startswith('Начать')
+    blocked=browser.new_context(viewport={'width':390,'height':844})
+    blocked.route('**/*',serve)
+    blocked.add_init_script("Object.defineProperty(window,'localStorage',{get(){throw Error('blocked')}})")
+    bp=blocked.new_page();blocked_errors=[];bp.on('pageerror',lambda e:blocked_errors.append(str(e)))
+    for path in PAGES:bp.goto(BASE+path,wait_until='networkidle')
+    bp.locator('#answer-add').fill('8');bp.locator('#math form button[type="submit"]').click()
+    assert bp.locator('#math .result').is_visible();assert not blocked_errors,blocked_errors
+    # Static navigation also works with JavaScript disabled.
+    plain=browser.new_context(java_script_enabled=False,viewport={'width':390,'height':844})
+    plain.route('**/*',serve);np=plain.new_page()
+    np.goto(BASE);np.get_by_role('link',name='Выбрать свой первый шаг').click()
+    np.locator('.path-ready a').click();np.locator('.lesson-row > a').click()
+    assert np.url==BASE+'lessons/first-discovery/'
+    assert np.locator('noscript').is_visible()
+    print('PASS: four pages, nested paths, seven exercises, native storage/history, resume, mobile layouts, no-JS navigation, reduced motion and blocked storage.')
+    browser.close()

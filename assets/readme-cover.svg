@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 380" role="img" aria-labelledby="title desc">
+<title id="title">АГА! — лаборатория ясности</title><desc id="desc">От кажется к могу проверить. Математика и код начинаются со смысла.</desc>
+<rect width="1200" height="380" rx="32" fill="#dfefe3"/><circle cx="1080" cy="160" r="245" fill="#cce4d7"/>
+<g font-family="Trebuchet MS,Arial,sans-serif" fill="#283642"><text x="65" y="109" font-size="66" font-weight="900">АГА!</text><text x="67" y="147" font-size="21" letter-spacing="2">ЛАБОРАТОРИЯ ЯСНОСТИ</text><path d="M63 240h571" stroke="#d9ef79" stroke-width="21"/><text x="65" y="236" font-size="38" font-weight="700">От «кажется» к «могу проверить».</text><text x="67" y="294" font-size="22">Математика и код. Сначала — смысл.</text></g>
+<g transform="translate(790 67) rotate(-6 160 120)"><rect width="330" height="232" rx="22" fill="#2c414d" stroke="#536e76" stroke-width="5"/><circle cx="29" cy="27" r="6" fill="#ffa193"/><circle cx="49" cy="27" r="6" fill="#f1cb86"/><circle cx="69" cy="27" r="6" fill="#badbbb"/><text x="29" y="130" fill="#fff8e5" font-family="Trebuchet MS,Arial,sans-serif" font-size="57" font-weight="700">5 + 3 = 8</text><path d="M29 153q110 9 245 0" fill="none" stroke="#d9ef79" stroke-width="7" stroke-linecap="round"/><text x="29" y="198" fill="#d8e8da" font-family="Arial,sans-serif" font-size="18">представить · записать · проверить</text></g>
+<path d="m1120 29 10 25 26 7-25 12-7 27-13-25-26-8 25-12z" fill="#d9ef79" stroke="#283642" stroke-width="3"/>
+</svg>
