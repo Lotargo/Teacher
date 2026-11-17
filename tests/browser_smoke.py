@@ -182,6 +182,7 @@ with sync_playwright() as pw:
     blocked.add_init_script("Object.defineProperty(window,'localStorage',{get(){throw Error('blocked')}})")
     bp=blocked.new_page();blocked_errors=[];bp.on('pageerror',lambda e:blocked_errors.append(str(e)))
     for path in PAGES:bp.goto(BASE+path,wait_until='networkidle')
+    bp.goto(BASE+'lessons/first-discovery/',wait_until='networkidle')
     bp.locator('#answer-add').fill('8');bp.locator('#math form button[type="submit"]').click()
     assert bp.locator('#math .result').is_visible();assert not blocked_errors,blocked_errors
     # Motion remains optional and is paused off screen; no observer is required to read.
