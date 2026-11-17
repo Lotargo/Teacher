@@ -39,3 +39,9 @@ test('shared mobile control and motion preference are loaded by both entrypoints
   assert.match(js,/prefers-reduced-motion/); assert.match(js,/aga-motion/);
   assert.match(js,/pageshow/); assert.match(js,/storage/);
 });
+
+test('lesson footer stays in the same shell as the sticky sidebar', () => {
+  const html = readFileSync(new URL('lessons/first-discovery/index.html', root), 'utf8');
+  assert.match(html, /<\/main>\s*<!-- site-footer:start -->/);
+  assert.match(html, /<!-- site-footer:end -->\s*<\/div>/);
+});

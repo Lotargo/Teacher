@@ -5,6 +5,7 @@ It does NOT substitute for browser_smoke.py's real-document navigation checks.
 from pathlib import Path
 import re,base64
 from playwright.sync_api import sync_playwright
+from lesson_layout import assert_lesson_layout
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT.parent/'aga-multipage-previews';OUT.mkdir(exist_ok=True)
 PAGES=['index.html','courses/index.html','courses/start/index.html','lessons/first-discovery/index.html']
@@ -50,6 +51,8 @@ with sync_playwright() as pw:
             if width>=768 and path=='courses/index.html':
                 assert page.locator('.path-ready').bounding_box()['y']==page.locator('.path-planned').bounding_box()['y']
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'),(width,path)
+            if path.startswith('lessons/'):
+                assert_lesson_layout(page)
             if width in [390,1440]:
                 for image in page.locator('img[loading="lazy"]').all():
                     image.scroll_into_view_if_needed()
@@ -57,6 +60,10 @@ with sync_playwright() as pw:
                 page.evaluate('scrollTo(0,0)')
                 name=path.replace('/index.html','').replace('index.html','home').replace('/','-')
                 page.screenshot(path=str(OUT/f'{name}-{width}.png'),full_page=not path.startswith('lessons/'))
+    for width,height in [(801,700),(1024,560),(1920,1080),(2200,1000)]:
+        page.set_viewport_size({'width':width,'height':height})
+        load('lessons/first-discovery/index.html')
+        assert_lesson_layout(page)
     for path in PAGES:
         page.set_viewport_size({'width':390,'height':844})
         load(path)

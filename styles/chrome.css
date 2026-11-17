@@ -69,7 +69,21 @@ body.with-chrome:is(.portal,.lesson-page) .site-footer .footer-control:hover:not
 body.with-chrome:is(.portal,.lesson-page) .site-footer .footer-control:disabled{opacity:.75}
 body.with-chrome:is(.portal,.lesson-page) .site-footer .to-top{margin-left:auto}
 body.with-chrome:is(.portal,.lesson-page) .site-footer :focus-visible{outline-color:#d9ef79}
-@media(min-width:1600px){.lesson-page.with-chrome .site-footer{max-width:calc(100% - 100px)}}
+/* Keep the rail's sticky containing block as tall as the whole lesson page.
+   The footer is a grid sibling of main, not a full-width block after .shell. */
+@media(min-width:801px){
+ .lesson-page.with-chrome .shell{--lesson-gutter:clamp(22px,4vw,66px)}
+ .lesson-page.with-chrome .shell>.sidebar{grid-column:1;grid-row:1 / span 2}
+ .lesson-page.with-chrome .shell>main{grid-column:2;grid-row:1}
+ body.lesson-page.with-chrome .shell>.site-footer{grid-column:2;grid-row:2;min-width:0;width:calc(100% - 2 * var(--lesson-gutter));max-width:calc(1370px - 2 * var(--lesson-gutter));margin:72px auto 24px}
+}
+/* At these widths the lesson footer has less room than the portal footer. */
+@media(min-width:801px) and (max-width:1200px){
+ .lesson-page.with-chrome .footer-main{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+ .lesson-page.with-chrome .footer-invite{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:20px}
+ .lesson-page.with-chrome .footer-invite p{margin:0}
+ .lesson-page.with-chrome .footer-invite .button{flex-shrink:0}
+}
 @media(max-width:1320px){body.with-chrome:is(.portal,.lesson-page) .site-footer{margin-left:38px;margin-right:38px}.chrome-inner{gap:20px}.site-menu{gap:16px}.with-chrome .portal-nav .nav-chip{padding:10px 12px}.footer-main{gap:28px}}
 @media(max-width:1100px){body.with-chrome:is(.portal,.lesson-page) .site-header{padding-left:28px;padding-right:28px}.with-chrome .chrome-brand small{font-size:11px}body.with-chrome:is(.portal,.lesson-page) .site-footer{margin-left:28px;margin-right:28px;padding:34px 28px 22px}.with-chrome .header-action{padding:12px 14px}.site-menu{gap:12px}.with-chrome .portal-nav .nav-chip{font-size:14px;padding:10px}.footer-main{gap:22px}.footer-invite{padding:19px}.footer-invite p{font-size:22px}}
 @media(max-width:900px){

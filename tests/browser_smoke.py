@@ -7,6 +7,7 @@ from pathlib import Path
 from urllib.parse import urlparse, unquote
 import mimetypes, os
 from playwright.sync_api import sync_playwright
+from lesson_layout import assert_lesson_layout
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT.parent/'aga-multipage-previews';OUT.mkdir(exist_ok=True)
 BASE='https://aga.test/Teacher-/'
@@ -131,8 +132,15 @@ with sync_playwright() as pw:
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'),f'overflow: {width} {path}'
             assert page.locator('h1').count()==1
             assert page.evaluate('[...document.images].filter(i=>i.loading!=="lazy").every(i=>i.complete&&i.naturalWidth>0)'),path
+            if path=='lessons/first-discovery/':
+                assert_lesson_layout(page)
             if width==390:
                 page.screenshot(path=str(OUT/(('home' if not path else path.strip('/').replace('/','-'))+'-mobile.png')),full_page=True)
+    for width,height in [(801,700),(1024,560),(1920,1080),(2200,1000)]:
+        page.set_viewport_size({'width':width,'height':height})
+        go('lessons/first-discovery/')
+        assert_lesson_layout(page)
+    page.set_viewport_size({'width':1440,'height':1000})
     go('courses/');follow(page.locator('.path-ready a'));page.go_back(wait_until='networkidle');assert page.url==BASE+'courses/'
     go('#math');page.wait_for_url('**/lessons/first-discovery/#math');assert page.locator('#answer-add').count()==1
     assert not missing,missing
