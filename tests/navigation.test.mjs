@@ -19,7 +19,7 @@ test('all local href/src paths work from a nested GitHub Pages directory', () =>
   for (const page of pages) {
     const html=readFileSync(resolve(root,page),'utf8');
     for (const match of html.matchAll(/\b(?:href|src)="([^"]+)"/g)) {
-      const link=match[1]; if (/^(https?:|data:|#)/.test(link)) continue;
+      const link=match[1]; if (/^(https?:|mailto:|tel:|data:|#)/.test(link)) continue;
       assert.ok(!link.startsWith('/'), 'Root-relative URL breaks a project site: '+link);
       const target=resolve(dirname(resolve(root,page)),link.split(/[?#]/)[0]);
       assert.ok(existsSync(target),page+' → '+link);
