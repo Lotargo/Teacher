@@ -21,25 +21,24 @@ export function depthOffsets(pointerX, pointerY, scrollY = 0) {
 
 const sceneHTML = `
   <div class="aga-depth-layer aga-depth-far" data-depth="far">
-    <i class="aga-depth-halo aga-depth-halo-a"></i><i class="aga-depth-halo aga-depth-halo-b"></i>
-    <i class="aga-depth-halo aga-depth-halo-c"></i>
-    <i class="aga-depth-wash aga-depth-wash-a"></i><i class="aga-depth-wash aga-depth-wash-b"></i>
+    <div class="forest-landscape"></div>
   </div>
-  <div class="aga-depth-layer aga-depth-middle" data-depth="middle">
-    <i class="aga-depth-orbit aga-depth-orbit-a"></i><i class="aga-depth-orbit aga-depth-orbit-b"></i>
-    <i class="aga-depth-outline-star aga-depth-star-a"></i>
-    <i class="aga-depth-outline-star aga-depth-star-b"></i>
-    <i class="aga-depth-asterisk aga-depth-asterisk-a">✳</i>
-    <i class="aga-depth-asterisk aga-depth-asterisk-b">✳</i>
-    <i class="aga-depth-dot-trail aga-depth-dots-a"></i>
+  <div class="aga-depth-layer aga-depth-middle" data-depth="trees">
+    <div class="forest-trees"></div>
   </div>
-  <div class="aga-depth-layer aga-depth-near" data-depth="near">
-    <i class="aga-depth-paper aga-depth-paper-a"><b>✦</b></i>
-    <i class="aga-depth-paper aga-depth-paper-b"><b>∑</b></i>
-    <i class="aga-depth-stroke aga-depth-stroke-a"></i>
-    <i class="aga-depth-stroke aga-depth-stroke-b"></i>
-    <i class="aga-depth-dot-trail aga-depth-dots-b"></i>
-  </div>`;
+  <div class="aga-depth-layer aga-depth-animals-back" data-depth="animals-back">
+    <div class="forest-animal forest-fox"></div>
+    <div class="forest-animal forest-squirrel"></div>
+  </div>
+  <div class="aga-depth-layer aga-depth-animals-front" data-depth="animals-front">
+    <div class="forest-animal forest-bear"></div>
+    <div class="forest-animal forest-rabbit"></div>
+    <div class="forest-animal forest-hedgehog"></div>
+  </div>
+  <div class="aga-depth-layer aga-depth-foreground" data-depth="foreground">
+    <div class="forest-grass"></div>
+  </div>
+  <div class="forest-reading-wash"></div>`;
 
 const heroHTML = `
   <span class="aga-hero-backdrop"></span>
