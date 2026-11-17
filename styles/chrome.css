@@ -124,3 +124,10 @@ body.with-chrome:is(.portal,.lesson-page) .site-footer :focus-visible{outline-co
 /* Room for the new FAQ chip without crowding the header. */
 @media(min-width:901px) and (max-width:1270px){.with-chrome .portal-nav{gap:2px;padding:4px}.with-chrome .portal-nav .nav-chip{padding:9px 9px;font-size:13px}.chrome-inner{gap:14px}.site-menu{gap:12px}.with-chrome .header-action{padding:11px 12px;font-size:13px}}
 @media(min-width:901px) and (max-width:1040px){.with-chrome .chrome-brand img{width:39px;height:39px}.with-chrome .chrome-brand b{font-size:27px}.with-chrome .chrome-brand small{font-size:10px}.with-chrome .portal-nav .nav-chip{padding:8px 7px;font-size:12px}.chrome-inner{gap:9px}.site-menu{gap:8px}}
+
+/* Decorative user sticker fills the existing spare column without changing landmarks. */
+.footer-invite{margin-bottom:186px}
+.footer-invite::after{content:"";position:absolute;display:block;top:calc(100% + 49px);left:2px;width:calc(100% - 4px);aspect-ratio:720 / 262;background:url('../assets/footer-sticker.avif') center / contain no-repeat;transform:rotate(-4deg);filter:drop-shadow(0 7px 3px #0c1b2740);pointer-events:none}
+@media(max-width:900px){.footer-invite{margin-bottom:178px}.footer-invite::after{top:calc(100% + 30px);width:min(340px,100%);left:50%;transform:translateX(-50%) rotate(-4deg)}}
+@media(min-width:801px) and (max-width:1200px){.lesson-page .footer-invite{margin-bottom:178px}.lesson-page .footer-invite::after{top:calc(100% + 30px);width:min(340px,100%);left:50%;transform:translateX(-50%) rotate(-4deg)}}
+@media(max-width:600px){.footer-invite{margin-bottom:150px}.footer-invite::after{top:calc(100% + 30px);width:100%;left:0;transform:rotate(-4deg)}}

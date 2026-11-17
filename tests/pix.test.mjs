@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
 import { getPageContext, getSuggestions, getLocalAnswer, guessLocalIntent, buildAiMessages, PATHS } from '../src/pix-core.js';
 import { askCloudflare, readCloudflareStream } from '../src/cloudflare-adapter.js';
+import { clampPosition } from '../src/pix-ui.js';
 import { CLOUDFLARE_CHAT_URL, TURNSTILE_SITE_KEY } from '../src/cloudflare-config.js';
 const root = new URL('../', import.meta.url);
 const read = file => readFileSync(new URL(file,root),'utf8');
@@ -71,9 +72,12 @@ test('No Puter code or client-side storage of sensitive data is shipped',()=>{
   assert.ok(!ui.includes('localStorage.setItem'));
   assert.ok(!ui.includes('innerHTML = reply'));
   assert.ok(ui.includes('body.textContent = text'));
-  assert.ok(ui.includes("get('#pix-connect-cloudflare').addEventListener('click'"));
+  assert.ok(ui.includes("get('#pix-chat-form').addEventListener('submit'"));
+  assert.ok(!ui.includes('data-pix-mode'));
+  assert.ok(!ui.includes('pix-owner-key'));
+  assert.ok(ui.includes('GREETING'));
   assert.ok(ui.includes('loadTurnstile()'));
-  assert.ok(!/localStorage\\.(setItem|getItem)|sessionStorage\\./.test(adapter));
+  assert.ok(!/localStorage\.(setItem|getItem)|sessionStorage\./.test(adapter));
   assert.ok(!read('src/cloudflare-config.js').includes('Bearer '));
   for(const file of ['assets/pix-guide.webp','styles/pix.css','faq/index.html'])assert.ok(existsSync(new URL(file,root)),file);
 });
@@ -129,17 +133,38 @@ test('Browser Cloudflare adapter prefers SSE and gracefully types JSON fallback'
   );
 });
 
-test('Chat interface includes large layout, waiting animation, stop, expand and opt-in sound',()=>{
+test('Chat interface includes large layout, waiting animation, stop, drag, unread and default-on sound',()=>{
   const css=read('styles/pix.css'), js=read('src/pix-guide.js');
-  for(const name of ['pix-composer','pix-chat-dock','pix-message-avatar','pix-thinking','pix-spinner','pix-typing-dots','pix-chat-log']){
+  for(const name of ['pix-composer','pix-chat-dock','pix-message-avatar','pix-thinking','pix-spinner','pix-typing-dots','pix-chat-log','pix-unread','pix-control-dot']){
     assert.ok(css.includes('.'+name),name);
   }
   for(const id of ['pix-sound','pix-expand','pix-stop','pix-thinking','pix-chat-question']){
     assert.ok(js.includes('id="'+id+'"'),id);
   }
   assert.ok(js.includes("activeRequest?.abort()"));
-  assert.ok(js.includes('requestAnimationFrame'));
-  assert.ok(js.includes('textContent = target.slice'));
+  assert.ok(read('src/pix-ui.js').includes('requestAnimationFrame'));
+  assert.ok(read('src/pix-ui.js').includes('textContent = target.slice'));
   assert.ok(js.includes("playSound('done')"));
   assert.ok(js.includes("aria-pressed=\"false\""));
+});
+
+test('Panel clamping keeps drag and keyboard moves inside the viewport',()=>{
+  assert.deepEqual(clampPosition(-120,-120,548,720,1440,1000),{left:10,top:10});
+  assert.deepEqual(clampPosition(1800,1200,548,720,1440,1000),{left:882,top:270});
+  assert.deepEqual(clampPosition(100,70,548,720,500,600),{left:10,top:10});
+  assert.deepEqual(clampPosition(200,100,548,720,1440,1000),{left:200,top:100});
+});
+test('Greeting and unread state are local; provider chrome and non-AI mode are gone',()=>{
+  const ui=read('src/pix-guide.js');
+  assert.ok(ui.includes('let soundEnabled = true'));
+  assert.ok(ui.includes('setUnread(1)'));
+  assert.ok(ui.includes("bubble('assistant', GREETING)"));
+  assert.ok(ui.includes('setPointerCapture'));
+  assert.ok(!ui.includes('pix-mode-switch'));
+  assert.ok(!ui.includes('Gemma'));
+  assert.ok(!ui.includes('pix-presence'));
+  assert.ok(!ui.includes('pix-model-chip'));
+  assert.ok(ui.includes('Dota 2'));
+  assert.ok(read('styles/chrome.css').includes('assets/footer-sticker.avif'));
+  assert.ok(existsSync(new URL('assets/footer-sticker.avif',root)));
 });
