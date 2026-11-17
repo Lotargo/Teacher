@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
 import { getPageContext, getSuggestions, getLocalAnswer, guessLocalIntent, buildAiMessages, PATHS } from '../src/pix-core.js';
-import { askCloudflare } from '../src/cloudflare-adapter.js';
+import { askCloudflare, readCloudflareStream } from '../src/cloudflare-adapter.js';
 import { CLOUDFLARE_CHAT_URL, TURNSTILE_SITE_KEY } from '../src/cloudflare-config.js';
 const root = new URL('../', import.meta.url);
 const read = file => readFileSync(new URL(file,root),'utf8');
@@ -86,4 +86,60 @@ test('FAQ and layout retain clear opt-in and privacy explanation',()=>{
   assert.ok((faq.match(/<details/g)||[]).length>=8);
   assert.ok(read('templates/header.html').includes('href="{{root}}faq/"'));
   assert.ok(read('templates/footer.html').includes('src/pix-guide.js'));
+});
+
+test('Gemma SSE is parsed incrementally, ignoring reasoning and handling split chunks',async()=>{
+  const encoder=new TextEncoder();
+  const content=[
+    'data: {"choices":[{"delta":{"reasoning_content":"internal"}}]}\\n\\n',
+    'data: {"choices":[{"delta":{"content":"Привет, "}}]}\\n\\n',
+    'data: {"choices":[{"delta":{"content":"Пикс!"}}]}\\n\\n',
+    'data: [DONE]\\n\\n'
+  ].join('').replaceAll('\\n','\n');
+  const bytes=encoder.encode(content);
+  const body=new ReadableStream({
+    start(controller) {
+      for(let i=0;i<bytes.length;i+=11) controller.enqueue(bytes.slice(i,i+11));
+      controller.close();
+    }
+  });
+  const deltas=[];
+  const result=await readCloudflareStream(body,delta=>deltas.push(delta));
+  assert.equal(result,'Привет, Пикс!');
+  assert.deepEqual(deltas,['Привет, ','Пикс!']);
+  assert.ok(!deltas.some(text=>text.includes('internal')));
+});
+
+test('Browser Cloudflare adapter prefers SSE and gracefully types JSON fallback',async()=>{
+  const deltas=[];
+  const fetcher=async(url,options)=>{
+    assert.equal(options.headers.Accept,'text/event-stream');
+    return new Response('{"reply":"Ответ!"}',{headers:{'Content-Type':'application/json'}});
+  };
+  const reply=await askCloudflare([{role:'user',content:'Тест'}],{
+    ownerToken:'only-on-client',fetcher,onDelta:deltas.push.bind(deltas)
+  });
+  assert.equal(reply,'Ответ!');
+  assert.deepEqual(deltas,['Ответ!']);
+  await assert.rejects(
+    askCloudflare([{role:'user',content:'Test'}],{
+      ownerToken:'secret',fetcher:async()=>{ throw new DOMException('The operation was aborted.','AbortError'); }
+    }),
+    error=>error.name==='AbortError'
+  );
+});
+
+test('Chat interface includes large layout, waiting animation, stop, expand and opt-in sound',()=>{
+  const css=read('styles/pix.css'), js=read('src/pix-guide.js');
+  for(const name of ['pix-composer','pix-chat-dock','pix-message-avatar','pix-thinking','pix-spinner','pix-typing-dots','pix-chat-log']){
+    assert.ok(css.includes('.'+name),name);
+  }
+  for(const id of ['pix-sound','pix-expand','pix-stop','pix-thinking','pix-chat-question']){
+    assert.ok(js.includes('id="'+id+'"'),id);
+  }
+  assert.ok(js.includes("activeRequest?.abort()"));
+  assert.ok(js.includes('requestAnimationFrame'));
+  assert.ok(js.includes('textContent = target.slice'));
+  assert.ok(js.includes("playSound('done')"));
+  assert.ok(js.includes("aria-pressed=\"false\""));
 });

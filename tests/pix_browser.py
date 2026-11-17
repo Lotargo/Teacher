@@ -56,6 +56,14 @@ try:
   page.locator('.pix-launcher').click()
   assert page.locator('#pix-panel').is_visible()
   assert page.locator('#pix-local').is_visible()
+  assert page.locator('#pix-panel').bounding_box()['width']>=500
+  page.locator('#pix-expand').click()
+  assert page.locator('#pix-expand').get_attribute('aria-pressed')=='true'
+  assert page.locator('#pix-panel').bounding_box()['width']>=700
+  page.locator('#pix-expand').click()
+  assert page.locator('#pix-expand').get_attribute('aria-pressed')=='false'
+  assert page.locator('#pix-sound').is_visible()
+  assert page.locator('#pix-stop').count()==1
   assert 'С чего начать' in page.locator('#pix-chips').inner_text()
   page.locator('#pix-search').fill('Как считать скидку?')
   page.locator('#pix-search-form button').click()
@@ -68,6 +76,7 @@ try:
   assert not requests
   page.locator('#pix-connect-cloudflare').click()
   assert 'Введи личный' in page.locator('#pix-connect-status').inner_text()
+  page.locator('#pix-owner-entry summary').click()
   page.locator('#pix-owner-key').fill('test-pilot-secret')
   page.locator('#pix-connect-cloudflare').click()
   page.locator('#pix-chat-question').wait_for(state='visible')
@@ -75,7 +84,7 @@ try:
   assert not requests
   page.locator('#pix-chat-question').fill('Объясни на бытовом примере')
   page.locator('#pix-chat-question').press('Enter')
-  page.locator('.pix-bubble.is-pix').wait_for()
+  page.wait_for_function("() => document.querySelector('.pix-bubble.is-pix p')?.textContent.includes('Ответ Пикс: проверь решение.')")
   assert '<img' in page.locator('.pix-bubble.is-pix').inner_text()
   assert page.locator('.pix-bubble img').count()==0,'AI output must be plain text'
   assert len(requests)==1

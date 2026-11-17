@@ -10,6 +10,11 @@
       "name": "CHAT_LIMITER",
       "namespace_id": "910017",
       "simple": { "limit": 3, "period": 60 }
+    },
+    {
+      "name": "GLOBAL_LIMITER",
+      "namespace_id": "910018",
+      "simple": { "limit": 15, "period": 60 }
     }
   ]
 }

@@ -62,6 +62,7 @@ test('Invalid authorization, missing protection, and malicious requests never ca
 test('Public requests require verified Turnstile and rate limit',async()=>{
   const {env,calls}=setup();
   env.TURNSTILE_SECRET='test-server-secret';
+  env.TURNSTILE_SITE_KEY='public-site-key';
   env.CHAT_LIMITER={limit:async()=>({success:true})};
   const oldFetch=globalThis.fetch;
   try {
@@ -90,6 +91,7 @@ test('Public requests require verified Turnstile and rate limit',async()=>{
 test('A failed Turnstile challenge is rejected without inference',async()=>{
   const {env,calls}=setup();
   env.TURNSTILE_SECRET='test-server-secret';
+  env.TURNSTILE_SITE_KEY='public-site-key';
   env.CHAT_LIMITER={limit:async()=>({success:true})};
   const oldFetch=globalThis.fetch;
   try {
@@ -101,4 +103,66 @@ test('A failed Turnstile challenge is rejected without inference',async()=>{
     assert.equal(result.status,403);
     assert.equal(calls.length,0);
   } finally {globalThis.fetch=oldFetch;}
+});
+
+test('Native Gemma 4 SSE is forwarded, with JSON fallback when streaming is unsupported',async()=>{
+  const {env}=setup();
+  const mock='data: {"choices":[{"delta":{"content":"Привет"}}]}\\n\\ndata: [DONE]\\n\\n'.replaceAll('\\n','\n');
+  const encoder=new TextEncoder();
+  let seenStream=false;
+  env.AI.run=async(model,params)=>{
+    assert.equal(model,'@cf/google/gemma-4-26b-a4b-it');
+    seenStream=Boolean(params.stream);
+    return new ReadableStream({start(controller){controller.enqueue(encoder.encode(mock));controller.close();}});
+  };
+  const response=await worker.fetch(request('chat',{
+    headers:{...owner,Origin:ORIGIN,Accept:'text/event-stream'}
+  }),env);
+  assert.equal(response.status,200);
+  assert.match(response.headers.get('Content-Type'),/text\/event-stream/);
+  assert.equal(response.headers.get('Access-Control-Allow-Origin'),ORIGIN);
+  assert.equal(await response.text(),mock);
+  assert.ok(seenStream);
+  let runs=0;
+  env.AI.run=async(_model,params)=>{
+    runs++;
+    if(params.stream) throw new Error('stream unsupported');
+    return {choices:[{message:{content:'JSON fallback'}}]};
+  };
+  const fallback=await worker.fetch(request('chat',{
+    headers:{...owner,Origin:ORIGIN,Accept:'text/event-stream'}
+  }),env);
+  assert.equal(fallback.status,200);
+  assert.equal((await fallback.json()).reply,'JSON fallback');
+  assert.equal(runs,2);
+});
+
+test('Optional shared rate limit can reject public usage before inference',async()=>{
+  const {env,calls}=setup();
+  env.TURNSTILE_SECRET='fake-server-secret';
+  env.TURNSTILE_SITE_KEY='public-site-key';
+  env.CHAT_LIMITER={limit:async()=>({success:true})};
+  env.GLOBAL_LIMITER={limit:async()=>({success:false})};
+  const response=await worker.fetch(request('chat',{
+    headers:{Origin:ORIGIN,'CF-Connecting-IP':'127.0.0.1'},
+    extra:{turnstileToken:'one-time-token'}
+  }),env);
+  assert.equal(response.status,429);
+  assert.equal(calls.length,0);
+});
+
+test('Public configuration exposes only the sitekey, never the secret',async()=>{
+  const {env,calls}=setup();
+  const before=await worker.fetch(new Request(HOST+'/config',{headers:{Origin:ORIGIN}}),env);
+  assert.equal(before.status,200);
+  assert.deepEqual(await before.json(),{publicEnabled:false,sitekey:''});
+  env.TURNSTILE_SITE_KEY='0x4-public';
+  env.TURNSTILE_SECRET='do-not-reveal';
+  env.CHAT_LIMITER={limit:async()=>({success:true})};
+  const after=await worker.fetch(new Request(HOST+'/config',{headers:{Origin:ORIGIN}}),env);
+  assert.equal(after.headers.get('Access-Control-Allow-Origin'),ORIGIN);
+  const config=await after.json();
+  assert.deepEqual(config,{publicEnabled:true,sitekey:'0x4-public'});
+  assert.equal(JSON.stringify(config).includes('do-not-reveal'),false);
+  assert.equal(calls.length,0);
 });

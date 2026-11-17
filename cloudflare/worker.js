@@ -74,9 +74,14 @@ export default {
       return new Response(null, { status: 204, headers: {
         ...headers,
         "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization, Accept",
         "Access-Control-Max-Age": "600"
       }});
+    }
+    if (request.method === "GET" && url.pathname === "/config") {
+      // Sitekeys are public; the corresponding TURNSTILE_SECRET never leaves Cloudflare.
+      const enabled = Boolean(env.TURNSTILE_SITE_KEY && env.TURNSTILE_SECRET && env.CHAT_LIMITER);
+      return json({ publicEnabled: enabled, sitekey: enabled ? env.TURNSTILE_SITE_KEY : "" }, 200, headers);
     }
     if (request.method === "GET" && url.pathname === "/") {
       return json({ status: "online", model: "gemma-4-26b-a4b-it", endpoint: "POST /chat" }, 200, headers);
@@ -104,7 +109,7 @@ export default {
     if (!owner) {
       // CORS alone is NOT authentication. Public mode fails closed without both bindings.
       if (origin !== SITE_ORIGIN) return json({ error: "Forbidden" }, 403, headers);
-      if (!env.TURNSTILE_SECRET || !env.CHAT_LIMITER) {
+      if (!env.TURNSTILE_SITE_KEY || !env.TURNSTILE_SECRET || !env.CHAT_LIMITER) {
         return json({ error: "Public AI is not configured" }, 503, headers);
       }
       const ip = request.headers.get("CF-Connecting-IP");
@@ -113,6 +118,13 @@ export default {
         const limit = await env.CHAT_LIMITER.limit({ key: "pix:" + ip });
         if (!limit.success) {
           return json({ error: "Rate limit exceeded" }, 429, { ...headers, "Retry-After": "60" });
+        }
+        // Additional shared quota per Cloudflare location (optional binding).
+        if (env.GLOBAL_LIMITER) {
+          const shared = await env.GLOBAL_LIMITER.limit({ key: "pix:shared" });
+          if (!shared.success) {
+            return json({ error: "Public quota temporarily busy" }, 429, { ...headers, "Retry-After": "60" });
+          }
         }
         if (!(await verifyChallenge(request, data.turnstileToken, env))) {
           return json({ error: "Challenge failed" }, 403, headers);
@@ -126,9 +138,31 @@ export default {
       ...data.messages
     ];
     try {
-      const result = await env.AI.run(MODEL, {
-        messages, temperature: 0.85, max_completion_tokens: 768
-      });
+      const params = { messages, temperature: 0.85, max_completion_tokens: 768 };
+      const wantsStream = request.headers.get("Accept")?.includes("text/event-stream");
+      let result;
+      if (wantsStream) {
+        try {
+          result = await env.AI.run(MODEL, { ...params, stream: true });
+        } catch {
+          // Graceful JSON fallback when native streaming is unsupported.
+          result = await env.AI.run(MODEL, params);
+        }
+        if (result && typeof result.getReader === "function") {
+          // Forward Cloudflare SSE without buffering, preserving low CPU overhead.
+          return new Response(result, {
+            status: 200,
+            headers: {
+              ...headers,
+              "Content-Type": "text/event-stream; charset=utf-8",
+              "Cache-Control": "no-store, no-transform",
+              "X-Content-Type-Options": "nosniff"
+            }
+          });
+        }
+      } else {
+        result = await env.AI.run(MODEL, params);
+      }
       const reply = result?.choices?.[0]?.message?.content ?? result?.response ?? "";
       if (typeof reply !== "string" || !reply.trim()) {
         return json({ error: "Model returned no text" }, 502, headers);
