@@ -30,7 +30,7 @@ jobs:
           python -m playwright install --with-deps chromium
       - name: Check real page navigation and lesson progress
         run: python tests/browser_smoke.py
-      - name: Check Pix and voluntary Puter integration (mocked)
+      - name: Check Pix and voluntary Cloudflare integration (mocked)
         run: python tests/pix_browser.py
   deploy:
     name: Publish to Pages

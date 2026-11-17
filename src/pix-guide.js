@@ -1,5 +1,6 @@
 import { PATHS, getPageContext, getSuggestions, getLocalAnswer, guessLocalIntent, buildAiMessages } from './pix-core.js';
-import { loadPuter, askPuter, explainPuterAuthError } from './puter-adapter.js';
+import { askCloudflare } from './cloudflare-adapter.js';
+import { TURNSTILE_SITE_KEY } from './cloudflare-config.js';
 
 const page = getPageContext(document.body.dataset.page || 'home').route;
 const root = new URL('../', import.meta.url);
@@ -26,7 +27,7 @@ host.innerHTML = `
     </div>
     <div class="pix-mode-switch" role="group" aria-label="Режим помощницы">
       <button type="button" class="pix-mode is-current" data-pix-mode="local" aria-pressed="true">Без ИИ</button>
-      <button type="button" class="pix-mode" data-pix-mode="ai" aria-pressed="false">ИИ через Puter <span aria-hidden="true">✦</span></button>
+      <button type="button" class="pix-mode" data-pix-mode="ai" aria-pressed="false">ИИ через Cloudflare <span aria-hidden="true">✦</span></button>
     </div>
     <div class="pix-body">
       <section class="pix-local" id="pix-local">
@@ -44,28 +45,31 @@ host.innerHTML = `
         <div id="pix-ai-consent" class="pix-consent">
           <div class="pix-ai-sticker" aria-hidden="true">✧</div>
           <h3>Хочешь поговорить с ИИ?</h3>
-          <p>Это <strong>необязательная</strong> функция через сторонний сервис Puter. Сначала загрузим его SDK, затем ты сам решишь, входить ли в аккаунт.</p>
-          <p><strong>АГА! ничего не продаёт и не получает процент.</strong> Puter даёт собственный бесплатный лимит; если он закончится, дальнейшая оплата — только Puter, по его условиям.</p>
-          <p>Твой вопрос, контекст текущего раздела и последние реплики диалога будут отправлены в Puter и могут обрабатываться поставщиками моделей. Не отправляй пароли и чужие личные данные.</p>
-          <button type="button" id="pix-load-puter" class="pix-primary">Загрузить Puter.js</button>
-          <button type="button" id="pix-login" class="pix-primary" hidden>Войти через Puter</button>
+          <p>Это <strong>необязательная</strong> беседа с Gemma 4 через Cloudflare. Аккаунт и оплата не нужны, но у бесплатной модели есть ограничения.</p>
+          <p>Только при отправке в Cloudflare попадут твой вопрос, название раздела и до восьми предыдущих реплик диалога. Не отправляй пароли и чужие личные данные. АГА! не сохраняет переписку в собственной базе.</p>
+          <div id="pix-owner-entry">
+            <label class="pix-secret-label" for="pix-owner-key">Личный доступ для тестирования</label>
+            <input id="pix-owner-key" type="password" autocomplete="off" spellcheck="false" placeholder="PILOT_TOKEN владельца">
+            <p class="pix-owner-note">Публичный доступ ещё не настроен: сейчас нужен токен владельца. Не публикуй его. Он не сохраняется после перезагрузки страницы.</p>
+          </div>
+          <button type="button" id="pix-connect-cloudflare" class="pix-primary">Подключить облачный ИИ</button>
           <p id="pix-connect-status" class="pix-status" role="status" aria-live="polite"></p>
-          <p id="pix-login-help" class="pix-login-help" hidden>Уже есть аккаунт? Нажми «Log In» в окне Puter. Можно проверить вход отдельно на <a href="https://puter.com/" target="_blank" rel="noopener noreferrer">Puter.com ↗</a>. Если регистрация не работает и там, обратись в <a href="mailto:support@puter.com">поддержку Puter</a> с кодом из окна ошибки. АГА! не управляет регистрацией.</p>
         </div>
         <div id="pix-ai-chat" class="pix-ai-chat" hidden>
+          <div id="pix-turnstile" class="pix-turnstile" aria-label="Проверка Cloudflare" hidden></div>
           <div class="pix-chat-log" id="pix-chat-log" role="log" aria-label="Диалог с Пикс" aria-live="polite" aria-relevant="additions text">
             <p class="pix-chat-intro">Теперь можно спросить по-настоящему. Я вижу только название текущего раздела и то, что ты сам напишешь.</p>
           </div>
           <form id="pix-chat-form" class="pix-chat-form">
-            <label class="pix-sr-only" for="pix-chat-question">Вопрос к Пикс через Puter</label>
+            <label class="pix-sr-only" for="pix-chat-question">Вопрос к Пикс через Cloudflare</label>
             <textarea id="pix-chat-question" maxlength="1200" rows="2" placeholder="О чём хочешь поговорить?" required></textarea>
             <div class="pix-chat-actions"><button type="button" id="pix-clear-chat" class="pix-muted">Очистить диалог</button><button type="submit" class="pix-primary" id="pix-send">Отправить ↗</button></div>
           </form>
-          <p class="pix-status" id="pix-chat-status" role="status" aria-live="polite">Запросы расходуют лимит твоего Puter-аккаунта. Enter — отправить, Shift+Enter — новая строка.</p>
+          <p class="pix-status" id="pix-chat-status" role="status" aria-live="polite">Облачная модель может ошибаться. Enter — отправить, Shift+Enter — новая строка.</p>
         </div>
       </section>
     </div>
-    <div class="pix-footer"><a id="pix-faq-link" href="#">Вопросы и оплата</a><span>АГА! · помощница по желанию</span></div>
+    <div class="pix-footer"><a id="pix-faq-link" href="#">Вопросы и приватность</a><span>АГА! · помощница по желанию</span></div>
   </section>`;
 document.body.appendChild(host);
 
@@ -75,7 +79,11 @@ const faqLink = get('#pix-faq-link');
 faqLink.href = new URL(PATHS.faq.path, root).href;
 const chips = get('#pix-chips'), answer = get('#pix-answer');
 let activeMode = 'local';
-let puterClient = null;
+let accessMode = '';
+let ownerToken = '';
+let challengeToken = '';
+let widgetId = null;
+let turnstileScript = null;
 let loading = false;
 let pending = false;
 let turns = [];
@@ -137,48 +145,78 @@ function mode(next) {
 host.querySelectorAll('[data-pix-mode]').forEach(button => button.addEventListener('click', () => mode(button.dataset.pixMode)));
 
 const status = get('#pix-connect-status');
-function setStatus(text) { status.textContent = text; }
+function setStatus(message) { status.textContent = message; }
 function showConnected() {
-  get('#pix-login-help').hidden = true;
   get('#pix-ai-consent').hidden = true;
   get('#pix-ai-chat').hidden = false;
-  pose('idea'); get('#pix-chat-question').focus();
+  pose('idea');
+  get('#pix-chat-question').focus();
 }
-const loadButton = get('#pix-load-puter');
-loadButton.addEventListener('click', async () => {
+function loadTurnstile() {
+  if (window.turnstile?.render) return Promise.resolve(window.turnstile);
+  if (turnstileScript) return turnstileScript;
+  turnstileScript = new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+    script.async = true;
+    script.onload = () => window.turnstile?.render
+      ? resolve(window.turnstile)
+      : reject(new Error('Проверка Cloudflare не загрузилась.'));
+    script.onerror = () => reject(new Error('Не удалось загрузить проверку Cloudflare.'));
+    document.head.appendChild(script);
+  }).catch(error => { turnstileScript = null; throw error; });
+  return turnstileScript;
+}
+get('#pix-owner-entry').hidden = Boolean(TURNSTILE_SITE_KEY);
+get('#pix-connect-cloudflare').addEventListener('click', async event => {
   if (loading) return;
-  loading = true; loadButton.disabled = true; setStatus('Подключаю библиотеку Puter…');
-  try {
-    puterClient = await loadPuter();
-    if (puterClient.auth?.isSignedIn?.()) {
-      showConnected();
-    } else {
-      loadButton.hidden = true;
-      get('#pix-login').hidden = false;
-      setStatus('SDK подключён. Вход в Puter — отдельное добровольное действие.');
-    }
-  } catch (error) {
-    setStatus(error?.message || 'Не получилось подключить Puter. Локальные подсказки работают без него.');
-    loadButton.disabled = false;
-    pose('thinking');
-  } finally { loading = false; }
-});
-// signIn is called synchronously from the click handler (popup-blocker requirement).
-get('#pix-login').addEventListener('click', async event => {
-  if (!puterClient?.auth?.signIn) { setStatus('Puter не предоставил функцию входа.'); return; }
   const button = event.currentTarget;
-  button.disabled = true;
-  setStatus('Ожидаю подтверждения входа в Puter…');
-  get('#pix-login-help').hidden = true;
+  loading = true; button.disabled = true;
   try {
-    const signInPromise = puterClient.auth.signIn();
-    await signInPromise;
-    showConnected();
-  } catch (error) {
-    setStatus(explainPuterAuthError(error));
-    get('#pix-login-help').hidden = false;
+    if (TURNSTILE_SITE_KEY) {
+      setStatus('Загружаю проверку Cloudflare…');
+      const turnstile = await loadTurnstile();
+      accessMode = 'public';
+      showConnected();
+      const mount = get('#pix-turnstile');
+      mount.hidden = false;
+      get('#pix-send').disabled = true;
+      widgetId = turnstile.render(mount, {
+        sitekey: TURNSTILE_SITE_KEY,
+        action: 'pix_chat',
+        theme: 'light',
+        size: 'flexible',
+        callback(token) {
+          challengeToken = token;
+          if (!pending) get('#pix-send').disabled = false;
+          get('#pix-chat-status').textContent = 'Проверка готова. Можно отправить сообщение.';
+        },
+        'expired-callback'() {
+          challengeToken = '';
+          get('#pix-send').disabled = true;
+          get('#pix-chat-status').textContent = 'Проверка устарела. Подожди обновления.';
+        },
+        'error-callback'() {
+          challengeToken = '';
+          get('#pix-send').disabled = true;
+          get('#pix-chat-status').textContent = 'Cloudflare не смог проверить подключение.';
+        }
+      });
+    } else {
+      const key = get('#pix-owner-key');
+      const token = key.value.trim();
+      if (!token) { setStatus('Введи личный PILOT_TOKEN для тестирования.'); key.focus(); return; }
+      ownerToken = token;
+      key.value = '';
+      accessMode = 'owner';
+      showConnected();
+    }
+  } catch(error) {
+    get('#pix-ai-consent').hidden = false;
+    get('#pix-ai-chat').hidden = true;
+    setStatus(error?.message || 'Не удалось подключить Cloudflare.');
     pose('guide');
-  } finally { button.disabled = false; }
+  } finally { loading = false; button.disabled = false; }
 });
 
 const form = get('#pix-chat-form'), input = get('#pix-chat-question');
@@ -191,24 +229,40 @@ function bubble(role, text) {
   log.scrollTop = log.scrollHeight;
 }
 async function sendMessage() {
-  if (pending || !puterClient?.ai?.chat) return;
+  if (pending || !accessMode) return;
+  if (accessMode === 'public' && !challengeToken) {
+    chatStatus.textContent = 'Подожди подтверждения проверки Cloudflare.';
+    return;
+  }
   const question = input.value.trim();
   if (!question) return;
   pending = true; send.disabled = true; input.disabled = true; input.value = '';
   bubble('user', question); chatStatus.textContent = 'Пикс думает…'; pose('thinking');
   try {
     const messages = buildAiMessages(page, turns, question);
-    const reply = await askPuter(puterClient, messages);
+    const reply = await askCloudflare(messages, {
+      page,
+      ...(accessMode === 'owner' ? { ownerToken } : { turnstileToken: challengeToken })
+    });
     bubble('assistant', reply);
-    turns.push({role:'user',content:question}, {role:'assistant',content:reply});
+    turns.push({ role:'user', content:question }, { role:'assistant', content:reply });
     turns = turns.slice(-8);
     pose('idea');
     chatStatus.textContent = 'Ответ сгенерирован ИИ. Важные выводы лучше проверить самостоятельно.';
-  } catch (error) {
+  } catch(error) {
     pose('guide');
-    bubble('assistant', 'Не удалось получить ответ. Локальные подсказки по-прежнему доступны в соседнем режиме.');
-    chatStatus.textContent = 'Запрос не завершён: ' + (error?.message || 'неизвестная ошибка Puter');
-  } finally { pending = false; send.disabled = false; input.disabled = false; input.focus(); }
+    bubble('assistant', 'Не удалось получить ответ. Локальные подсказки остаются доступны.');
+    chatStatus.textContent = 'Запрос не завершён: ' + (error?.message || 'неизвестная ошибка Cloudflare');
+  } finally {
+    pending = false;
+    input.disabled = false;
+    if (accessMode === 'public') {
+      challengeToken = '';
+      send.disabled = true;
+      if (widgetId !== null) window.turnstile?.reset(widgetId);
+    } else { send.disabled = false; }
+    input.focus();
+  }
 }
 form.addEventListener('submit', event => { event.preventDefault(); void sendMessage(); });
 input.addEventListener('keydown', event => {
@@ -223,4 +277,4 @@ get('#pix-clear-chat').addEventListener('click', () => {
   log.appendChild(p);
   chatStatus.textContent = 'Готова слушать!'; pose('hello');
 });
-// No SDK is loaded here. Only explicit click on #pix-load-puter fetches remote code.
+// No external code loads before the user opts in; owner token stays in memory only.

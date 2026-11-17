@@ -22,7 +22,7 @@ export function getPageContext(page = 'home') {
     workshop: 'Мастерская идей: составить понятное задание для собственного проекта.',
     library: 'Библиотека АГА!: статьи и тщательно отобранные внешние ресурсы.',
     article: 'Статья о проверке проектов, сгенерированных ИИ.',
-    faq: 'Вопросы и ответы об АГА!, Пикс и добровольном Puter.js.',
+    faq: 'Вопросы и ответы об АГА!, Пикс и добровольном облачном ИИ.',
   };
   return { route, label: PATHS[route].label, description: context[route] };
 }
@@ -66,7 +66,7 @@ const CARDS = {
   },
   puter: {
     label: 'Как работает ИИ?', state: 'guide',
-    text: 'Сейчас я подсказываю по самому сайту, без сети и без аккаунта. ИИ через Puter — отдельная добровольная функция. Перед включением покажем, какие данные отправляются, кому и за чей счёт.',
+    text: 'Сейчас я подсказываю по самому сайту, без сети и без аккаунта. ИИ через Cloudflare — отдельная добровольная функция. Перед включением покажем, какие данные отправляются и какие есть лимиты.',
     links: [LINK('faq')],
   },
 };
@@ -93,31 +93,16 @@ export function guessLocalIntent(text, page = 'home') {
   if (/код|print|python|пайтон|скобк|переменн/.test(q)) return 'code';
   if (/провер|ошибк|безопасн|уязвим|иск(усств|у|и)|нейросет/.test(q)) return 'check';
   if (/иде[яию]|сайт|приложен|игр|проект|заработ/.test(q)) return 'idea';
-  if (/плат|деньг|путер|puter|квот|логин|вход|приват|данн/.test(q)) return 'puter';
+  if (/плат|деньг|cloudflare|клаудф|квот|логин|вход|приват|данн/.test(q)) return 'puter';
   if (/задани|яблок|понят|подсказ|застр/.test(q)) return 'lesson';
   if (/нача|перв|с нуля/.test(q)) return 'start';
   return page === 'lesson' ? 'lesson' : 'how';
 }
 
-export const ASSISTANT_INSTRUCTIONS = `Ты Пикс — доброжелательная и иногда шутливая проводница по образовательной лаборатории «АГА!». Всегда отвечай на русском, кратко, просто, без сюсюканья и без профессионального жаргона. Для пользователя программирование и даже базовая математика могут быть незнакомы. Не предполагай знаний. Сначала используй знакомую бытовую аналогию, затем объясняй точную запись, если это уместно. Помогай самостоятельно проверить гипотезу, не выдавай готовый ответ ученику, когда он просит только подсказку. Не придумывай несуществующие страницы или курсы: сейчас есть знакомство, практическая математика, мастерская и библиотека. Не говори, что можешь изменять файлы, проходить урок за ученика, обращаться к браузеру или проверять настоящий сервер: у тебя нет таких действий. Не утверждай, что код безопасен только потому, что он запустился. Для финансов, здоровья, личных данных и физического оборудования советуй независимую проверку специалистом. Ты — помощница, не экзаменатор и не источник окончательной истины. Без рекламы, платных предложений и агитации за профессию IT.`;
-
+/** Server owns the system instruction. Browser sends only conversation text. */
 export function buildAiMessages(page, turns, question) {
-  const context = getPageContext(page);
-  const safeTurns = Array.isArray(turns) ? turns.slice(-8).filter(t =>
-    (t?.role === 'user' || t?.role === 'assistant') && typeof t.content === 'string'
-  ).map(t => ({ role: t.role, content: t.content.slice(0, 2000) })) : [];
-  return [
-    { role: 'system', content: ASSISTANT_INSTRUCTIONS + '\nТекущая страница: ' + context.description },
-    ...safeTurns,
-    { role: 'user', content: String(question || '').slice(0, 1200) },
-  ];
-}
-
-export function getAiText(response) {
-  const content = response?.message?.content ?? response?.text ?? response;
-  const answer = typeof content === 'string' ? content
-    : Array.isArray(content) ? content.filter(x => x?.type === 'text' && typeof x.text === 'string').map(x => x.text).join('\n')
-    : '';
-  if (!answer.trim()) throw new Error('Ответ Puter не содержит текста. Попробуй сформулировать вопрос иначе.');
-  return answer.slice(0, 6000);
+  const recent = Array.isArray(turns) ? turns.slice(-8).filter(turn =>
+    (turn?.role === 'user' || turn?.role === 'assistant') && typeof turn.content === 'string'
+  ).map(turn => ({ role:turn.role, content:turn.content.slice(0, 1500) })) : [];
+  return [...recent, { role:'user', content:String(question || '').slice(0, 1200) }];
 }

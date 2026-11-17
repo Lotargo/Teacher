@@ -84,3 +84,9 @@ body.still .pix-guide *,body.page-hidden .pix-guide *{animation:none!important;t
  .pix-mode{font-size:12px!important;padding:8px 6px}
 }
 @media(max-width:360px){.pix-guide .pix-launcher .pix-pose{--pix-size:83px}.pix-panel{bottom:99px;max-height:calc(100dvh - 116px)}}
+
+/* Cloudflare opt-in and owner-only pilot: no persisted tokens. */
+.pix-secret-label{display:block;font-size:12px;font-weight:900;margin-bottom:6px}
+.pix-consent #pix-owner-key{display:block;width:100%;min-height:43px;border:1px solid #c6d0bc;border-radius:11px;background:#fff;color:#263b43;padding:10px 12px;font-size:14px}
+.pix-owner-note{font-size:12px!important;color:#718176!important;margin:7px 0 12px!important}
+.pix-turnstile{min-height:66px;margin-bottom:12px}
