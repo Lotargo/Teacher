@@ -27,17 +27,21 @@ def assert_composition(page, width, height):
             assert not image.is_visible(), name
             continue
         assert image.is_visible(), name
-        box = image.bounding_box()
+        # Read both rectangles together so parallax cannot move the actor between measurements.
+        geometry = actor.evaluate('''actor => {
+            const image = actor.querySelector('.forest-animal').getBoundingClientRect();
+            const support = actor.querySelector('.forest-support');
+            return { image: image.toJSON(), supportTop: support?.getBoundingClientRect().top ?? null };
+        }''')
+        box = geometry['image']
         boxes[name] = box
         minimum_width, minimum_height = PREVIOUS[name]
         assert box['width'] >= minimum_width and box['height'] >= minimum_height, (name, box)
         assert box['x'] >= 0 and box['x'] + box['width'] <= width, (name, box)
         assert box['y'] >= 80 and box['y'] + box['height'] <= height, (name, box)
         assert actor.locator('.forest-contact-shadow').count() == 1
-        support = actor.locator('.forest-support')
-        if support.count():
-            platform = support.bounding_box()
-            overlap = box['y'] + box['height'] - platform['y']
+        if geometry['supportTop'] is not None:
+            overlap = box['bottom'] - geometry['supportTop']
             assert 0 <= overlap <= 32, (name, 'feet detached from support', overlap)
         assert float(image.evaluate('e=>getComputedStyle(e).opacity')) >= .94
     if boxes:
