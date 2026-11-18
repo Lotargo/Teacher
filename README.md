@@ -1,14 +1,14 @@
 <p align="center">
-  <a href="https://lotargo.github.io/Teacher-/"><img src="assets/readme-cover.svg" width="100%" alt="АГА! — лаборатория ясности. От «кажется» к «могу проверить»."></a>
+  <a href="https://lotargo.github.io/Teacher/"><img src="assets/readme-cover.svg" width="100%" alt="АГА! — лаборатория ясности. От «кажется» к «могу проверить»."></a>
 </p>
 
 <p align="center"><strong>Идеи уже есть. Научимся превращать их в реальность — и проверять то, что получилось.</strong></p>
 
 <p align="center">
-  <a href="https://lotargo.github.io/Teacher-/">Открыть АГА! ↗</a> &nbsp; · &nbsp;
-  <a href="https://lotargo.github.io/Teacher-/math/">Математика</a> &nbsp; · &nbsp;
-  <a href="https://lotargo.github.io/Teacher-/workshop/">Мастерская</a> &nbsp; · &nbsp;
-  <a href="https://lotargo.github.io/Teacher-/library/">Библиотека</a>
+  <a href="https://lotargo.github.io/Teacher/">Открыть АГА! ↗</a> &nbsp; · &nbsp;
+  <a href="https://lotargo.github.io/Teacher/math/">Математика</a> &nbsp; · &nbsp;
+  <a href="https://lotargo.github.io/Teacher/workshop/">Мастерская</a> &nbsp; · &nbsp;
+  <a href="https://lotargo.github.io/Teacher/library/">Библиотека</a>
 </p>
 
 ---
@@ -29,13 +29,13 @@
 
 ### Найти собственный путь
 
-**[Практика](https://lotargo.github.io/Teacher-/courses/)** — первое знакомство с логикой, числами и кодом, без школьных предпосылок.
+**[Практика](https://lotargo.github.io/Teacher/courses/)** — первое знакомство с логикой, числами и кодом, без школьных предпосылок.
 
-**[Математика для жизни](https://lotargo.github.io/Teacher-/math/)** — проценты, покупки, запасы, время и понятные вычисления.
+**[Математика для жизни](https://lotargo.github.io/Teacher/math/)** — проценты, покупки, запасы, время и понятные вычисления.
 
-**[Мастерская идей](https://lotargo.github.io/Teacher-/workshop/)** — от человеческого замысла к проверяемому заданию для ИИ и первому прототипу.
+**[Мастерская идей](https://lotargo.github.io/Teacher/workshop/)** — от человеческого замысла к проверяемому заданию для ИИ и первому прототипу.
 
-**[Библиотека](https://lotargo.github.io/Teacher-/library/)** — короткие авторские материалы и тщательно выбранные внешние ресурсы.
+**[Библиотека](https://lotargo.github.io/Teacher/library/)** — короткие авторские материалы и тщательно выбранные внешние ресурсы.
 
 ### Бесплатно. Без сертификатов. Без искусственных барьеров.
 
@@ -48,4 +48,4 @@
 
 Помощница Пикси временно отключена, пока мы проверяем более стабильное подключение к ИИ. Кнопка Пикси не загружается, и сайт не обращается к облачной модели при посещении страниц. Исходники и иллюстрации сохранены для будущего возвращения.
 
-**Остальные разделы работают без неё:** уроки, калькуляторы и локальная мастерская. Прогресс хранится только в браузере. Подробности — в **[вопросах и ответах](https://lotargo.github.io/Teacher-/faq/)**.
+**Остальные разделы работают без неё:** уроки, калькуляторы и локальная мастерская. Прогресс хранится только в браузере. Подробности — в **[вопросах и ответах](https://lotargo.github.io/Teacher/faq/)**.
