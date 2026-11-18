@@ -11,14 +11,31 @@ import worker from '../cloudflare/worker.js';
 const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
 const request=()=>new Request('https://worker.test/chat',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer test',Accept:'text/event-stream'},body:JSON.stringify({messages:[{role:'user',content:'Привет'}]})});
 const sse=events=>new ReadableStream({start(c){const enc=new TextEncoder();for(const event of events)c.enqueue(enc.encode('data: '+(typeof event==='string'?event:JSON.stringify(event))+'\n\n'));c.close();}});
+const greetingKey = 'aga:Teacher:pix-greeting-shown:v1';
 
 test('Welcome notification is claimed once across page loads, not tied to chat history',()=>{
  const values=new Map();const store={getItem:k=>values.get(k),setItem:(k,v)=>values.set(k,v)};
  assert.equal(claimGreeting(store),true);
  for(let i=0;i<9;i++)assert.equal(claimGreeting(store),false);
- assert.deepEqual([...values.values()],['1']);
+ assert.deepEqual([...values],[[greetingKey,'1']]);
  assert.equal(claimGreeting({getItem(){throw Error('blocked')}}),false);
  assert.equal(claimGreeting({getItem(){return null},setItem(){throw Error('quota')}}),false);
+});
+
+test('A legacy welcome flag migrates without notifying again and survives a failed write', () => {
+  const legacyKey = 'aga:Teacher-:pix-greeting-shown:v1';
+  const values = new Map([[legacyKey, '1']]);
+  const store = {
+    getItem: key => values.get(key) ?? null,
+    setItem: (key, value) => values.set(key, value),
+    removeItem: key => values.delete(key),
+  };
+
+  assert.equal(claimGreeting({ ...store, setItem() { throw Error('quota'); } }), false);
+  assert.deepEqual([...values], [[legacyKey, '1']]);
+  assert.equal(claimGreeting(store), false);
+  assert.deepEqual([...values], [[greetingKey, '1']]);
+  assert.equal(claimGreeting(store), false);
 });
 
 test('All pages load the early theme bootstrap and the shared stylesheet',()=>{
