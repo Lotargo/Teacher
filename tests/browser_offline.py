@@ -22,9 +22,9 @@ def document(path):
         code=re.sub(r'^import .*;\n','',code,flags=re.M)
         code=re.sub(r'^export ','',code,flags=re.M)
         if name=='site-chrome.js':
-            code=code.replace("new URL('../' + introLesson.href + p.fragment, import.meta.url)","new URL(introLesson.href + p.fragment, 'https://aga.test/Teacher-/')")
+            code=code.replace("new URL('../' + introLesson.href + p.fragment, import.meta.url)","new URL(introLesson.href + p.fragment, 'https://aga.test/Teacher/')")
         if name=='portal.js':
-            code=code.replace("new URL('../', import.meta.url)","new URL('https://aga.test/Teacher-/')")
+            code=code.replace("new URL('../', import.meta.url)","new URL('https://aga.test/Teacher/')")
             # Only automatic legacy-anchor navigation is disabled in this offline test.
             code=code.replace("location.replace(url(introLesson.href + location.hash));",'/* Covered by real navigation test. */')
             for asset,mime in [('pix.webp','image/webp'),('mark.svg','image/svg+xml')]:

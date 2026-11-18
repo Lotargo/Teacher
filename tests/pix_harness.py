@@ -6,7 +6,7 @@ separately by the standard browser test on the GitHub runner.
 from pathlib import Path
 import re, json, base64, mimetypes
 ROOT=Path(__file__).resolve().parents[1]
-BASE='https://aga.test/Teacher-/'
+BASE='https://aga.test/Teacher/'
 
 def inline_asset(path):
     mime=mimetypes.guess_type(str(path))[0] or 'application/octet-stream'

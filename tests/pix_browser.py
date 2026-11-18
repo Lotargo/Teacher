@@ -7,7 +7,7 @@ from urllib.parse import urlparse, unquote
 import os, mimetypes
 from playwright.sync_api import sync_playwright
 ROOT=Path(__file__).resolve().parents[1]
-BASE='https://aga.test/Teacher-/'
+BASE='https://aga.test/Teacher/'
 OFFLINE=os.environ.get('PIX_OFFLINE')=='1'
 OUT=Path(os.environ.get('PIX_CHECKS_OUT',str(ROOT.parent/'pix-checks')));OUT.mkdir(exist_ok=True)
 PAGES=['','courses/','courses/start/','lessons/first-discovery/','math/','workshop/','library/','library/check-ai/','faq/']
@@ -43,7 +43,7 @@ with sync_playwright() as pw:
   if u.netloc!='aga.test':
    if 'workers.dev' in u.netloc or 'challenges.cloudflare.com' in u.netloc:external.append(route.request.url)
    route.fulfill(status=204);return
-  path=(ROOT/unquote(u.path.removeprefix('/Teacher-/'))).resolve()
+  path=(ROOT/unquote(u.path.removeprefix('/Teacher/'))).resolve()
   if path.is_dir():path=path/'index.html'
   if ROOT not in path.parents or not path.is_file():missing.append(str(path));route.fulfill(status=404);return
   route.fulfill(status=200,body=path.read_bytes(),content_type=mimetypes.guess_type(str(path))[0] or 'text/plain')

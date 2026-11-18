@@ -1,4 +1,4 @@
-"""Real multi-document navigation on an intercepted test origin, under /Teacher-/.
+"""Real multi-document navigation on an intercepted test origin, under /Teacher/.
 No HTML inlining, module rewriting, or mock localStorage. External fonts are
 blocked in this test; the site's system-font fallback is deliberately exercised.
 Requires Python Playwright and its Chromium build (not site dependencies).
@@ -10,16 +10,16 @@ from playwright.sync_api import sync_playwright
 from lesson_layout import assert_lesson_layout
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT.parent/'aga-multipage-previews';OUT.mkdir(exist_ok=True)
-BASE='https://aga.test/Teacher-/'
+BASE='https://aga.test/Teacher/'
 PAGES=['','courses/','courses/start/','lessons/first-discovery/','math/','workshop/','library/','library/check-ai/','faq/']
 missing=[]
 def serve(route):
     u=urlparse(route.request.url)
     if u.netloc!='aga.test':
         route.fulfill(status=204,body='');return
-    if not u.path.startswith('/Teacher-/'):
+    if not u.path.startswith('/Teacher/'):
         missing.append(u.path);route.fulfill(status=404,body='Outside project');return
-    rel=unquote(u.path[len('/Teacher-/'):]);p=(ROOT/rel).resolve()
+    rel=unquote(u.path[len('/Teacher/'):]);p=(ROOT/rel).resolve()
     if ROOT not in p.parents and p!=ROOT:
         route.fulfill(status=403);return
     if p.is_dir():p=p/'index.html'

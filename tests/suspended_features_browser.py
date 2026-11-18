@@ -4,7 +4,7 @@ from urllib.parse import urlparse, unquote
 from playwright.sync_api import sync_playwright
 import mimetypes, os, re
 ROOT=Path(__file__).resolve().parents[1]
-BASE="https://aga.test/Teacher-/"
+BASE="https://aga.test/Teacher/"
 PAGES=["","courses/","courses/start/","lessons/first-discovery/","math/","workshop/","library/","library/check-ai/","faq/"]
 external=[];errors=[]
 def serve(route):
@@ -13,9 +13,9 @@ def serve(route):
         external.append(route.request.url)
         route.fulfill(status=204,body="")
         return
-    if not url.path.startswith("/Teacher-/"):
+    if not url.path.startswith("/Teacher/"):
         route.fulfill(status=404);return
-    file=(ROOT/unquote(url.path[len("/Teacher-/"):])).resolve()
+    file=(ROOT/unquote(url.path[len("/Teacher/"):])).resolve()
     if ROOT not in file.parents and file!=ROOT:
         route.fulfill(status=403);return
     if file.is_dir():file=file/"index.html"

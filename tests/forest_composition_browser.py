@@ -8,7 +8,7 @@ import mimetypes, os
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
-BASE = 'https://aga.test/Teacher-/'
+BASE = 'https://aga.test/Teacher/'
 # Rounded-up rendered dimensions of the previous release, not new target sizes.
 PREVIOUS = {'bear': (211, 253), 'rabbit': (192, 235),
             'fox': (184, 225), 'squirrel': (179, 233), 'hedgehog': (160, 200)}
@@ -60,7 +60,7 @@ def run():
         if url.netloc != 'aga.test':
             route.fulfill(status=204, body='')
             return
-        path = (ROOT / unquote(url.path.removeprefix('/Teacher-/'))).resolve()
+        path = (ROOT / unquote(url.path.removeprefix('/Teacher/'))).resolve()
         if path.is_dir():
             path /= 'index.html'
         if ROOT not in path.parents or not path.is_file():

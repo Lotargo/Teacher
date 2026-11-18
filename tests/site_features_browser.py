@@ -7,7 +7,7 @@ from urllib.parse import urlparse,unquote
 import os,mimetypes
 from playwright.sync_api import sync_playwright
 ROOT=Path(__file__).resolve().parents[1]
-BASE='https://aga.test/Teacher-/'
+BASE='https://aga.test/Teacher/'
 OFFLINE=os.environ.get('PIX_OFFLINE')=='1'
 OUT=ROOT.parent/'site-feature-checks';OUT.mkdir(exist_ok=True)
 PAGES=['','courses/','courses/start/','lessons/first-discovery/','math/','workshop/','library/','library/check-ai/','faq/']
@@ -32,7 +32,7 @@ with sync_playwright() as pw:
   if u.netloc!='aga.test':
    if 'workers.dev' in u.netloc or 'challenges.cloudflare.com' in u.netloc:unexpected.append(route.request.url)
    route.fulfill(status=204);return
-  p=(ROOT/unquote(u.path.removeprefix('/Teacher-/'))).resolve()
+  p=(ROOT/unquote(u.path.removeprefix('/Teacher/'))).resolve()
   if p.is_dir():p=p/'index.html'
   route.fulfill(status=200 if p.is_file() else 404,body=p.read_bytes() if p.is_file() else b'',content_type=mimetypes.guess_type(str(p))[0] or 'text/plain')
  context.route('**/*',serve)

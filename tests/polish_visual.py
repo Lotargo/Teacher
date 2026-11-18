@@ -10,7 +10,7 @@ from pix_harness import document
 ROOT=Path(__file__).resolve().parents[1]
 OUT=Path(os.environ.get('PIX_CHECKS_OUT',str(ROOT.parent/'pix-polish-checks')));OUT.mkdir(exist_ok=True)
 OFFLINE=os.environ.get('PIX_OFFLINE')=='1'
-BASE='https://aga.test/Teacher-/'
+BASE='https://aga.test/Teacher/'
 with sync_playwright() as pw:
  browser=pw.chromium.launch(executable_path=os.environ.get('CHROMIUM_PATH'),headless=True,args=['--no-sandbox'])
  context=browser.new_context(reduced_motion='reduce')
@@ -18,7 +18,7 @@ with sync_playwright() as pw:
  def serve(route):
   url=urlparse(route.request.url)
   if url.netloc!='aga.test':route.fulfill(status=204);return
-  path=(ROOT/unquote(url.path.removeprefix('/Teacher-/'))).resolve()
+  path=(ROOT/unquote(url.path.removeprefix('/Teacher/'))).resolve()
   if path.is_dir():path=path/'index.html'
   if ROOT not in path.parents or not path.is_file():route.fulfill(status=404);return
   route.fulfill(status=200,body=path.read_bytes(),content_type=mimetypes.guess_type(str(path))[0] or 'text/plain')
